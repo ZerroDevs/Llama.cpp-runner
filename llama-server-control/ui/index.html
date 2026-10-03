@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <title>Llama Server Control</title>
+    <link id="font-link" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link rel="stylesheet" href="css/styles.css">
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        base: 'var(--bg-base)',
+                        card: 'var(--bg-card)',
+                        border: 'var(--border)',
+                        brand: 'var(--brand)',
+                        brand_hover: 'var(--brand-hover)',
+                        sec: 'var(--sec)',
+                        sec_hover: 'var(--sec-hover)',
+                        textPrimary: 'var(--text-primary)',
+                        textMuted: 'var(--text-muted)'
+                    },
+                    fontFamily: {
+                        sans: ['var(--font-primary)', 'sans-serif']
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-base text-textPrimary h-screen flex flex-col overflow-hidden font-sans transition-colors duration-300">
+    <!-- Header -->
+    <header class="h-16 border-b border-border bg-card flex items-center justify-between px-6 shrink-0 shadow-sm">
+        <div class="flex items-center gap-4">
+            <div class="relative w-8 h-8 flex items-center justify-center">
+                <img id="app-logo" src="images/Logo.nobg.png" alt="Logo" class="w-8 h-8 object-contain z-10" onerror="this.style.display='none'; document.getElementById('logo-fallback').classList.remove('hidden');">
+                <i id="logo-fallback" data-lucide="cpu" class="text-brand w-8 h-8 absolute hidden"></i>
+            </div>
+            <h1 class="text-xl font-bold tracking-tight" data-i18n="app_title">Llama Server Control</h1>
+            <div class="flex items-center gap-2 ml-4 px-3 py-1 rounded-full bg-base border border-border text-sm font-medium">
+                <div id="status-dot" class="w-2.5 h-2.5 rounded-full bg-red-500 transition-colors duration-300"></div>
+                <span id="status-text" data-i18n="status_stopped">Stopped</span>
+            </div>
+        </div>
+        <div class="flex items-center gap-4">
+            <select id="lang-select" class="bg-base border border-border rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:border-brand transition-colors cursor-pointer">
+                <option value="en">English</option>
+                <option value="ar">العربية</option>
+            </select>
+            <button id="theme-toggle" class="p-2 rounded-lg hover:bg-base border border-transparent hover:border-border transition-all" title="Toggle Theme">
+                <i data-lucide="sun" class="w-5 h-5 hidden dark:block text-textMuted hover:text-textPrimary"></i>
+                <i data-lucide="moon" class="w-5 h-5 block dark:hidden text-textMuted hover:text-textPrimary"></i>
+            </button>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <div class="flex-1 flex overflow-hidden">
+        <!-- Sidebar Navigation -->
+        <nav class="w-64 border-r border-border bg-card p-4 flex flex-col gap-2 shrink-0">
+            <button class="nav-btn active flex items-center gap-3 p-3 rounded-lg text-left transition-colors" data-target="tab-main">
+                <i data-lucide="server" class="w-5 h-5"></i>
+                <span class="font-semibold" data-i18n="nav_main">Server & Models</span>
+            </button>
+            <button class="nav-btn flex items-center gap-3 p-3 rounded-lg text-left transition-colors" data-target="tab-tuning">
+                <i data-lucide="sliders-horizontal" class="w-5 h-5"></i>
+                <span class="font-semibold" data-i18n="nav_tuning">Performance Tuning</span>
+            </button>
+            <button class="nav-btn flex items-center gap-3 p-3 rounded-lg text-left transition-colors" data-target="tab-logs">
+                <i data-lucide="terminal" class="w-5 h-5"></i>
+                <span class="font-semibold" data-i18n="nav_logs">Live Logs</span>
+            </button>
+            <button class="nav-btn flex items-center gap-3 p-3 rounded-lg text-left transition-colors" data-target="tab-about">
+                <i data-lucide="info" class="w-5 h-5"></i>
+                <span class="font-semibold" data-i18n="nav_about">About & Guides</span>
+            </button>
+        </nav>
+
+        <!-- Scrollable Tab Content -->
+        <main class="flex-1 overflow-y-auto p-8 relative">
+            
+            <!-- Banner for Missing Binary -->
+            <div id="missing-binary-banner" class="hidden mb-6 p-4 rounded-xl border border-red-500/30 bg-red-500/10 flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                    <i data-lucide="alert-triangle" class="text-red-500 w-6 h-6"></i>
+                    <div>
+                        <h3 class="font-semibold text-red-500 dark:text-red-400" data-i18n="banner_binary_title">llama-server.exe is missing!</h3>
+                        <p class="text-sm text-textMuted" data-i18n="banner_binary_desc">Please select the required CUDA 12 build binary.</p>
+                    </div>
+                </div>
+                <button id="banner-locate-btn" class="px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg font-medium transition-colors" data-i18n="btn_locate">
+                    Locate llama-server.exe
+                </button>
+            </div>
+
+            <!-- Tab: Main -->
+            <div id="tab-main" class="tab-pane active space-y-8 max-w-4xl mx-auto">
+                <div class="space-y-6">
+                    <div class="form-group">
+                        <label class="block text-sm font-semibold mb-2" data-i18n="lbl_binary">Server Binary</label>
+                        <div class="flex gap-2">
+                            <input type="text" id="cfg-server_binary" class="flex-1 input-field" readonly placeholder="C:\path\to\llama-server.exe">
+                            <button id="btn-browse-binary" class="btn-secondary px-6" data-i18n="btn_browse">Browse</button>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="block text-sm font-semibold mb-2" data-i18n="lbl_model">Model Path (-m)</label>
+                        <div class="flex gap-2">
+                            <input type="text" id="cfg-model_path" class="flex-1 input-field" readonly placeholder="C:\path\to\model.gguf">
+                            <button id="btn-browse-model" class="btn-secondary px-6" data-i18n="btn_browse">Browse</button>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="block text-sm font-semibold mb-2" data-i18n="lbl_vision">Vision Projector (-mmproj) <span class="text-xs text-textMuted font-normal mx-2">(Optional)</span></label>
+                        <div class="flex gap-2">
+                            <input type="text" id="cfg-vision_projector" class="flex-1 input-field" readonly placeholder="C:\path\to\mmproj.gguf">
+                            <button id="btn-browse-vision" class="btn-secondary px-6" data-i18n="btn_browse">Browse</button>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="form-group">
+                            <label class="block text-sm font-semibold mb-2" data-i18n="lbl_context">Context Size (-c)</label>
+                            <select id="cfg-context_size" class="w-full input-field">
+                                <option value="2048">2048</option>
+                                <option value="4096">4096</option>
+                                <option value="8192">8192</option>
+                                <option value="16384">16384</option>
+                                <option value="32768">32768</option>
+                                <option value="65536">65536</option>
+                                <option value="131072">131072</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="block text-sm font-semibold mb-2" data-i18n="lbl_port">Port (--port)</label>
+                            <input type="number" id="cfg-port" class="w-full input-field" value="8080">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tab: Tuning -->
+            <div id="tab-tuning" class="tab-pane hidden space-y-8 max-w-4xl mx-auto">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="form-group card p-5 rounded-xl border border-border">
+                        <label class="flex items-center justify-between cursor-pointer">
+                            <div>
+                                <span class="block text-sm font-semibold" data-i18n="lbl_flash_attn">Flash Attention (-fa)</span>
+                                <span class="text-xs text-textMuted" data-i18n="desc_flash_attn">Improves performance on supported GPUs</span>
+                            </div>
+                            <div class="relative inline-block w-12 h-6 rounded-full transition-colors bg-border toggle-bg">
+                                <input type="checkbox" id="cfg-flash_attention" class="peer sr-only">
+                                <span class="absolute left-1 top-1 w-4 h-4 bg-white rounded-full transition-transform peer-checked:translate-x-6"></span>
+                            </div>
+                        </label>
+                    </div>
+
+                    <div class="form-group card p-5 rounded-xl border border-border">
+                        <label class="block text-sm font-semibold mb-3" data-i18n="lbl_gpu_layers">GPU Offload Layers (-ngl)</label>
+                        <div class="flex items-center gap-4">
+                            <input type="range" id="cfg-gpu_layers-slider" min="0" max="128" value="99" class="flex-1 accent-brand">
+                            <input type="number" id="cfg-gpu_layers" class="w-20 input-field text-center" value="99">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="block text-sm font-semibold mb-2" data-i18n="lbl_threads">CPU Threads (-t)</label>
+                        <input type="number" id="cfg-cpu_threads" class="w-full input-field" value="4">
+                    </div>
+
+                    <div class="form-group">
+                        <label class="block text-sm font-semibold mb-2" data-i18n="lbl_host">Host Binding (--host)</label>
+                        <select id="cfg-host" class="w-full input-field">
+                            <option value="127.0.0.1">127.0.0.1 (Local only)</option>
+                            <option value="0.0.0.0">0.0.0.0 (Network visible)</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="block text-sm font-semibold mb-2" data-i18n="lbl_kv_k">KV Cache Quantization K (-ctk)</label>
+                        <select id="cfg-kv_cache_type_k" class="w-full input-field">
+                            <option value="f16">f16</option>
+                            <option value="q8_0">q8_0</option>
+                            <option value="q4_0">q4_0</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="block text-sm font-semibold mb-2" data-i18n="lbl_kv_v">KV Cache Quantization V (-ctv)</label>
+                        <select id="cfg-kv_cache_type_v" class="w-full input-field">
+                            <option value="f16">f16</option>
+                            <option value="q8_0">q8_0</option>
+                            <option value="q4_0">q4_0</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="block text-sm font-semibold mb-2" data-i18n="lbl_batch">Logical Batch Size (-b)</label>
+                        <input type="number" id="cfg-batch_size" class="w-full input-field" value="512">
+                    </div>
+
+                    <div class="form-group">
+                        <label class="block text-sm font-semibold mb-2" data-i18n="lbl_ubatch">Physical Batch Size (-ub)</label>
+                        <input type="number" id="cfg-ubatch_size" class="w-full input-field" value="2048">
+                    </div>
+                </div>
+
+                <div class="form-group pt-4 border-t border-border">
+                    <label class="block text-sm font-semibold mb-2" data-i18n="lbl_api_key">API Key (--api-key)</label>
+                    <input type="password" id="cfg-api_key" class="w-full input-field" placeholder="Leave empty for no auth">
+                </div>
+
+                <div class="form-group">
+                    <label class="block text-sm font-semibold mb-2" data-i18n="lbl_custom_args">Custom CLI Arguments</label>
+                    <input type="text" id="cfg-custom_args" class="w-full input-field font-mono" placeholder="e.g. --mlock --no-mmap">
+                </div>
+            </div>
+
+            <!-- Tab: Logs -->
+            <div id="tab-logs" class="tab-pane hidden h-full flex flex-col">
+                <div class="flex items-center justify-between mb-4 shrink-0">
+                    <h2 class="text-lg font-bold" data-i18n="title_logs">Live Server Console</h2>
+                    <div class="flex items-center gap-3">
+                        <label class="flex items-center gap-2 cursor-pointer text-sm">
+                            <input type="checkbox" id="auto-scroll" checked class="accent-brand">
+                            <span data-i18n="lbl_autoscroll">Auto-scroll</span>
+                        </label>
+                        <button id="btn-copy-logs" class="btn-secondary text-xs px-3 py-1.5 flex items-center gap-2">
+                            <i data-lucide="copy" class="w-3.5 h-3.5"></i> <span data-i18n="btn_copy">Copy All</span>
+                        </button>
+                        <button id="btn-clear-logs" class="btn-secondary text-xs px-3 py-1.5 flex items-center gap-2">
+                            <i data-lucide="trash-2" class="w-3.5 h-3.5"></i> <span data-i18n="btn_clear">Clear</span>
+                        </button>
+                    </div>
+                </div>
+                <div class="flex-1 bg-black/90 dark:bg-[#0a0a0a] rounded-xl border border-border p-4 overflow-hidden relative shadow-inner">
+                    <div id="log-container" class="h-full overflow-y-auto font-mono text-[13px] leading-relaxed break-all select-text space-y-1 p-1">
+                        <!-- Logs appended here -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tab: About -->
+            <div id="tab-about" class="tab-pane hidden space-y-6 max-w-4xl mx-auto text-sm leading-relaxed">
+                <div class="card p-6 rounded-xl border border-border space-y-4">
+                    <h2 class="text-xl font-bold text-brand" data-i18n="about_title">Llama Server Control</h2>
+                    <p data-i18n="about_desc1">A modern, ultra-lightweight, and headless desktop GUI runner for llama.cpp's server binary on Windows.</p>
+                    <p data-i18n="about_desc2">To achieve maximum performance on NVIDIA RTX GPUs, ensure you are using a binary built with CUDA support.</p>
+                    
+                    <h3 class="font-bold mt-6 text-textPrimary" data-i18n="about_integration">API Integration Example (cURL)</h3>
+                    <pre class="bg-base p-4 rounded-lg border border-border font-mono text-xs overflow-x-auto text-textMuted" dir="ltr">curl http://127.0.0.1:8080/v1/chat/completions \
+-H "Content-Type: application/json" \
+-d '{
+  "model": "gpt-3.5-turbo",
+  "messages": [{"role": "user", "content": "Hello!"}]
+}'</pre>
+                </div>
+            </div>
+
+        </main>
+    </div>
+
+    <!-- Bottom Action Bar -->
+    <footer class="h-20 border-t border-border bg-card flex items-center justify-between px-8 shrink-0 shadow-sm z-10 relative">
+        <div class="flex items-center gap-4 w-1/3">
+            <button id="btn-webchat" class="btn-secondary px-4 py-2 flex items-center gap-2" title="Open Web Chat">
+                <i data-lucide="message-square" class="w-4 h-4"></i>
+                <span data-i18n="btn_webchat">Web Chat</span>
+            </button>
+            <button id="btn-copyurl" class="btn-secondary px-4 py-2 flex items-center gap-2" title="Copy API URL">
+                <i data-lucide="link" class="w-4 h-4"></i>
+                <span data-i18n="btn_copyurl">Copy URL</span>
+            </button>
+        </div>
+        
+        <div class="flex items-center justify-center gap-4 w-1/3">
+            <button id="btn-start" class="btn-primary px-8 py-2.5 rounded-full font-bold text-base shadow-lg shadow-brand/20 transition-all flex items-center gap-2">
+                <i data-lucide="play" class="w-5 h-5"></i>
+                <span data-i18n="btn_start">Start Server</span>
+            </button>
+            <button id="btn-stop" class="btn-danger px-8 py-2.5 rounded-full font-bold text-base shadow-lg transition-all hidden items-center justify-center gap-2">
+                <i data-lucide="square" class="w-5 h-5"></i>
+                <span data-i18n="btn_stop">Stop Server</span>
+            </button>
+        </div>
+        
+        <div class="w-1/3 flex justify-end">
+            <!-- Toast notification container -->
+            <div id="toast" class="opacity-0 transition-opacity duration-300 bg-base border border-border px-4 py-2 rounded-lg text-sm shadow-lg flex items-center gap-2 pointer-events-none">
+                <i data-lucide="check-circle" class="w-4 h-4 text-brand"></i>
+                <span id="toast-msg">Copied</span>
+            </div>
+        </div>
+    </footer>
+
+    <script src="js/i18n.js"></script>
+    <script src="js/logs.js"></script>
+    <script src="js/app.js"></script>
+    <script>
+        lucide.createIcons();
+    </script>
+</body>
+</html>
