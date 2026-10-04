@@ -2,8 +2,8 @@
     "server_binary": "E:\\llama-server\\llama-server.exe",
     "model_path": "E:\\Llama.cpp models\\hub\\models--Noobito45--Qwen3.8-9B-heretic-uncensored-NVFP4-GGUF\\snapshots\\6a9d3ae466e566cd3319d0cbae3e1243279b62e3\\Qwen3.8-9B-distill-heretic_nvfp4_q4_k_m.gguf",
     "vision_projector": "E:\\Llama.cpp models\\hub\\models--Noobito45--Qwen3.8-9B-heretic-uncensored-NVFP4-GGUF\\snapshots\\6a9d3ae466e566cd3319d0cbae3e1243279b62e3\\mmproj-BF16.gguf",
-    "context_size": "8192",
-    "gpu_layers": 99,
+    "context_size": "16384",
+    "gpu_layers": 33,
     "port": 8080,
     "flash_attention": true,
     "cpu_threads": 8,
@@ -15,5 +15,10 @@
     "api_key": "",
     "custom_args": "",
     "theme": "dark",
-    "language": "en"
+    "language": "en",
+    "models_dir": "E:\\Llama.cpp models",
+    "minimize_to_tray": false,
+    "run_on_startup": false,
+    "lora_adapters": "",
+    "draft_model": ""
 }

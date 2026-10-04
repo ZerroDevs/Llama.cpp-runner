@@ -23,6 +23,11 @@ class LogStreamer:
                     import json
                     try:
                         self.window.evaluate_js(f"window.receiveLog({json.dumps(cleaned_line)})")
+                        
+                        # Detect ready states
+                        lower_line = cleaned_line.lower()
+                        if "model loaded" in lower_line or "http server listening" in lower_line:
+                            self.window.evaluate_js("if(window.onServerReady) window.onServerReady();")
                     except Exception as e:
                         pass
         self.stream.close()

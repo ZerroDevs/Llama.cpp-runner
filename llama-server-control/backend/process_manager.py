@@ -24,9 +24,19 @@ class ProcessManager:
         if model_path:
             cmd.extend(["-m", model_path])
             
+        loras = config.get("lora_adapters", "").split(",")
+        for lora in loras:
+            lora = lora.strip()
+            if lora:
+                cmd.extend(["--lora", lora])
+            
         vision = config.get("vision_projector")
         if vision:
             cmd.extend(["--mmproj", vision])
+            
+        draft = config.get("draft_model")
+        if draft:
+            cmd.extend(["--model-draft", draft])
             
         cmd.extend(["-c", str(config.get("context_size", 8192))])
         cmd.extend(["-ngl", str(config.get("gpu_layers", 99))])
@@ -94,14 +104,27 @@ class ProcessManager:
 
     def stop_server(self):
         if self.process:
+            pid = self.process.pid
+            
             try:
-                self.process.terminate()
-                self.process.wait(timeout=3)
+                import psutil
+                parent = psutil.Process(pid)
+                for child in parent.children(recursive=True):
+                    child.kill()
+                parent.kill()
             except Exception:
-                pass
+                try:
+                    subprocess.run(
+                        ["taskkill", "/F", "/T", "/PID", str(pid)],
+                        creationflags=subprocess.CREATE_NO_WINDOW,
+                        stdout=subprocess.DEVNULL,
+                        stderr=subprocess.DEVNULL
+                    )
+                except Exception:
+                    pass
+                    
             try:
-                if self.process.poll() is None:
-                    self.process.kill()
+                self.process.wait(timeout=2)
             except Exception:
                 pass
             
@@ -110,6 +133,27 @@ class ProcessManager:
                 
             self.process = None
             self.log_streamer = None
+            
+        # Fallback scan for orphaned llama-server.exe
+        try:
+            import psutil
+            for proc in psutil.process_iter(['name', 'cmdline']):
+                try:
+                    name = proc.info.get('name', '')
+                    if name and 'llama-server' in name.lower():
+                        proc.kill()
+                except Exception:
+                    continue
+        except Exception:
+            try:
+                subprocess.run(
+                    ["taskkill", "/F", "/IM", "llama-server.exe"],
+                    creationflags=subprocess.CREATE_NO_WINDOW,
+                    stdout=subprocess.DEVNULL,
+                    stderr=subprocess.DEVNULL
+                )
+            except Exception:
+                pass
             
         return {"status": "success", "message": "Server stopped."}
 

@@ -1,9 +1,77 @@
 import os
 import sys
 import webview
+import threading
+import atexit
+import signal
+import logging
 from backend.api_bridge import ApiBridge
+
+logging.basicConfig(filename='exit_trace.log', level=logging.DEBUG)
+
 from backend.config_manager import ConfigManager
 from backend.process_manager import ProcessManager
+
+try:
+    import pystray
+    from PIL import Image, ImageDraw
+    HAS_PYSTRAY = True
+except ImportError:
+    HAS_PYSTRAY = False
+
+def create_tray_image():
+    # Simple green circle if no logo
+    image = Image.new('RGB', (64, 64), (2, 21, 26))
+    d = ImageDraw.Draw(image)
+    d.ellipse((16, 16, 48, 48), fill=(0, 229, 153))
+    return image
+
+def setup_tray(window, process_manager, config_manager):
+    import webbrowser
+
+    def on_open(icon, item):
+        window.show()
+        window.restore()
+
+    def on_toggle_server(icon, item):
+        if process_manager.check_status():
+            process_manager.stop_server()
+            icon.notify("Server stopped.", title="Llama Server Control")
+        else:
+            config = config_manager.get_config()
+            result = process_manager.start_server(config)
+            if result.get("status") == "error":
+                icon.notify(f"Start Error: {result.get('message')}", title="Llama Server Control")
+            else:
+                icon.notify("Server started successfully.", title="Llama Server Control")
+
+    def on_open_web_ui(icon, item):
+        port = config_manager.get_config().get("port", 8080)
+        webbrowser.open(f"http://127.0.0.1:{port}")
+
+    def on_exit(icon, item):
+        icon.stop()
+        process_manager.stop_server()
+        window.destroy()
+        os._exit(0)
+
+    menu = pystray.Menu(
+        pystray.MenuItem('Open Dashboard', on_open, default=True),
+        pystray.MenuItem(
+            lambda item: 'Stop Server' if process_manager.check_status() else 'Start Server',
+            on_toggle_server
+        ),
+        pystray.MenuItem(
+            'Open Web Chat UI',
+            on_open_web_ui,
+            visible=lambda item: process_manager.check_status()
+        ),
+        pystray.MenuItem('Exit', on_exit)
+    )
+    
+    icon = pystray.Icon("LlamaServerControl", create_tray_image(), "Llama Server Control", menu)
+    threading.Thread(target=icon.run, daemon=True).start()
+    return icon
 
 def get_base_path():
     if getattr(sys, 'frozen', False):
@@ -22,15 +90,107 @@ def main():
         'Llama Server Control',
         f'file://{ui_path}',
         js_api=api,
-        width=1000,
-        height=800,
-        min_size=(800, 600)
+        width=1200,
+        height=850,
+        min_size=(1000, 700)
     )
     
     api.set_window(window)
     process_manager.set_window(window)
+
+    def force_cleanup(signum=None, frame=None):
+        logging.debug(f"force_cleanup called with signum={signum}")
+        process_manager.stop_server()
+        os._exit(0)
+
+        
+    atexit.register(process_manager.stop_server)
+    try:
+        signal.signal(signal.SIGINT, force_cleanup)
+        signal.signal(signal.SIGTERM, force_cleanup)
+        signal.signal(signal.SIGBREAK, force_cleanup)
+    except Exception:
+        pass
+
+    if HAS_PYSTRAY:
+        tray_icon = setup_tray(window, process_manager, config_manager)
+        
+        def on_closing():
+            logging.debug("on_closing called")
+            if config_manager.get_config().get("minimize_to_tray", False):
+                logging.debug("minimize_to_tray is True, hiding window")
+                try:
+                    threading.Timer(0.1, window.hide).start()
+                    logging.debug("window.hide() deferred via timer")
+                except Exception as e:
+                    logging.debug(f"window.hide() exception: {e}")
+                try:
+                    tray_icon.notify(
+                        "App is still running in the background.",
+                        title="Llama Server Control"
+                    )
+                except Exception as e:
+                    logging.debug(f"tray_icon exception: {e}")
+                logging.debug("returning False from on_closing")
+                return False
+            logging.debug("stopping server and returning True")
+            process_manager.stop_server()
+            return True
+            
+        def on_closed():
+            logging.debug("on_closed called")
+            process_manager.stop_server()
+            tray_icon.stop()
+            os._exit(0)
+            
+        def on_minimized():
+            logging.debug("on_minimized called")
+            if config_manager.get_config().get("minimize_to_tray", False):
+                try:
+                    threading.Timer(0.1, window.hide).start()
+                except Exception:
+                    pass
+                try:
+                    tray_icon.notify(
+                        "App is still running in the background.",
+                        title="Llama Server Control"
+                    )
+                except Exception:
+                    pass
+
+        window.events.closing += on_closing
+        window.events.closed += on_closed
+        window.events.minimized += on_minimized
+    else:
+        def on_closing():
+            process_manager.stop_server()
+            return True
+            
+        def on_closed():
+            process_manager.stop_server()
+            os._exit(0)
+            
+        window.events.closing += on_closing
+        window.events.closed += on_closed
     
-    webview.start(debug=False)
+    def on_loaded():
+        if '--startup' in sys.argv:
+            try:
+                import threading
+                threading.Timer(0.5, window.hide).start()
+                def do_notify():
+                    if HAS_PYSTRAY:
+                        tray_icon.notify("Running in background.", "Llama Server Auto-Start")
+                threading.Timer(2.0, do_notify).start()
+                
+                # Auto-start the server on Windows startup
+                config = config_manager.get_config()
+                process_manager.start_server(config)
+            except Exception as e:
+                logging.debug(f"Startup error: {e}")
+
+    window.events.loaded += on_loaded
+    webview.start(debug=True)
 
 if __name__ == '__main__':
     main()

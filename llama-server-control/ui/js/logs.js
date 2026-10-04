@@ -29,15 +29,26 @@ window.receiveLog = function(logLine) {
     }
 };
 
-document.getElementById('btn-clear-logs').addEventListener('click', () => {
+document.getElementById('btn-clear-logs')?.addEventListener('click', () => {
     logContainer.innerHTML = '';
 });
 
-document.getElementById('btn-copy-logs').addEventListener('click', () => {
+document.getElementById('btn-copy-logs')?.addEventListener('click', () => {
     const text = logContainer.innerText;
     navigator.clipboard.writeText(text).then(() => {
         if (window.showToast) {
             window.showToast(translations[currentLang].toast_copied || 'Copied!');
         }
     });
+});
+
+document.getElementById('btn-export-logs')?.addEventListener('click', () => {
+    const text = logContainer.innerText;
+    const blob = new Blob([text], { type: 'text/plain' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `llama-server-logs-${new Date().toISOString().replace(/[:.]/g, '-')}.txt`;
+    a.click();
+    URL.revokeObjectURL(url);
 });

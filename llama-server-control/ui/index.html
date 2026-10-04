@@ -6,6 +6,10 @@
     <link id="font-link" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;600;700&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
     <link rel="stylesheet" href="css/styles.css">
     <script>
         tailwind.config = {
@@ -32,11 +36,10 @@
     </script>
 </head>
 <body class="bg-base text-textPrimary h-screen flex flex-col overflow-hidden font-sans transition-colors duration-300">
-    <!-- Header -->
-    <header class="h-16 border-b border-border bg-card flex items-center justify-between px-6 shrink-0 shadow-sm">
+    <header class="h-16 border-b border-border bg-card flex items-center justify-between px-6 shrink-0 shadow-sm z-20 relative">
         <div class="flex items-center gap-4">
             <div class="relative w-8 h-8 flex items-center justify-center">
-                <img id="app-logo" src="images/Logo.nobg.png" alt="Logo" class="w-8 h-8 object-contain z-10" onerror="this.style.display='none'; document.getElementById('logo-fallback').classList.remove('hidden');">
+                <img id="app-logo" src="images/Logo-nobg.png" alt="Logo" class="w-8 h-8 object-contain z-10" onerror="this.style.display='none'; document.getElementById('logo-fallback').classList.remove('hidden');">
                 <i id="logo-fallback" data-lucide="cpu" class="text-brand w-8 h-8 absolute hidden"></i>
             </div>
             <h1 class="text-xl font-bold tracking-tight" data-i18n="app_title">Llama Server Control</h1>
@@ -57,32 +60,47 @@
         </div>
     </header>
 
-    <!-- Main Content -->
     <div class="flex-1 flex overflow-hidden">
-        <!-- Sidebar Navigation -->
-        <nav class="w-64 border-r border-border bg-card p-4 flex flex-col gap-2 shrink-0">
+        <nav class="w-64 border-r border-border bg-card p-4 flex flex-col gap-2 shrink-0 z-10">
             <button class="nav-btn active flex items-center gap-3 p-3 rounded-lg text-left transition-colors" data-target="tab-main">
                 <i data-lucide="server" class="w-5 h-5"></i>
-                <span class="font-semibold" data-i18n="nav_main">Server & Models</span>
+                <span class="font-semibold" data-i18n="nav_main">Dashboard & Server</span>
+            </button>
+            <button class="nav-btn flex items-center gap-3 p-3 rounded-lg text-left transition-colors" data-target="tab-chat">
+                <i data-lucide="message-circle" class="w-5 h-5"></i>
+                <span class="font-semibold">AI Chat</span>
+            </button>
+            <button class="nav-btn flex items-center gap-3 p-3 rounded-lg text-left transition-colors" data-target="tab-models">
+                <i data-lucide="library" class="w-5 h-5"></i>
+                <span class="font-semibold" data-i18n="nav_models">Models Library</span>
+            </button>
+            <button class="nav-btn flex items-center gap-3 p-3 rounded-lg text-left transition-colors" data-target="tab-hub">
+                <i data-lucide="cloud-download" class="w-5 h-5"></i>
+                <span class="font-semibold">Model Hub</span>
+            </button>
+            <button class="nav-btn flex items-center gap-3 p-3 rounded-lg text-left transition-colors" data-target="tab-hardware">
+                <i data-lucide="activity" class="w-5 h-5"></i>
+                <span class="font-semibold" data-i18n="nav_hardware">Hardware Monitor</span>
             </button>
             <button class="nav-btn flex items-center gap-3 p-3 rounded-lg text-left transition-colors" data-target="tab-tuning">
                 <i data-lucide="sliders-horizontal" class="w-5 h-5"></i>
                 <span class="font-semibold" data-i18n="nav_tuning">Performance Tuning</span>
             </button>
+            <button class="nav-btn flex items-center gap-3 p-3 rounded-lg text-left transition-colors" data-target="tab-api">
+                <i data-lucide="code-2" class="w-5 h-5"></i>
+                <span class="font-semibold" data-i18n="nav_api">API Playground</span>
+            </button>
             <button class="nav-btn flex items-center gap-3 p-3 rounded-lg text-left transition-colors" data-target="tab-logs">
                 <i data-lucide="terminal" class="w-5 h-5"></i>
                 <span class="font-semibold" data-i18n="nav_logs">Live Logs</span>
             </button>
-            <button class="nav-btn flex items-center gap-3 p-3 rounded-lg text-left transition-colors" data-target="tab-about">
+            <button class="nav-btn flex items-center gap-3 p-3 rounded-lg text-left transition-colors mt-auto" data-target="tab-about">
                 <i data-lucide="info" class="w-5 h-5"></i>
-                <span class="font-semibold" data-i18n="nav_about">About & Guides</span>
+                <span class="font-semibold" data-i18n="nav_about">About & Setup Guide</span>
             </button>
         </nav>
 
-        <!-- Scrollable Tab Content -->
         <main class="flex-1 overflow-y-auto p-8 relative">
-            
-            <!-- Banner for Missing Binary -->
             <div id="missing-binary-banner" class="hidden mb-6 p-4 rounded-xl border border-red-500/30 bg-red-500/10 flex items-center justify-between">
                 <div class="flex items-center gap-3">
                     <i data-lucide="alert-triangle" class="text-red-500 w-6 h-6"></i>
@@ -96,11 +114,30 @@
                 </button>
             </div>
 
-            <!-- Tab: Main -->
+            <!-- Tab: Main (Dashboard) -->
             <div id="tab-main" class="tab-pane active space-y-8 max-w-4xl mx-auto">
+                <div class="card p-5 rounded-xl border border-border flex items-center justify-between mb-4 shadow-sm bg-brand/5 border-brand/20">
+                    <div class="flex items-center gap-3">
+                        <i data-lucide="network" class="w-6 h-6 text-brand"></i>
+                        <div>
+                            <h3 class="font-bold text-sm text-brand" data-i18n="lbl_network">Network Access</h3>
+                            <p class="text-xs text-textMuted" data-i18n="desc_network">Local API URL (Host is <span id="lbl-host-status" class="font-mono">127.0.0.1</span>)</p>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <span id="network-url" class="font-mono text-sm px-3 py-1.5 bg-base rounded-md border border-border">http://127.0.0.1:8080/v1</span>
+                        <button id="btn-copy-network" class="p-1.5 hover:text-brand transition-colors" title="Copy"><i data-lucide="copy" class="w-4 h-4"></i></button>
+                    </div>
+                </div>
+
                 <div class="space-y-6">
                     <div class="form-group">
-                        <label class="block text-sm font-semibold mb-2" data-i18n="lbl_binary">Server Binary</label>
+                        <label class="block text-sm font-semibold mb-2 flex items-center justify-between" data-i18n="lbl_binary">
+                            <span>Server Binary</span>
+                            <button id="btn-update-server" class="text-xs bg-brand/10 hover:bg-brand/20 text-brand px-3 py-1 rounded-full font-medium transition-colors flex items-center gap-1">
+                                <i data-lucide="download-cloud" class="w-3 h-3"></i> Auto-Update
+                            </button>
+                        </label>
                         <div class="flex gap-2">
                             <input type="text" id="cfg-server_binary" class="flex-1 input-field" readonly placeholder="C:\path\to\llama-server.exe">
                             <button id="btn-browse-binary" class="btn-secondary px-6" data-i18n="btn_browse">Browse</button>
@@ -114,6 +151,14 @@
                             <button id="btn-browse-model" class="btn-secondary px-6" data-i18n="btn_browse">Browse</button>
                         </div>
                     </div>
+                    
+                    <div class="form-group">
+                        <label class="block text-sm font-semibold mb-2">LoRA Adapters <span class="text-xs text-textMuted font-normal mx-2">(Optional, Comma-separated)</span></label>
+                        <div class="flex gap-2">
+                            <input type="text" id="cfg-lora_adapters" class="flex-1 input-field" placeholder="C:\path\to\lora1.gguf, C:\path\to\lora2.gguf">
+                            <button id="btn-browse-lora" class="btn-secondary px-6" data-i18n="btn_browse">Browse</button>
+                        </div>
+                    </div>
 
                     <div class="form-group">
                         <label class="block text-sm font-semibold mb-2" data-i18n="lbl_vision">Vision Projector (-mmproj) <span class="text-xs text-textMuted font-normal mx-2">(Optional)</span></label>
@@ -123,30 +168,277 @@
                         </div>
                     </div>
 
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div class="form-group">
-                            <label class="block text-sm font-semibold mb-2" data-i18n="lbl_context">Context Size (-c)</label>
-                            <select id="cfg-context_size" class="w-full input-field">
-                                <option value="2048">2048</option>
-                                <option value="4096">4096</option>
-                                <option value="8192">8192</option>
-                                <option value="16384">16384</option>
-                                <option value="32768">32768</option>
-                                <option value="65536">65536</option>
-                                <option value="131072">131072</option>
-                            </select>
+                    <div class="form-group">
+                        <label class="block text-sm font-semibold mb-2">Draft Model <span class="text-xs text-textMuted font-normal mx-2">(Optional, for Speculative Decoding speedup)</span></label>
+                        <div class="flex gap-2">
+                            <input type="text" id="cfg-draft_model" class="flex-1 input-field" readonly placeholder="C:\path\to\tiny_model.gguf">
+                            <button id="btn-browse-draft" class="btn-secondary px-6" data-i18n="btn_browse">Browse</button>
                         </div>
-                        <div class="form-group">
-                            <label class="block text-sm font-semibold mb-2" data-i18n="lbl_port">Port (--port)</label>
-                            <input type="number" id="cfg-port" class="w-full input-field" value="8080">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tab: AI Chat -->
+            <div id="tab-chat" class="tab-pane hidden h-full flex gap-4 max-w-6xl mx-auto">
+                <!-- Chat Area -->
+                <div class="flex-1 card rounded-xl border border-border flex flex-col overflow-hidden bg-base/50">
+                    <div class="p-4 border-b border-border bg-card flex items-center justify-between shrink-0">
+                        <div class="flex items-center gap-3">
+                            <div class="w-8 h-8 rounded-full bg-brand/20 flex items-center justify-center">
+                                <i data-lucide="bot" class="w-4 h-4 text-brand"></i>
+                            </div>
+                            <div>
+                                <h3 class="font-bold text-sm">Local Assistant</h3>
+                                <p class="text-xs text-textMuted" id="chat-model-name">No model loaded</p>
+                            </div>
                         </div>
+                        <button id="btn-clear-chat" class="btn-secondary text-xs px-3 py-1.5 flex items-center gap-2">
+                            <i data-lucide="trash-2" class="w-3.5 h-3.5"></i> Clear Chat
+                        </button>
+                    </div>
+                    
+                    <div id="chat-messages" class="flex-1 overflow-y-auto p-4 space-y-4">
+                        <div class="flex gap-3 max-w-[85%]">
+                            <div class="w-8 h-8 rounded-full bg-brand/20 flex items-center justify-center shrink-0 mt-1">
+                                <i data-lucide="bot" class="w-4 h-4 text-brand"></i>
+                            </div>
+                            <div class="bg-card border border-border p-3 rounded-2xl rounded-tl-sm text-sm">
+                                Hello! Start the server to begin chatting with me.
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="p-4 border-t border-border bg-card shrink-0">
+                        <div class="relative flex items-end gap-2">
+                            <textarea id="chat-input" rows="1" class="flex-1 bg-base border border-border rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-brand resize-none max-h-32" placeholder="Type a message..."></textarea>
+                            <button id="btn-send-chat" class="btn-primary w-11 h-11 rounded-xl flex items-center justify-center shrink-0">
+                                <i data-lucide="send" class="w-4 h-4"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Persona & Settings Sidebar -->
+                <div class="w-72 shrink-0 flex flex-col gap-4">
+                    <div class="card p-4 rounded-xl border border-border flex flex-col gap-3">
+                        <h3 class="font-bold text-sm flex items-center gap-2">
+                            <i data-lucide="contact" class="w-4 h-4 text-brand"></i> Persona
+                        </h3>
+                        <p class="text-xs text-textMuted">Control how the AI behaves and responds.</p>
+                        
+                        <textarea id="chat-system-prompt" rows="4" class="w-full bg-base border border-border rounded-lg px-3 py-2 text-xs focus:outline-none focus:border-brand resize-none" placeholder="You are a helpful AI assistant..."></textarea>
+                        
+                        <div class="pt-3 border-t border-border">
+                            <h4 class="font-semibold text-xs mb-2 flex items-center gap-2 text-amber-500">
+                                <i data-lucide="sparkles" class="w-3 h-3"></i> Auto-Generate Persona
+                            </h4>
+                            <div class="flex gap-2">
+                                <input type="text" id="persona-idea" class="flex-1 input-field text-xs py-1.5" placeholder="e.g. Grumpy Pirate">
+                                <button id="btn-generate-persona" class="btn-secondary px-3 py-1.5 text-xs">Generate</button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="card p-4 rounded-xl border border-border flex flex-col gap-3">
+                        <h3 class="font-bold text-sm flex items-center gap-2">
+                            <i data-lucide="sliders" class="w-4 h-4 text-sec"></i> Settings
+                        </h3>
+                        <div class="space-y-3 mt-1">
+                            <div>
+                                <label class="flex justify-between text-xs font-semibold mb-1">Temperature <span id="lbl-temp">0.7</span></label>
+                                <input type="range" id="chat-temp" min="0" max="2" step="0.1" value="0.7" class="w-full accent-brand">
+                            </div>
+                            <div>
+                                <label class="flex justify-between text-xs font-semibold mb-1">Max Tokens <span id="lbl-tokens">2048</span></label>
+                                <input type="range" id="chat-tokens" min="256" max="8192" step="256" value="2048" class="w-full accent-brand">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tab: Models -->
+            <div id="tab-models" class="tab-pane hidden space-y-6 max-w-5xl mx-auto h-full flex flex-col">
+                <div class="flex items-end gap-4 shrink-0">
+                    <div class="form-group flex-1">
+                        <label class="block text-sm font-semibold mb-2" data-i18n="lbl_models_dir">Models Directory</label>
+                        <div class="flex gap-2">
+                            <input type="text" id="cfg-models_dir" class="flex-1 input-field" readonly placeholder="E:\Models\Llama.cpp">
+                            <button id="btn-browse-models-dir" class="btn-secondary px-4" data-i18n="btn_browse">Browse</button>
+                        </div>
+                    </div>
+                    <button id="btn-scan-models" class="btn-primary px-6 py-2.5 rounded-lg flex items-center justify-center gap-2 font-medium">
+                        <i data-lucide="refresh-cw" class="w-4 h-4"></i> <span data-i18n="btn_scan">Scan Directory</span>
+                    </button>
+                </div>
+                <div class="flex-1 overflow-y-auto pr-2 pb-10">
+                    <div id="models-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                        <div class="col-span-full text-center p-8 text-textMuted" data-i18n="msg_no_models">Click scan to load models...</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tab: Model Hub -->
+            <div id="tab-hub" class="tab-pane hidden space-y-6 max-w-5xl mx-auto h-full flex flex-col">
+                <div class="flex items-center justify-between shrink-0">
+                    <h2 class="text-2xl font-bold">HuggingFace Hub</h2>
+                </div>
+                
+                <div class="flex items-center gap-4 shrink-0">
+                    <input type="text" id="hub-search-input" class="input-field flex-1" placeholder="Search for GGUF models (e.g. Llama 3 8B GGUF)...">
+                    <label class="flex items-center gap-3 cursor-pointer bg-base px-4 py-2 rounded-lg border border-border shrink-0 hover:border-brand/50 transition-colors">
+                        <span class="text-sm font-semibold flex items-center gap-2 text-red-400">
+                            <i data-lucide="flame" class="w-4 h-4"></i> Uncensored
+                        </span>
+                        <div class="relative inline-block w-9 h-5 rounded-full transition-colors bg-border toggle-bg">
+                            <input type="checkbox" id="hub-uncensored" class="peer sr-only">
+                            <span class="absolute left-1 top-1 w-3 h-3 bg-white rounded-full transition-transform peer-checked:translate-x-4"></span>
+                        </div>
+                    </label>
+                    <button id="btn-hub-search" class="btn-primary px-6 py-2.5 rounded-lg flex items-center gap-2 font-medium">
+                        <i data-lucide="search" class="w-4 h-4"></i> Search
+                    </button>
+                </div>
+                
+                <div class="flex-1 overflow-y-auto pr-2 pb-10">
+                    <div id="hub-results-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                        <div class="col-span-full text-center p-8 text-textMuted">Search for models to begin...</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Hub Download Modal -->
+            <div id="hub-download-modal" class="hidden fixed inset-0 bg-base/80 backdrop-blur-sm z-50 flex items-center justify-center p-6">
+                <div class="card p-6 rounded-2xl border border-border max-w-2xl w-full shadow-2xl flex flex-col max-h-[90vh]">
+                    <h3 class="text-lg font-bold mb-4 truncate" id="modal-repo-name">Select File to Download</h3>
+                    <div class="flex-1 overflow-y-auto space-y-2 mb-6 pr-2" id="modal-file-list">
+                        <!-- File rows -->
+                    </div>
+                    
+                    <div id="hub-progress-container" class="hidden space-y-2 mb-6 shrink-0">
+                        <div class="flex justify-between text-xs text-textMuted font-bold">
+                            <span id="hub-progress-text">Downloading...</span>
+                            <span id="hub-progress-percent">0%</span>
+                        </div>
+                        <div class="w-full bg-base rounded-full h-2 overflow-hidden border border-border">
+                            <div id="hub-progress-bar" class="bg-brand h-full transition-all duration-300" style="width: 0%"></div>
+                        </div>
+                    </div>
+
+                    <div class="flex justify-end gap-3 shrink-0">
+                        <button id="btn-hub-close-modal" class="btn-secondary px-6 py-2">Close</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tab: Hardware -->
+            <div id="tab-hardware" class="tab-pane hidden space-y-8 max-w-4xl mx-auto">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="card p-6 rounded-xl border border-border shadow-sm flex flex-col gap-4">
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center gap-3">
+                                <i data-lucide="gpu" class="w-6 h-6 text-brand"></i>
+                                <div>
+                                    <h3 class="font-bold text-lg">GPU VRAM</h3>
+                                    <p id="gpu-name" class="text-xs text-textMuted font-medium truncate max-w-[200px]">Loading...</p>
+                                </div>
+                            </div>
+                            <span id="gpu-text" class="text-sm font-mono text-textMuted">0 GB / 0 GB</span>
+                        </div>
+                        <div class="h-4 w-full bg-base rounded-full overflow-hidden border border-border">
+                            <div id="gpu-bar" class="h-full bg-brand transition-all duration-500 ease-out" style="width: 0%"></div>
+                        </div>
+                        <p id="ctx-warning" class="text-xs text-amber-500 hidden"></p>
+                    </div>
+
+                    <div class="card p-6 rounded-xl border border-border shadow-sm flex flex-col gap-4">
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center gap-3">
+                                <i data-lucide="memory-stick" class="w-6 h-6 text-sec"></i>
+                                <h3 class="font-bold text-lg">System RAM</h3>
+                            </div>
+                            <span id="ram-text" class="text-sm font-mono text-textMuted">0 GB / 0 GB</span>
+                        </div>
+                        <div class="h-4 w-full bg-base rounded-full overflow-hidden border border-border">
+                            <div id="ram-bar" class="h-full bg-sec transition-all duration-500 ease-out" style="width: 0%"></div>
+                        </div>
+                    </div>
+                    
+                    <div class="card p-6 rounded-xl border border-border shadow-sm flex flex-col gap-4">
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center gap-3">
+                                <i data-lucide="cpu" class="w-6 h-6 text-blue-500"></i>
+                                <div>
+                                    <h3 class="font-bold text-lg">CPU Load</h3>
+                                    <p id="cpu-name" class="text-xs text-textMuted font-medium truncate max-w-[200px]">Loading...</p>
+                                </div>
+                            </div>
+                            <span id="cpu-text" class="text-sm font-mono text-textMuted">0%</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Live Performance Benchmark -->
+                <div class="card p-6 rounded-xl border border-border shadow-sm">
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="flex items-center gap-3">
+                            <i data-lucide="activity" class="w-6 h-6 text-brand"></i>
+                            <h3 class="font-bold text-lg">Live Performance Benchmark</h3>
+                        </div>
+                        <button id="btn-run-benchmark" class="btn-primary text-xs px-4 py-2 flex items-center gap-2">
+                            <i data-lucide="play" class="w-4 h-4"></i> Run Test
+                        </button>
+                    </div>
+                    
+                    <div class="flex items-center gap-8 mb-6">
+                        <div>
+                            <p class="text-xs text-textMuted font-semibold mb-1 uppercase tracking-wider">Prompt Eval Speed</p>
+                            <p class="text-2xl font-mono font-bold" id="bench-prompt-speed">-- <span class="text-sm text-textMuted font-normal">T/s</span></p>
+                        </div>
+                        <div>
+                            <p class="text-xs text-textMuted font-semibold mb-1 uppercase tracking-wider">Generation Speed</p>
+                            <p class="text-2xl font-mono font-bold text-brand" id="bench-gen-speed">-- <span class="text-sm text-textMuted font-normal">T/s</span></p>
+                        </div>
+                    </div>
+
+                    <div class="w-full h-48 relative">
+                        <canvas id="benchmarkChart"></canvas>
                     </div>
                 </div>
             </div>
 
             <!-- Tab: Tuning -->
             <div id="tab-tuning" class="tab-pane hidden space-y-8 max-w-4xl mx-auto">
+                <div class="flex items-center justify-between card p-4 rounded-xl border border-border">
+                    <div class="flex items-center gap-3">
+                        <i data-lucide="zap" class="w-5 h-5 text-amber-400"></i>
+                        <span class="font-semibold text-sm" data-i18n="lbl_presets">Configuration Presets:</span>
+                    </div>
+                    <select id="cfg-preset" class="input-field w-64 text-sm font-medium">
+                        <option value="custom" data-i18n="preset_custom">Custom</option>
+                        <option value="fast" data-i18n="preset_fast">Ultra Fast Chat</option>
+                        <option value="deep" data-i18n="preset_deep">Deep Coding / Agent</option>
+                    </select>
+                </div>
+
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="form-group">
+                        <label class="block text-sm font-semibold mb-2" data-i18n="lbl_context">Context Size (-c)</label>
+                        <select id="cfg-context_size" class="w-full input-field">
+                            <option value="2048">2048</option>
+                            <option value="4096">4096</option>
+                            <option value="8192">8192</option>
+                            <option value="16384">16384</option>
+                            <option value="32768">32768</option>
+                            <option value="65536">65536</option>
+                            <option value="131072">131072</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="block text-sm font-semibold mb-2" data-i18n="lbl_port">Port (--port)</label>
+                        <input type="number" id="cfg-port" class="w-full input-field" value="8080">
+                    </div>
+                    
                     <div class="form-group card p-5 rounded-xl border border-border">
                         <label class="flex items-center justify-between cursor-pointer">
                             <div>
@@ -161,16 +453,24 @@
                     </div>
 
                     <div class="form-group card p-5 rounded-xl border border-border">
-                        <label class="block text-sm font-semibold mb-3" data-i18n="lbl_gpu_layers">GPU Offload Layers (-ngl)</label>
+                        <div class="flex items-center justify-between mb-3">
+                            <label class="block text-sm font-semibold" data-i18n="lbl_gpu_layers">GPU Offload Layers (-ngl)</label>
+                            <button id="btn-auto-vram" class="text-xs bg-brand/10 hover:bg-brand/20 text-brand px-3 py-1 rounded-full font-medium transition-colors flex items-center gap-1">
+                                <i data-lucide="wand-2" class="w-3 h-3"></i> Auto-Set
+                            </button>
+                        </div>
                         <div class="flex items-center gap-4">
                             <input type="range" id="cfg-gpu_layers-slider" min="0" max="128" value="99" class="flex-1 accent-brand">
                             <input type="number" id="cfg-gpu_layers" class="w-20 input-field text-center" value="99">
                         </div>
+                        <p id="vram-prediction-text" class="text-xs text-textMuted mt-3 hidden"></p>
                     </div>
 
                     <div class="form-group">
                         <label class="block text-sm font-semibold mb-2" data-i18n="lbl_threads">CPU Threads (-t)</label>
-                        <input type="number" id="cfg-cpu_threads" class="w-full input-field" value="4">
+                        <div class="flex gap-2">
+                            <input type="number" id="cfg-cpu_threads" class="w-full input-field" value="4">
+                        </div>
                     </div>
 
                     <div class="form-group">
@@ -220,6 +520,50 @@
                     <input type="text" id="cfg-custom_args" class="w-full input-field font-mono" placeholder="e.g. --mlock --no-mmap">
                 </div>
             </div>
+            
+            <!-- Tab: API -->
+            <div id="tab-api" class="tab-pane hidden space-y-6 max-w-4xl mx-auto h-full flex flex-col">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <!-- cURL -->
+                    <div class="card p-5 rounded-xl border border-border flex flex-col">
+                        <div class="flex items-center justify-between mb-3">
+                            <h3 class="font-bold text-sm">cURL Command</h3>
+                            <button id="btn-copy-curl" class="btn-secondary text-xs px-2 py-1"><i data-lucide="copy" class="w-3 h-3"></i></button>
+                        </div>
+                        <pre id="code-curl" class="bg-base p-3 rounded-lg border border-border font-mono text-[11px] text-textMuted overflow-x-auto flex-1 select-all" dir="ltr">curl http://127.0.0.1:8080/v1/chat/completions \
+-H "Content-Type: application/json" \
+-d '{
+  "model": "local-model",
+  "messages": [{"role": "user", "content": "Hello!"}]
+}'</pre>
+                    </div>
+                    <!-- Python -->
+                    <div class="card p-5 rounded-xl border border-border flex flex-col">
+                        <div class="flex items-center justify-between mb-3">
+                            <h3 class="font-bold text-sm">Python (OpenAI SDK)</h3>
+                            <button id="btn-copy-python" class="btn-secondary text-xs px-2 py-1"><i data-lucide="copy" class="w-3 h-3"></i></button>
+                        </div>
+                        <pre id="code-python" class="bg-base p-3 rounded-lg border border-border font-mono text-[11px] text-textMuted overflow-x-auto flex-1 select-all" dir="ltr">from openai import OpenAI
+client = OpenAI(base_url="http://127.0.0.1:8080/v1", api_key="sk-no-key")
+res = client.chat.completions.create(
+    model="local-model",
+    messages=[{"role": "user", "content": "Hello!"}]
+)
+print(res.choices[0].message.content)</pre>
+                    </div>
+                </div>
+                
+                <div class="card p-6 rounded-xl border border-border mt-6 flex flex-col flex-1">
+                    <h3 class="font-bold text-lg mb-2" data-i18n="api_test_title">Interactive Test Box</h3>
+                    <p class="text-sm text-textMuted mb-4">Send a quick ping to the local API endpoint (requires server running).</p>
+                    <div class="flex gap-2 mb-4">
+                        <button id="btn-test-ping" class="btn-primary px-6 py-2 rounded-lg text-sm font-bold flex items-center gap-2">
+                            <i data-lucide="send" class="w-4 h-4"></i> Send Ping
+                        </button>
+                    </div>
+                    <pre id="ping-output" class="bg-base p-4 rounded-lg border border-border font-mono text-xs text-textMuted overflow-auto flex-1 max-h-64">Awaiting response...</pre>
+                </div>
+            </div>
 
             <!-- Tab: Logs -->
             <div id="tab-logs" class="tab-pane hidden h-full flex flex-col">
@@ -232,6 +576,9 @@
                         </label>
                         <button id="btn-copy-logs" class="btn-secondary text-xs px-3 py-1.5 flex items-center gap-2">
                             <i data-lucide="copy" class="w-3.5 h-3.5"></i> <span data-i18n="btn_copy">Copy All</span>
+                        </button>
+                        <button id="btn-export-logs" class="btn-secondary text-xs px-3 py-1.5 flex items-center gap-2">
+                            <i data-lucide="download" class="w-3.5 h-3.5"></i> <span data-i18n="btn_export">Export</span>
                         </button>
                         <button id="btn-clear-logs" class="btn-secondary text-xs px-3 py-1.5 flex items-center gap-2">
                             <i data-lucide="trash-2" class="w-3.5 h-3.5"></i> <span data-i18n="btn_clear">Clear</span>
@@ -251,26 +598,35 @@
                     <h2 class="text-xl font-bold text-brand" data-i18n="about_title">Llama Server Control</h2>
                     <p data-i18n="about_desc1">A modern, ultra-lightweight, and headless desktop GUI runner for llama.cpp's server binary on Windows.</p>
                     <p data-i18n="about_desc2">To achieve maximum performance on NVIDIA RTX GPUs, ensure you are using a binary built with CUDA support.</p>
-                    
-                    <h3 class="font-bold mt-6 text-textPrimary" data-i18n="about_integration">API Integration Example (cURL)</h3>
-                    <pre class="bg-base p-4 rounded-lg border border-border font-mono text-xs overflow-x-auto text-textMuted" dir="ltr">curl http://127.0.0.1:8080/v1/chat/completions \
--H "Content-Type: application/json" \
--d '{
-  "model": "gpt-3.5-turbo",
-  "messages": [{"role": "user", "content": "Hello!"}]
-}'</pre>
+                    <div class="mt-4 pt-4 border-t border-border flex items-center justify-between">
+                        <label class="flex items-center gap-3 cursor-pointer">
+                            <span class="font-semibold text-sm" data-i18n="lbl_minimize_tray">Minimize to System Tray on close</span>
+                            <div class="relative inline-block w-10 h-5 rounded-full transition-colors bg-border toggle-bg">
+                                <input type="checkbox" id="cfg-minimize_to_tray" class="peer sr-only">
+                                <span class="absolute left-1 top-1 w-3 h-3 bg-white rounded-full transition-transform peer-checked:translate-x-5"></span>
+                            </div>
+                        </label>
+                    </div>
+                    <div class="mt-4 pt-4 border-t border-border flex items-center justify-between">
+                        <label class="flex items-center gap-3 cursor-pointer">
+                            <span class="font-semibold text-sm" data-i18n="lbl_run_startup">Run silently on Windows Startup</span>
+                            <div class="relative inline-block w-10 h-5 rounded-full transition-colors bg-border toggle-bg">
+                                <input type="checkbox" id="cfg-run_on_startup" class="peer sr-only">
+                                <span class="absolute left-1 top-1 w-3 h-3 bg-white rounded-full transition-transform peer-checked:translate-x-5"></span>
+                            </div>
+                        </label>
+                    </div>
                 </div>
             </div>
-
         </main>
     </div>
 
     <!-- Bottom Action Bar -->
-    <footer class="h-20 border-t border-border bg-card flex items-center justify-between px-8 shrink-0 shadow-sm z-10 relative">
+    <footer class="h-20 border-t border-border bg-card flex items-center justify-between px-8 shrink-0 shadow-sm z-20 relative">
         <div class="flex items-center gap-4 w-1/3">
-            <button id="btn-webchat" class="btn-secondary px-4 py-2 flex items-center gap-2" title="Open Web Chat">
+            <button id="btn-webchat" class="btn-secondary px-4 py-2 flex items-center gap-2" title="Open AI Chat">
                 <i data-lucide="message-square" class="w-4 h-4"></i>
-                <span data-i18n="btn_webchat">Web Chat</span>
+                <span data-i18n="btn_webchat">Open Chat</span>
             </button>
             <button id="btn-copyurl" class="btn-secondary px-4 py-2 flex items-center gap-2" title="Copy API URL">
                 <i data-lucide="link" class="w-4 h-4"></i>
@@ -291,7 +647,7 @@
         
         <div class="w-1/3 flex justify-end">
             <!-- Toast notification container -->
-            <div id="toast" class="opacity-0 transition-opacity duration-300 bg-base border border-border px-4 py-2 rounded-lg text-sm shadow-lg flex items-center gap-2 pointer-events-none">
+            <div id="toast" class="opacity-0 transition-opacity duration-300 bg-base border border-border px-4 py-2 rounded-lg text-sm shadow-lg flex items-center gap-2 pointer-events-none transform translate-y-2">
                 <i data-lucide="check-circle" class="w-4 h-4 text-brand"></i>
                 <span id="toast-msg">Copied</span>
             </div>
@@ -300,6 +656,11 @@
 
     <script src="js/i18n.js"></script>
     <script src="js/logs.js"></script>
+    <script src="js/models.js"></script>
+    <script src="js/hub.js"></script>
+    <script src="js/hardware.js"></script>
+    <script src="js/integrations.js"></script>
+    <script src="js/chat.js"></script>
     <script src="js/app.js"></script>
     <script>
         lucide.createIcons();

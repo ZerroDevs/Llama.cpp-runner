@@ -23,7 +23,9 @@ class ConfigManager:
             "api_key": "",
             "custom_args": "",
             "theme": "dark",
-            "language": "en"
+            "language": "en",
+            "models_dir": "",
+            "minimize_to_tray": False
         }
         self.config = self.load_config()
 
