@@ -20,5 +20,9 @@
     "minimize_to_tray": false,
     "run_on_startup": false,
     "lora_adapters": "",
-    "draft_model": ""
+    "draft_model": "",
+    "swarm_launcher_path": "E:\\GE Ui\\SwarmUI\\launch-windows.bat",
+    "swarm_port": 7801,
+    "swarm_host": "127.0.0.1",
+    "swarm_extra_args": ""
 }

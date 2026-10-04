@@ -55,7 +55,17 @@ const translations = {
         btn_stop: "Stop Server",
         toast_copied: "Copied!",
         btn_load_run: "Load & Run",
-        err_no_dir: "Please select a directory first."
+        err_no_dir: "Please select a directory first.",
+        nav_swarm: "SwarmUI Studio",
+        swarm_title: "SwarmUI (Image Generation)",
+        swarm_desc: "Run your local Stable Diffusion models alongside your LLM.",
+        lbl_swarm_launcher: "SwarmUI Launcher (.bat / .cmd)",
+        lbl_swarm_port: "Port",
+        lbl_swarm_host: "Host (IP Address)",
+        lbl_swarm_extra_args: "Extra CLI Arguments",
+        btn_start_swarm: "Start SwarmUI",
+        btn_stop_swarm: "Stop SwarmUI",
+        btn_open_swarm: "Open Swarm Web"
     },
     ar: {
         app_title: "متحكم خادم لاما",
@@ -113,7 +123,17 @@ const translations = {
         btn_stop: "إيقاف الخادم",
         toast_copied: "تم النسخ!",
         btn_load_run: "تحميل وتشغيل",
-        err_no_dir: "يرجى تحديد المجلد أولاً."
+        err_no_dir: "يرجى تحديد المجلد أولاً.",
+        nav_swarm: "ستوديو SwarmUI",
+        swarm_title: "SwarmUI (توليد الصور)",
+        swarm_desc: "قم بتشغيل نماذج Stable Diffusion المحلية بجانب LLM الخاص بك.",
+        lbl_swarm_launcher: "مشغل SwarmUI (.bat / .cmd)",
+        lbl_swarm_port: "المنفذ (Port)",
+        lbl_swarm_host: "المضيف (IP Address)",
+        lbl_swarm_extra_args: "إضافات سطر الأوامر (CLI)",
+        btn_start_swarm: "تشغيل SwarmUI",
+        btn_stop_swarm: "إيقاف SwarmUI",
+        btn_open_swarm: "فتح واجهة الويب"
     }
 };
 

@@ -5,16 +5,23 @@ window.receiveLog = function(logLine) {
     if (!logLine) return;
     
     const div = document.createElement('div');
-    div.className = 'whitespace-pre-wrap';
+    div.className = 'whitespace-pre-wrap log-line';
     
-    if (logLine.includes('WARN')) {
-        div.classList.add('log-warn');
-    } else if (logLine.includes('ERR') || logLine.includes('fail')) {
-        div.classList.add('log-error');
-    } else if (logLine.includes('INFO') || logLine.includes('llama_')) {
-        div.classList.add('log-info');
+    if (logLine.startsWith('[SWARM] ')) {
+        div.dataset.source = 'swarm';
+        logLine = logLine.substring(8);
+        div.classList.add('text-indigo-400');
     } else {
-        div.classList.add('text-gray-300', 'dark:text-gray-400');
+        div.dataset.source = 'llama';
+        if (logLine.includes('WARN')) {
+            div.classList.add('log-warn');
+        } else if (logLine.includes('ERR') || logLine.includes('fail')) {
+            div.classList.add('log-error');
+        } else if (logLine.includes('INFO') || logLine.includes('llama_')) {
+            div.classList.add('log-info');
+        } else {
+            div.classList.add('text-gray-300', 'dark:text-gray-400');
+        }
     }
     
     div.textContent = logLine;
@@ -52,3 +59,47 @@ document.getElementById('btn-export-logs')?.addEventListener('click', () => {
     a.click();
     URL.revokeObjectURL(url);
 });
+
+// Log Filter Logic
+const filterAll = document.getElementById('log-filter-all');
+const filterLlama = document.getElementById('log-filter-llama');
+const filterSwarm = document.getElementById('log-filter-swarm');
+
+function setLogFilter(source) {
+    const activeClass = ['bg-brand', 'text-white', 'shadow-sm'];
+    const inactiveClass = ['text-textMuted', 'hover:text-textPrimary'];
+    
+    [filterAll, filterLlama, filterSwarm].forEach(btn => {
+        if (btn) {
+            btn.classList.remove(...activeClass);
+            btn.classList.add(...inactiveClass);
+        }
+    });
+
+    if (source === 'all') {
+        filterAll.classList.remove(...inactiveClass);
+        filterAll.classList.add(...activeClass);
+        logContainer.className = "h-full overflow-y-auto font-mono text-[13px] leading-relaxed break-all select-text space-y-1 p-1 filter-all";
+    } else if (source === 'llama') {
+        filterLlama.classList.remove(...inactiveClass);
+        filterLlama.classList.add(...activeClass);
+        logContainer.className = "h-full overflow-y-auto font-mono text-[13px] leading-relaxed break-all select-text space-y-1 p-1 filter-llama";
+    } else if (source === 'swarm') {
+        filterSwarm.classList.remove(...inactiveClass);
+        filterSwarm.classList.add(...activeClass);
+        logContainer.className = "h-full overflow-y-auto font-mono text-[13px] leading-relaxed break-all select-text space-y-1 p-1 filter-swarm";
+    }
+}
+
+filterAll?.addEventListener('click', () => setLogFilter('all'));
+filterLlama?.addEventListener('click', () => setLogFilter('llama'));
+filterSwarm?.addEventListener('click', () => setLogFilter('swarm'));
+
+// Initial state css is handled in style.css or dynamically:
+// We need to inject styles for these classes to hide unwanted logs
+const style = document.createElement('style');
+style.innerHTML = `
+    .filter-llama .log-line[data-source="swarm"] { display: none !important; }
+    .filter-swarm .log-line[data-source="llama"] { display: none !important; }
+`;
+document.head.appendChild(style);

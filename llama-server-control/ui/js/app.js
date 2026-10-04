@@ -31,7 +31,11 @@ const configMap = {
     'custom_args': document.getElementById('cfg-custom_args'),
     'models_dir': document.getElementById('cfg-models_dir'),
     'minimize_to_tray': document.getElementById('cfg-minimize_to_tray'),
-    'run_on_startup': document.getElementById('cfg-run_on_startup')
+    'run_on_startup': document.getElementById('cfg-run_on_startup'),
+    'swarm_launcher_path': document.getElementById('cfg-swarm_launcher_path'),
+    'swarm_port': document.getElementById('cfg-swarm_port'),
+    'swarm_host': document.getElementById('cfg-swarm_host'),
+    'swarm_extra_args': document.getElementById('cfg-swarm_extra_args')
 };
 
 const sliderGpu = document.getElementById('cfg-gpu_layers-slider');
@@ -50,6 +54,7 @@ window.addEventListener('pywebviewready', async () => {
     updateNetworkInfo();
     
     setInterval(pollStatus, 1000);
+    setInterval(pollSwarmStatus, 1000);
 });
 
 function loadConfigToUI() {
@@ -58,7 +63,10 @@ function loadConfigToUI() {
         if (el.type === 'checkbox') {
             el.checked = appConfig[key];
         } else {
-            el.value = appConfig[key] ?? '';
+            let val = appConfig[key] ?? '';
+            if (key === 'swarm_port' && (val === 0 || val === '')) val = 7801;
+            if (key === 'swarm_host' && val === '') val = '127.0.0.1';
+            el.value = val;
         }
     }
     sliderGpu.value = appConfig.gpu_layers ?? 99;
@@ -283,6 +291,15 @@ document.getElementById('btn-browse-draft').addEventListener('click', async () =
     }
 });
 
+document.getElementById('btn-browse-swarm-launcher').addEventListener('click', async () => {
+    if (!window.pywebview) return;
+    const path = await window.pywebview.api.select_swarm_launcher();
+    if (path) {
+        configMap.swarm_launcher_path.value = path;
+        saveConfig();
+    }
+});
+
 function applyTheme(theme) {
     if (theme === 'dark') {
         document.documentElement.classList.add('dark');
@@ -412,3 +429,64 @@ window.showToast = function(msg) {
         toast.classList.add('opacity-0', 'translate-y-2');
     }, 3000);
 }
+
+// SwarmUI Logic
+let isSwarmRunning = false;
+async function pollSwarmStatus() {
+    if (!window.pywebview || !window.pywebview.api) return;
+    const running = await window.pywebview.api.get_swarm_status();
+    updateSwarmStatusUI(running);
+}
+
+function updateSwarmStatusUI(running) {
+    const btnStart = document.getElementById('btn-start-swarm');
+    const btnStop = document.getElementById('btn-stop-swarm');
+    const statusDot = document.getElementById('swarm-status-dot');
+    const statusText = document.getElementById('swarm-status-text');
+    
+    isSwarmRunning = running;
+    if (isSwarmRunning) {
+        btnStart.classList.add('hidden');
+        btnStop.classList.remove('hidden');
+        btnStop.classList.add('flex');
+        
+        statusDot.classList.remove('bg-red-500');
+        statusDot.classList.add('pulsating-dot');
+        statusText.innerHTML = translations[currentLang]?.status_running || "Running";
+    } else {
+        btnStop.classList.add('hidden');
+        btnStop.classList.remove('flex');
+        btnStart.classList.remove('hidden');
+        
+        statusDot.classList.remove('pulsating-dot');
+        statusDot.classList.add('bg-red-500');
+        statusText.innerHTML = translations[currentLang]?.status_stopped || "Stopped";
+    }
+}
+
+document.getElementById('btn-start-swarm').addEventListener('click', async () => {
+    if (!window.pywebview) return;
+    await saveConfig();
+    const res = await window.pywebview.api.start_swarm(appConfig);
+    if (res.status === 'error') {
+        alert(res.message);
+    } else {
+        updateSwarmStatusUI(true);
+        document.querySelector('[data-target="tab-logs"]').click();
+    }
+});
+
+document.getElementById('btn-stop-swarm').addEventListener('click', async () => {
+    if (!window.pywebview) return;
+    const res = await window.pywebview.api.stop_swarm();
+    if (res.status === 'error') {
+        alert(res.message);
+    } else {
+        updateSwarmStatusUI(false);
+    }
+});
+
+document.getElementById('btn-open-swarm-web').addEventListener('click', () => {
+    if (!window.pywebview) return;
+    window.pywebview.api.open_swarm_ui();
+});

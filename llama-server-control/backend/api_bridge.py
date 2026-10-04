@@ -10,9 +10,10 @@ from backend.hub_manager import HubManager
 from backend.updater import Updater
 
 class ApiBridge:
-    def __init__(self, config_manager, process_manager):
+    def __init__(self, config_manager, process_manager, swarm_manager):
         self._config_manager = config_manager
         self._process_manager = process_manager
+        self._swarm_manager = swarm_manager
         self._hardware_monitor = HardwareMonitor()
         self._hardware_monitor.start()
         self._window = None
@@ -130,3 +131,27 @@ class ApiBridge:
 
     def get_hardware_data(self):
         return self._hardware_monitor.get_data()
+
+    # SwarmUI specific functions
+    def select_swarm_launcher(self):
+        if not self._window:
+            return None
+        file_types = ('SwarmUI Launcher (*.bat;*.cmd;*.exe)', 'All files (*.*)')
+        result = self._window.create_file_dialog(webview.FileDialog.OPEN, allow_multiple=False, file_types=file_types)
+        if result and len(result) > 0:
+            return result[0]
+        return None
+
+    def start_swarm(self, config):
+        return self._swarm_manager.start_swarm(config)
+
+    def stop_swarm(self):
+        return self._swarm_manager.stop_swarm()
+
+    def get_swarm_status(self):
+        return self._swarm_manager.check_status()
+        
+    def open_swarm_ui(self):
+        port = self.get_config().get("swarm_port", 7801)
+        webbrowser.open(f"http://127.0.0.1:{port}")
+        return {"status": "success"}

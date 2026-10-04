@@ -2,11 +2,12 @@ import threading
 import queue
 
 class LogStreamer:
-    def __init__(self, stream, window):
+    def __init__(self, stream, window, prefix=""):
         self.stream = stream
         self.window = window
         self.running = False
         self.thread = None
+        self.prefix = prefix
 
     def start(self):
         self.running = True
@@ -18,7 +19,7 @@ class LogStreamer:
             if not self.running:
                 break
             if line:
-                cleaned_line = line.strip()
+                cleaned_line = self.prefix + line.strip()
                 if self.window:
                     import json
                     try:

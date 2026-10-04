@@ -11,6 +11,7 @@ logging.basicConfig(filename='exit_trace.log', level=logging.DEBUG)
 
 from backend.config_manager import ConfigManager
 from backend.process_manager import ProcessManager
+from backend.swarm_manager import SwarmManager
 
 try:
     import pystray
@@ -26,7 +27,7 @@ def create_tray_image():
     d.ellipse((16, 16, 48, 48), fill=(0, 229, 153))
     return image
 
-def setup_tray(window, process_manager, config_manager):
+def setup_tray(window, process_manager, swarm_manager, config_manager):
     import webbrowser
 
     def on_open(icon, item):
@@ -52,6 +53,7 @@ def setup_tray(window, process_manager, config_manager):
     def on_exit(icon, item):
         icon.stop()
         process_manager.stop_server()
+        swarm_manager.stop_swarm()
         window.destroy()
         os._exit(0)
 
@@ -84,7 +86,8 @@ def main():
     
     config_manager = ConfigManager(os.path.join(base_path, 'config.json'))
     process_manager = ProcessManager()
-    api = ApiBridge(config_manager, process_manager)
+    swarm_manager = SwarmManager()
+    api = ApiBridge(config_manager, process_manager, swarm_manager)
     
     window = webview.create_window(
         'Llama Server Control',
@@ -97,14 +100,16 @@ def main():
     
     api.set_window(window)
     process_manager.set_window(window)
+    swarm_manager.set_window(window)
 
     def force_cleanup(signum=None, frame=None):
         logging.debug(f"force_cleanup called with signum={signum}")
         process_manager.stop_server()
+        swarm_manager.stop_swarm()
         os._exit(0)
 
-        
     atexit.register(process_manager.stop_server)
+    atexit.register(swarm_manager.stop_swarm)
     try:
         signal.signal(signal.SIGINT, force_cleanup)
         signal.signal(signal.SIGTERM, force_cleanup)
@@ -113,7 +118,7 @@ def main():
         pass
 
     if HAS_PYSTRAY:
-        tray_icon = setup_tray(window, process_manager, config_manager)
+        tray_icon = setup_tray(window, process_manager, swarm_manager, config_manager)
         
         def on_closing():
             logging.debug("on_closing called")
@@ -135,11 +140,13 @@ def main():
                 return False
             logging.debug("stopping server and returning True")
             process_manager.stop_server()
+            swarm_manager.stop_swarm()
             return True
             
         def on_closed():
             logging.debug("on_closed called")
             process_manager.stop_server()
+            swarm_manager.stop_swarm()
             tray_icon.stop()
             os._exit(0)
             
@@ -164,10 +171,12 @@ def main():
     else:
         def on_closing():
             process_manager.stop_server()
+            swarm_manager.stop_swarm()
             return True
             
         def on_closed():
             process_manager.stop_server()
+            swarm_manager.stop_swarm()
             os._exit(0)
             
         window.events.closing += on_closing
@@ -190,7 +199,7 @@ def main():
                 logging.debug(f"Startup error: {e}")
 
     window.events.loaded += on_loaded
-    webview.start(debug=True)
+    webview.start(debug=False)
 
 if __name__ == '__main__':
     main()
