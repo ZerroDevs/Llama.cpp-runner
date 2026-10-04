@@ -138,6 +138,18 @@ class LlamaProxyHandler(BaseHTTPRequestHandler):
                     if prompt.strip() == "/api":
                         self.handle_api_request(payload)
                         return
+                    if prompt.strip() in ["/eject", "/unload"]:
+                        self.handle_eject_request(payload)
+                        return
+                    if prompt.strip() in ["/sys", "/hw"]:
+                        self.handle_sys_request(payload)
+                        return
+                    if prompt.strip() == "/models":
+                        self.handle_models_request(payload)
+                        return
+                    if prompt.strip() == "/clear":
+                        self.handle_clear_request(payload)
+                        return
                 except:
                     pass
                 
@@ -170,6 +182,83 @@ class LlamaProxyHandler(BaseHTTPRequestHandler):
 
         self.forward_request()
 
+    def send_assistant_message(self, text, is_stream):
+        self.send_response(200)
+        self.send_header('Content-Type', 'text/event-stream' if is_stream else 'application/json')
+        self.send_header('Cache-Control', 'no-cache')
+        self.send_header('Connection', 'keep-alive')
+        self.end_headers()
+        
+        if is_stream:
+            chunk = {"choices":[{"delta":{"content": text}}]}
+            self.wfile.write(f"data: {json.dumps(chunk)}\n\n".encode('utf-8'))
+            self.wfile.write(b"data: [DONE]\n\n")
+            self.wfile.flush()
+        else:
+            resp = {
+                "choices": [{
+                    "message": {"role": "assistant", "content": text}
+                }]
+            }
+            self.wfile.write(json.dumps(resp).encode('utf-8'))
+
+    def handle_eject_request(self, payload):
+        self.send_assistant_message("*Model ejected. VRAM cleared.*\n\n*(Type any message to wake me back up)*", payload.get('stream', False))
+        
+        def eject_task():
+            time.sleep(1)
+            if hasattr(self.server, 'process_manager') and self.server.process_manager:
+                self.server.process_manager.stop_server()
+                cfg = self.server.config_manager.get_config()
+                cfg['model_path'] = ''
+                cfg['vision_projector'] = ''
+                self.server.process_manager.start_server(cfg)
+                
+        threading.Thread(target=eject_task, daemon=True).start()
+
+    def handle_sys_request(self, payload):
+        try:
+            import psutil
+            mem = psutil.virtual_memory()
+            ram = f"{round(mem.used / (1024**3), 2)}GB / {round(mem.total / (1024**3), 2)}GB ({mem.percent}%)"
+            cpu = f"{psutil.cpu_percent(interval=0.1)}%"
+        except:
+            ram = "N/A"
+            cpu = "N/A"
+            
+        try:
+            import subprocess
+            result = subprocess.check_output(
+                ['nvidia-smi', '--query-gpu=name,memory.used,memory.total', '--format=csv,nounits,noheader'],
+                text=True, creationflags=subprocess.CREATE_NO_WINDOW
+            )
+            parts = result.strip().split('\n')[0].split(',')
+            gpu = f"{parts[0].strip()} - {parts[1].strip()}MB / {parts[2].strip()}MB ({round((int(parts[1].strip()) / int(parts[2].strip())) * 100, 1)}%)"
+        except:
+            gpu = "N/A"
+
+        msg = f"### System Telemetry\n- **GPU VRAM:** {gpu}\n- **System RAM:** {ram}\n- **CPU Usage:** {cpu}"
+        self.send_assistant_message(msg, payload.get('stream', False))
+
+    def handle_models_request(self, payload):
+        cfg = self.server.config_manager.get_config() if hasattr(self.server, 'config_manager') else self.server.config
+        models_dir = cfg.get("models_dir", "")
+        if not models_dir or not os.path.exists(models_dir):
+            self.send_assistant_message("*Models directory not configured or not found.*", payload.get('stream', False))
+            return
+            
+        models = [f for f in os.listdir(models_dir) if f.endswith('.gguf')]
+        if not models:
+            self.send_assistant_message("*No `.gguf` models found in directory.*", payload.get('stream', False))
+            return
+            
+        msg = "### Available Models\n" + "\n".join([f"- `{m}`" for m in models])
+        self.send_assistant_message(msg, payload.get('stream', False))
+
+    def handle_clear_request(self, payload):
+        msg = "*Chat context wiped from server!*\n\n*(Note: To clear the messages from your screen, please refresh the page or click 'New Chat' in your client).* "
+        self.send_assistant_message(msg, payload.get('stream', False))
+
     def handle_api_request(self, payload):
         is_stream = payload.get('stream', False)
         
@@ -188,7 +277,7 @@ class LlamaProxyHandler(BaseHTTPRequestHandler):
         model_path = cfg.get("model_path", "")
         model_name = os.path.basename(model_path) if model_path else "local-model"
         
-        msg = f"""Here is how to connect external AI agents (like **Cline** or **Hermes**) to this server:
+        msg = f"""Here is how to connect external AI agents (like **Cline** or **Hermes** or **Other**) to this server:
 
 ### **API Configuration**
 *   **API Provider:** `OpenAI Compatible`
