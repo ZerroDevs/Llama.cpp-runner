@@ -135,6 +135,8 @@ let selectedImages = new Set();
 
 const btnToggleSelect = document.getElementById('btn-toggle-select');
 const btnBulkDelete = document.getElementById('btn-bulk-delete');
+const btnBulkCensor = document.getElementById('btn-bulk-censor');
+const btnBulkUncensor = document.getElementById('btn-bulk-uncensor');
 const btnBulkCancel = document.getElementById('btn-bulk-cancel');
 const bulkActions = document.getElementById('bulk-actions');
 const bulkCount = document.getElementById('bulk-count');
@@ -156,6 +158,52 @@ if (btnBulkCancel) {
         selectedImages.clear();
         updateBulkUI();
         renderSwarmGallery();
+    });
+}
+
+if (btnBulkCensor) {
+    btnBulkCensor.addEventListener('click', async () => {
+        if (selectedImages.size === 0) return;
+        btnBulkCensor.disabled = true;
+        btnBulkCensor.innerHTML = '<i data-lucide="loader" class="animate-spin w-4 h-4 text-indigo-400"></i>';
+        if (window.lucide) window.lucide.createIcons();
+        try {
+            const paths = Array.from(selectedImages);
+            await window.pywebview.api.censor_images(paths);
+            isSelectionMode = false;
+            selectedImages.clear();
+            updateBulkUI();
+            await loadSwarmGallery();
+        } catch (e) {
+            if (window.showToast) window.showToast('Failed to censor images');
+        } finally {
+            btnBulkCensor.disabled = false;
+            btnBulkCensor.innerHTML = '<i data-lucide="eye-off" class="w-4 h-4"></i>';
+            if (window.lucide) window.lucide.createIcons();
+        }
+    });
+}
+
+if (btnBulkUncensor) {
+    btnBulkUncensor.addEventListener('click', async () => {
+        if (selectedImages.size === 0) return;
+        btnBulkUncensor.disabled = true;
+        btnBulkUncensor.innerHTML = '<i data-lucide="loader" class="animate-spin w-4 h-4 text-green-400"></i>';
+        if (window.lucide) window.lucide.createIcons();
+        try {
+            const paths = Array.from(selectedImages);
+            await window.pywebview.api.uncensor_images(paths);
+            isSelectionMode = false;
+            selectedImages.clear();
+            updateBulkUI();
+            await loadSwarmGallery();
+        } catch (e) {
+            if (window.showToast) window.showToast('Failed to uncensor images');
+        } finally {
+            btnBulkUncensor.disabled = false;
+            btnBulkUncensor.innerHTML = '<i data-lucide="eye" class="w-4 h-4"></i>';
+            if (window.lucide) window.lucide.createIcons();
+        }
     });
 }
 
@@ -293,7 +341,9 @@ function renderSwarmGallery() {
                 <i data-lucide="check" class="w-3 h-3 text-white"></i>
             </div>`;
             
-            imgDiv.innerHTML = `${checkHtml}<img src="${img.data}" loading="lazy" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">`;
+            let blurClass = img.is_censored ? 'blur-2xl scale-110 hover:blur-none' : 'group-hover:scale-105';
+            
+            imgDiv.innerHTML = `${checkHtml}<img src="${img.data}" loading="lazy" class="w-full h-full object-cover transition-all duration-300 ${blurClass}">`;
             
             imgDiv.onclick = (e) => {
                 if (isSelectionMode) {

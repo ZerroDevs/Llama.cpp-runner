@@ -1,0 +1,30 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# Build / Distribution
+build/
+dist/
+build/*
+build/LlamaServerControl/*
+*.egg-info/
+*.spec
+*.exe
+
+# Application Data & Configs
+config.json
+censored.json
+exitcodes.json
+
+# Logs
+*.log
+exit_trace.log
+
+# Frontend (if built locally and ignored)
+frontend/
+
+# OS generated files
+.DS_Store
+Thumbs.db

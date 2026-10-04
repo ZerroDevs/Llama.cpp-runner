@@ -755,6 +755,12 @@ print(res.choices[0].message.content)</pre>
                         <div id="bulk-actions" class="hidden items-center gap-2 mr-2 bg-surface/50 border border-border px-3 py-1.5 rounded-lg shadow-sm backdrop-blur-sm">
                             <span class="text-sm font-semibold text-indigo-400"><span id="bulk-count">0</span> Selected</span>
                             <div class="h-4 w-[1px] bg-border mx-1"></div>
+                            <button id="btn-bulk-censor" class="p-1 text-textMuted hover:text-indigo-400 transition-colors" title="Blur/Censor Selected">
+                                <i data-lucide="eye-off" class="w-4 h-4"></i>
+                            </button>
+                            <button id="btn-bulk-uncensor" class="p-1 text-textMuted hover:text-green-400 transition-colors" title="Unblur Selected">
+                                <i data-lucide="eye" class="w-4 h-4"></i>
+                            </button>
                             <button id="btn-bulk-delete" class="p-1 text-textMuted hover:text-red-500 transition-colors" title="Delete Selected">
                                 <i data-lucide="trash-2" class="w-4 h-4"></i>
                             </button>

@@ -185,6 +185,7 @@ class ApiBridge:
             import urllib.parse
             
             result = []
+            censored_set = self._get_censored_list()
             for img_path in image_files:
                 folder = os.path.basename(os.path.dirname(img_path))
                 encoded_path = urllib.parse.quote(img_path)
@@ -192,6 +193,7 @@ class ApiBridge:
                 result.append({
                     "path": img_path,
                     "folder": folder,
+                    "is_censored": img_path in censored_set,
                     "data": f"http://127.0.0.1:{port}/local_image?path={encoded_path}"
                 })
             
@@ -220,6 +222,40 @@ class ApiBridge:
             except:
                 pass
         return {"status": "success", "deleted": deleted}
+
+    def _get_censored_list(self):
+        censored_file = "censored.json"
+        if os.path.exists(censored_file):
+            try:
+                import json
+                with open(censored_file, "r") as f:
+                    return set(json.load(f))
+            except:
+                return set()
+        return set()
+
+    def _save_censored_list(self, censored_set):
+        censored_file = "censored.json"
+        try:
+            import json
+            with open(censored_file, "w") as f:
+                json.dump(list(censored_set), f)
+        except:
+            pass
+
+    def censor_images(self, paths):
+        censored = self._get_censored_list()
+        for path in paths:
+            censored.add(path)
+        self._save_censored_list(censored)
+        return {"status": "success"}
+
+    def uncensor_images(self, paths):
+        censored = self._get_censored_list()
+        for path in paths:
+            censored.discard(path)
+        self._save_censored_list(censored)
+        return {"status": "success"}
 
     def open_image_folder(self, path):
         try:
