@@ -51,7 +51,8 @@ Our vision is to build the absolute lightest, most performant, zero-waste local 
   - `/models`: Scans and lists all `.gguf` files available in your models directory.
   - `/clear`: Wipes the backend stateless memory cache.
   - `/compact`: Condenses massive chat payloads dynamically into a dense summary block, saving huge amounts of context space.
-  -Note: --
+  
+  - `Note: --`
   - `/guess`: Attach up to multiple reference images alongside this command. The vision model analyzes their aesthetic, composition, and style, then strictly outputs optimized `Positive Prompt:` and `Negative Prompt:` tags without triggering generation.
   - `/yes`: Confirms and executes. Instantly catches the engineered prompts from the preceding `/guess` or `/art` response, unloads the LLM to free 100% VRAM, and dispatches them directly to SwarmUI for rendering.
   --
