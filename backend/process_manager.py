@@ -13,6 +13,15 @@ class ProcessManager:
     def set_window(self, window):
         self.window = window
 
+    def log_ui(self, msg):
+        if self.window:
+            try:
+                import json
+                safe_msg = json.dumps(msg)
+                self.window.evaluate_js(f"window.receiveLog({safe_msg})")
+            except Exception:
+                pass
+
     def is_port_in_use(self, port, host):
         with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
             return s.connect_ex((host, port)) == 0
@@ -65,6 +74,7 @@ class ProcessManager:
 
     def start_server(self, config):
         if self.process and self.process.poll() is None:
+            self.log_ui("[WARN] [Llama] Attempted to start server, but it is already running.")
             return {"status": "error", "message": "Server is already running."}
             
         binary = config.get("server_binary")
@@ -78,6 +88,9 @@ class ProcessManager:
             return {"status": "error", "message": f"Port {port} is already in use on {host}."}
 
         cmd = self.build_command(config)
+        
+        self.log_ui(f"[INFO] [Llama] Starting llama-server on {host}:{port}...")
+        self.log_ui(f"[INFO] [Llama] Command: {' '.join(cmd)}")
         
         try:
             startupinfo = subprocess.STARTUPINFO()
@@ -99,12 +112,15 @@ class ProcessManager:
             self.log_streamer = LogStreamer(self.process.stdout, self.window)
             self.log_streamer.start()
             
+            self.log_ui("[INFO] [Llama] Subprocess spawned successfully. Binding LogStreamer...")
             return {"status": "success", "message": "Server started successfully."}
         except Exception as e:
+            self.log_ui(f"[ERR] [Llama] Failed to start server: {str(e)}")
             return {"status": "error", "message": str(e)}
 
     def stop_server(self):
         if self.process:
+            self.log_ui("[INFO] [Llama] Stopping llama-server subprocess...")
             pid = self.process.pid
             
             try:

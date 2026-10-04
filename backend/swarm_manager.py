@@ -13,6 +13,15 @@ class SwarmManager:
     def set_window(self, window):
         self.window = window
 
+    def log_ui(self, msg):
+        if self.window:
+            try:
+                import json
+                safe_msg = json.dumps(msg)
+                self.window.evaluate_js(f"window.receiveLog({safe_msg})")
+            except Exception:
+                pass
+
     def is_port_in_use(self, port, host):
         with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
             return s.connect_ex((host, port)) == 0
@@ -34,6 +43,7 @@ class SwarmManager:
 
     def start_swarm(self, config):
         if self.process and self.process.poll() is None:
+            self.log_ui("[WARN] [SWARM] Attempted to start SwarmUI, but it is already running.")
             return {"status": "error", "message": "SwarmUI is already running."}
             
         binary = config.get("swarm_launcher_path")
@@ -46,6 +56,9 @@ class SwarmManager:
             return {"status": "error", "message": f"Port {port} is already in use on {host}."}
 
         cmd = self.build_command(config)
+        
+        self.log_ui(f"[INFO] [SWARM] Starting SwarmUI on {host}:{port}...")
+        self.log_ui(f"[INFO] [SWARM] Command: {' '.join(cmd)}")
         
         try:
             startupinfo = subprocess.STARTUPINFO()
@@ -72,12 +85,15 @@ class SwarmManager:
             self.log_streamer = LogStreamer(self.process.stdout, self.window, prefix="[SWARM] ")
             self.log_streamer.start()
             
+            self.log_ui("[INFO] [SWARM] Subprocess spawned successfully. Binding LogStreamer...")
             return {"status": "success", "message": "SwarmUI started successfully."}
         except Exception as e:
+            self.log_ui(f"[ERR] [SWARM] Failed to start SwarmUI: {str(e)}")
             return {"status": "error", "message": str(e)}
 
     def stop_swarm(self):
         if self.process:
+            self.log_ui("[INFO] [SWARM] Stopping SwarmUI subprocess...")
             pid = self.process.pid
             
             try:
