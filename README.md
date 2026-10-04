@@ -13,6 +13,7 @@ Our vision is to build the absolute lightest, most performant, zero-waste local 
 - **Full Configuration Control:** Easily tune `llama-server` settings including Host, Port, Context Size, CPU Threads, GPU Layers, Batch Sizes, Flash Attention, and K/V Cache Types.
 - **Hardware Acceleration:** Native support for Vision Projectors, LoRA Adapters, and Draft Models for speculative decoding.
 - **1-Click Start/Stop:** Effortlessly boot up your local AI server and shut it down cleanly through the UI or the System Tray. UI buttons dynamically lock/grey-out based on live server state.
+- **Auto-Sleep / VRAM Reclaimer:** Automatically unloads LLMs from VRAM after 10 minutes of inactivity to instantly return hardware resources back to the host system for gaming or heavy browsing. Seamlessly hot-loads the model back in the exact moment a new chat request is received.
 
 ### 🧠 Model Hub & Library
 - **HuggingFace Integration:** Search, browse, and download `.gguf` models directly from HuggingFace Hub right inside the app. Filter by "Uncensored", exact max VRAM constraints, and specific quantizations.
@@ -56,7 +57,6 @@ Our vision is to build the absolute lightest, most performant, zero-waste local 
 
 ## 🔮 Planned Features (Roadmap)
 
-- **Auto-Sleep / VRAM Reclaimer:** Automatically unload LLMs from VRAM after a period of inactivity (e.g. 10 minutes) to instantly return hardware resources back to the host system for gaming or heavy browsing. Seamlessly hot-load the model back in the exact moment a new chat request is received.
 - **Dynamic SwarmUI Model Selector:** Live querying of the `SwarmUI` model directory to dynamically populate image model dropdowns, allowing effortless hot-swapping between Qwen, SDXL, and SD1.5 checkpoints without hardcoding.
 - **Expanded Hub Integrations:** Allow direct 1-click installation of LoRAs and Vision Projectors from HuggingFace to matching local directories.
 
