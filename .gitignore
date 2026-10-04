@@ -21,6 +21,8 @@ exitcodes.json
 # Logs
 *.log
 exit_trace.log
+generated_cache/
+generated_cache/**
 
 # Frontend (if built locally and ignored)
 frontend/
