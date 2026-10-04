@@ -518,7 +518,7 @@ This server flawlessly intercepts standard OpenAI API calls (`/v1/chat/completio
             user_neg = parts[1].strip()
 
         if is_guess:
-            system_injection = "\n\n(SYSTEM: You are a Stable Diffusion prompt engineer. Visually analyze the attached image in detail. Generate a highly descriptive, comma-separated image generation prompt based strictly on this image. DO NOT write conversational text like 'Here is a prompt...'. Output STRICTLY in this exact format:\nPOSITIVE: <highly detailed positive prompt>\nNEGATIVE: <robust negative prompt>)"
+            system_injection = "Please visually analyze the attached image in detail. Generate a highly descriptive, comma-separated image generation prompt based strictly on this image. DO NOT write conversational text like 'Here is a prompt...'. Output STRICTLY in this exact format:\nPOSITIVE: <highly detailed positive prompt>\nNEGATIVE: <robust negative prompt>"
         elif is_art:
             if user_neg:
                 system_injection = f"\n\n(SYSTEM: You are a Stable Diffusion prompt engineer. Analyze my request. I have provided a positive and negative prompt. Enhance both to be highly detailed and descriptive. Output STRICTLY in this exact format:\nPOSITIVE: <detailed positive prompt, comma-separated>\nNEGATIVE: <robust negative prompt, comma-separated>\nDo not output anything else, no conversational filler, DO NOT REPEAT WORDS.)\n\nRequest Positive: {user_pos}\nRequest Negative: {user_neg}"
@@ -541,7 +541,7 @@ This server flawlessly intercepts standard OpenAI API calls (`/v1/chat/completio
             payload['prompt'] = system_injection
             
         payload['stream'] = True
-        payload['max_tokens'] = 300
+        payload['max_tokens'] = 500
         payload['presence_penalty'] = 0.5
         
         self.send_response(200)
@@ -564,13 +564,18 @@ This server flawlessly intercepts standard OpenAI API calls (`/v1/chat/completio
         generated_prompt = ""
         try:
             resp = requests.post(url, json=payload, stream=True, timeout=120)
-            for line in resp.iter_lines():
-                if line:
-                    decoded = line.decode('utf-8')
-                    if decoded.startswith('data: '):
-                        data_str = decoded[6:]
-                        if data_str == '[DONE]':
-                            break
+            if resp.status_code != 200:
+                err_text = resp.text
+                self.log_ui(f"[ERR] [LLM] Request failed with HTTP {resp.status_code}: {err_text}")
+                send_chunk(f"\n*[Error from LLM: HTTP {resp.status_code}]*\n")
+            else:
+                for line in resp.iter_lines():
+                    if line:
+                        decoded = line.decode('utf-8')
+                        if decoded.startswith('data: '):
+                            data_str = decoded[6:]
+                            if data_str == '[DONE]':
+                                break
                         try:
                             data = json.loads(data_str)
                             if 'choices' in data and len(data['choices']) > 0:
