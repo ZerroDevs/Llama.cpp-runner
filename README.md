@@ -66,7 +66,7 @@ Our vision is to build the absolute lightest, most performant, zero-waste local 
 
 - Windows OS
 - Python 3.10+
-- `llama-server.exe` (Downloadable via the Llama.cpp project)
+- `llama-server.exe` (Downloadable via the [Llama.cpp project](https://github.com/ggml-org/llama.cpp))
 - (Optional) SwarmUI installed locally for image generation features.
 
 ## Setup Instructions
