@@ -50,7 +50,7 @@ window.receiveLog = function(logLine) {
     div.textContent = logLine;
     logContainer.appendChild(div);
     
-    if (logContainer.childElementCount > 1000) {
+    while (logContainer.childElementCount > 500) {
         logContainer.removeChild(logContainer.firstChild);
     }
     

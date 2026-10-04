@@ -1,11 +1,10 @@
 import os
 import requests
 import threading
-from huggingface_hub import HfApi
 
 class HubManager:
     def __init__(self, api_bridge):
-        self.api = HfApi()
+        self._api = None
         self.download_thread = None
         self.download_progress = {
             "status": "idle",
@@ -17,13 +16,20 @@ class HubManager:
         }
         self._api_bridge = api_bridge # For hardware info
 
+    def _get_api(self):
+        if self._api is None:
+            from huggingface_hub import HfApi
+            self._api = HfApi()
+        return self._api
+
     def search_models(self, query, uncensored=False, limit=12):
         try:
+            api = self._get_api()
             filters = ["gguf"]
             if uncensored:
                 filters.append("uncensored")
                 
-            models = list(self.api.list_models(search=query, filter=filters, limit=limit, sort="downloads"))
+            models = list(api.list_models(search=query, filter=filters, limit=limit, sort="downloads"))
             
             hw = self._api_bridge.get_hardware_data()
             sys_ram_gb = hw.get("ram_total", 16.0)
@@ -33,7 +39,7 @@ class HubManager:
             
             def process_model(m):
                 try:
-                    info = self.api.model_info(m.id, files_metadata=True)
+                    info = api.model_info(m.id, files_metadata=True)
                     # Find smallest gguf size
                     sizes = [s.size for s in info.siblings if s.rfilename.endswith('.gguf') and s.size]
                     if not sizes:
@@ -75,7 +81,8 @@ class HubManager:
 
     def list_files(self, repo_id):
         try:
-            info = self.api.model_info(repo_id, files_metadata=True)
+            api = self._get_api()
+            info = api.model_info(repo_id, files_metadata=True)
             gguf_files = []
             
             hw = self._api_bridge.get_hardware_data()

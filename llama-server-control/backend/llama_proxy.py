@@ -67,6 +67,22 @@ class LlamaProxyHandler(BaseHTTPRequestHandler):
                 self.send_error(404, "File not found")
                 return
                 
+        if self.path.startswith('/local_image'):
+            from urllib.parse import urlparse, parse_qs
+            query = parse_qs(urlparse(self.path).query)
+            if 'path' in query:
+                filepath = query['path'][0]
+                if os.path.exists(filepath) and filepath.lower().endswith(('.png', '.jpg', '.jpeg', '.webp')):
+                    self.send_response(200)
+                    self.send_header('Content-Type', f"image/{filepath.split('.')[-1].lower()}")
+                    self.send_header('Cache-Control', 'max-age=3600')
+                    self.end_headers()
+                    with open(filepath, 'rb') as f:
+                        self.wfile.write(f.read())
+                    return
+            self.send_error(404, "Image not found")
+            return
+                
         self.forward_request()
 
     def do_OPTIONS(self):

@@ -100,4 +100,7 @@ class HardwareMonitor:
                 data["gpu_percent"] = 0
                 
             self.last_data.update(data)
-            time.sleep(2)
+            
+            import gc
+            gc.collect()
+            time.sleep(3)

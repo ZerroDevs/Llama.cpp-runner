@@ -13,7 +13,7 @@ const ctxSelect = document.getElementById('cfg-context_size');
 const ctxWarning = document.getElementById('ctx-warning');
 
 setInterval(async () => {
-    if (!window.pywebview) return;
+    if (!window.pywebview || document.hidden) return;
     
     // Ensure we only poll if tab is active (optimization)
     const isHardwareActive = !document.getElementById('tab-hardware').classList.contains('hidden');

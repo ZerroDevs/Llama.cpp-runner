@@ -178,25 +178,22 @@ class ApiBridge:
             image_files.sort(key=lambda x: os.path.getmtime(x), reverse=True)
             image_files = image_files[:100] # Limit to 100
             
+            port = int(self._config_manager.get_config().get("port", 8080))
+            import urllib.parse
+            
             result = []
-            import base64
             for img_path in image_files:
-                try:
-                    with open(img_path, 'rb') as f:
-                        b64 = base64.b64encode(f.read()).decode('utf-8')
-                        ext = os.path.splitext(img_path)[1].lower().replace('.', '')
-                        if ext == 'jpg': ext = 'jpeg'
-                        
-                        # Get folder name securely
-                        folder = os.path.basename(os.path.dirname(img_path))
-                        
-                        result.append({
-                            "path": img_path,
-                            "folder": folder,
-                            "data": f"data:image/{ext};base64,{b64}"
-                        })
-                except:
-                    pass
+                folder = os.path.basename(os.path.dirname(img_path))
+                encoded_path = urllib.parse.quote(img_path)
+                
+                result.append({
+                    "path": img_path,
+                    "folder": folder,
+                    "data": f"http://127.0.0.1:{port}/local_image?path={encoded_path}"
+                })
+            
+            import gc
+            gc.collect()
             return result
         except:
             return []
@@ -237,29 +234,36 @@ class ApiBridge:
                                 if len(length_bytes) != 4: break
                                 length = int.from_bytes(length_bytes, 'big')
                                 chunk_type = f.read(4)
-                                chunk_data = f.read(length)
-                                crc = f.read(4)
                                 
-                                if chunk_type == b'tEXt':
-                                    parts = chunk_data.split(b'\0', 1)
-                                    if len(parts) == 2:
-                                        k = parts[0].decode('latin-1', 'ignore').strip()
-                                        v = parts[1].decode('latin-1', 'ignore').strip()
-                                        if k and v: metadata[k] = v
-                                elif chunk_type == b'iTXt':
-                                    null1 = chunk_data.find(b'\0')
-                                    if null1 != -1:
-                                        k = chunk_data[:null1].decode('latin-1', 'ignore').strip()
-                                        null2 = chunk_data.find(b'\0', null1 + 3)
-                                        if null2 != -1:
-                                            null3 = chunk_data.find(b'\0', null2 + 1)
-                                            if null3 != -1:
-                                                v = chunk_data[null3 + 1:].decode('utf-8', 'ignore').strip()
-                                                if k and v: metadata[k] = v
+                                if chunk_type in (b'tEXt', b'iTXt'):
+                                    chunk_data = f.read(length)
+                                    crc = f.read(4)
+                                    if chunk_type == b'tEXt':
+                                        parts = chunk_data.split(b'\0', 1)
+                                        if len(parts) == 2:
+                                            k = parts[0].decode('latin-1', 'ignore').strip()
+                                            v = parts[1].decode('latin-1', 'ignore').strip()
+                                            if k and v: metadata[k] = v
+                                    elif chunk_type == b'iTXt':
+                                        null1 = chunk_data.find(b'\0')
+                                        if null1 != -1:
+                                            k = chunk_data[:null1].decode('latin-1', 'ignore').strip()
+                                            null2 = chunk_data.find(b'\0', null1 + 3)
+                                            if null2 != -1:
+                                                null3 = chunk_data.find(b'\0', null2 + 1)
+                                                if null3 != -1:
+                                                    v = chunk_data[null3 + 1:].decode('utf-8', 'ignore').strip()
+                                                    if k and v: metadata[k] = v
+                                    del chunk_data
                                 elif chunk_type == b'IEND':
                                     break
+                                else:
+                                    # Skip the payload entirely without allocating RAM
+                                    f.seek(length + 4, 1) # Skip data + CRC
                             except:
                                 break
+                    import gc
+                    gc.collect()
             return {"status": "success", "metadata": metadata}
         except Exception as e:
             return {"status": "error", "message": str(e)}

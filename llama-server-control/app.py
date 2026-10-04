@@ -151,10 +151,13 @@ def main():
             
         def on_closed():
             logging.debug("on_closed called")
+            import gc
+            gc.collect()
             process_manager.stop_server()
             swarm_manager.stop_swarm()
             proxy_server.stop()
-            tray_icon.stop()
+            if HAS_PYSTRAY:
+                tray_icon.stop()
             os._exit(0)
             
         def on_minimized():
@@ -183,6 +186,8 @@ def main():
             return True
             
         def on_closed():
+            import gc
+            gc.collect()
             process_manager.stop_server()
             swarm_manager.stop_swarm()
             proxy_server.stop()
@@ -208,7 +213,11 @@ def main():
                 logging.debug(f"Startup error: {e}")
 
     window.events.loaded += on_loaded
-    webview.start(debug=False)
+    # Attempt to force edgechromium with low memory footprint if supported by pywebview
+    try:
+        webview.start(debug=False, gui='edgechromium')
+    except:
+        webview.start(debug=False)
 
 if __name__ == '__main__':
     main()

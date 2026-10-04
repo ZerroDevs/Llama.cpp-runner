@@ -69,7 +69,7 @@ window.addEventListener('pywebviewready', async () => {
     
     setInterval(pollStatus, 1000);
     setInterval(pollSwarmStatus, 1000);
-    setTimeout(loadSwarmGallery, 1000);
+    // Swarm gallery is now lazy-loaded on tab click to save RAM at startup
 });
 
 let allGalleryImages = [];
@@ -162,7 +162,7 @@ function renderSwarmGallery() {
         galleryGroups[folderName].forEach(img => {
             const imgDiv = document.createElement('div');
             imgDiv.className = 'aspect-square rounded-xl overflow-hidden border border-border shadow-sm group relative cursor-pointer bg-card flex items-center justify-center';
-            imgDiv.innerHTML = `<img src="${img.data}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">`;
+            imgDiv.innerHTML = `<img src="${img.data}" loading="lazy" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">`;
             imgDiv.onclick = () => openImageModal(img);
             grid.appendChild(imgDiv);
         });
@@ -658,9 +658,26 @@ document.querySelectorAll('.nav-btn').forEach(btn => {
         const targetId = btn.getAttribute('data-target');
         document.getElementById(targetId).classList.remove('hidden');
         
+        // Load dependencies dynamically when tabs are opened
         if (targetId === 'tab-models') {
             const scanBtn = document.getElementById('btn-scan-models');
             if (scanBtn) scanBtn.click();
+        } else if (targetId === 'tab-swarm-lib') {
+            loadSwarmGallery();
+        }
+        
+        // AGGRESSIVE DOM UNLOADING: Free RAM when leaving heavy tabs
+        if (targetId !== 'tab-swarm-lib') {
+            const gallery = document.getElementById('swarm-gallery');
+            if (gallery) gallery.innerHTML = '';
+            allGalleryImages = [];
+            galleryGroups = {};
+        }
+        
+        if (targetId !== 'tab-hub') {
+            const hubResults = document.getElementById('hub-results');
+            if (hubResults) hubResults.innerHTML = '';
+            // Hub state variables (like search query) can remain, but DOM is wiped
         }
     });
 });
