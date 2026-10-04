@@ -135,6 +135,9 @@ class LlamaProxyHandler(BaseHTTPRequestHandler):
                     if "/draw " in prompt or prompt.startswith("/draw"):
                         self.handle_draw_request(prompt.replace("/draw", "").strip(), payload)
                         return
+                    if prompt.strip() == "/api":
+                        self.handle_api_request(payload)
+                        return
                 except:
                     pass
                 
@@ -166,6 +169,45 @@ class LlamaProxyHandler(BaseHTTPRequestHandler):
                 return
 
         self.forward_request()
+
+    def handle_api_request(self, payload):
+        is_stream = payload.get('stream', False)
+        
+        self.send_response(200)
+        self.send_header('Content-Type', 'text/event-stream' if is_stream else 'application/json')
+        self.send_header('Cache-Control', 'no-cache')
+        self.send_header('Connection', 'keep-alive')
+        self.end_headers()
+        
+        cfg = self.server.config_manager.get_config() if hasattr(self.server, 'config_manager') else self.server.config
+        host = cfg.get("host", "127.0.0.1")
+        if host == "0.0.0.0":
+            host = "127.0.0.1"
+        port = cfg.get("port", 8080)
+        
+        msg = f"""Here is how to connect external AI agents (like **Cline** or **Hermes**) to this server:
+
+### **API Configuration**
+*   **API Provider:** `OpenAI Compatible`
+*   **Base URL:** `http://{host}:{port}/v1`
+*   **API Key:** `sk-llama-runner` *(or literally anything, it doesn't matter)*
+*   **Model ID:** `local-model` *(or leave blank)*
+
+This server flawlessly intercepts standard OpenAI API calls (`/v1/chat/completions`) and pipes them through to the loaded `.gguf` model. You can safely drop the Base URL above into any OpenAI-compatible client!"""
+
+        if is_stream:
+            # Send the entire message in one chunk for speed
+            chunk = {"choices":[{"delta":{"content": msg}}]}
+            self.wfile.write(f"data: {json.dumps(chunk)}\n\n".encode('utf-8'))
+            self.wfile.write(b"data: [DONE]\n\n")
+            self.wfile.flush()
+        else:
+            resp = {
+                "choices": [{
+                    "message": {"role": "assistant", "content": msg}
+                }]
+            }
+            self.wfile.write(json.dumps(resp).encode('utf-8'))
 
     def handle_draw_request(self, original_prompt, payload):
         self.server.is_generating_image = True
