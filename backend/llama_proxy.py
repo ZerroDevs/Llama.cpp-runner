@@ -76,6 +76,7 @@ class LlamaProxyHandler(BaseHTTPRequestHandler):
                     self.send_response(200)
                     self.send_header('Content-Type', f"image/{filepath.split('.')[-1].lower()}")
                     self.send_header('Cache-Control', 'max-age=3600')
+                    self.send_header('Access-Control-Allow-Origin', '*')
                     self.end_headers()
                     with open(filepath, 'rb') as f:
                         self.wfile.write(f.read())
@@ -551,7 +552,8 @@ This server flawlessly intercepts standard OpenAI API calls (`/v1/chat/completio
                             
                             import urllib.parse
                             safe_path = urllib.parse.quote(full_path)
-                            send_chunk(f"\n\n![Generated Image](/local_image?path={safe_path})\n\n")
+                            my_port = self.server.config.get("port", 8080) if hasattr(self.server, 'config') else 8080
+                            send_chunk(f"\n\n![Generated Image](http://127.0.0.1:{my_port}/local_image?path={safe_path})\n\n")
                         except Exception:
                             # Fallback: SwarmUI likely returned a relative file path (like 'ViewImage?image=Output/xyz.png')
                             import urllib.parse
@@ -574,7 +576,8 @@ This server flawlessly intercepts standard OpenAI API calls (`/v1/chat/completio
                                         f.write(img_resp.content)
                                     
                                     safe_path = urllib.parse.quote(full_path)
-                                    send_chunk(f"\n\n![Generated Image](/local_image?path={safe_path})\n\n")
+                                    my_port = self.server.config.get("port", 8080) if hasattr(self.server, 'config') else 8080
+                                    send_chunk(f"\n\n![Generated Image](http://127.0.0.1:{my_port}/local_image?path={safe_path})\n\n")
                                 else:
                                     send_chunk(f"\n\n![Generated Image]({swarm_img_url})\n\n")
                             except Exception:
