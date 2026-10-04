@@ -105,12 +105,23 @@ class LlamaProxyHandler(BaseHTTPRequestHandler):
                 body_data = self.rfile.read(content_length)
                 try:
                     payload = json.loads(body_data)
-                    # Check if the last message starts with /draw
-                    prompt = ""
+                    # Check if the last message starts with a command
+                    raw_content = ""
                     if 'messages' in payload and len(payload['messages']) > 0:
-                        prompt = payload['messages'][-1].get('content', '')
+                        raw_content = payload['messages'][-1].get('content', '')
                     elif 'prompt' in payload:
-                        prompt = payload['prompt']
+                        raw_content = payload['prompt']
+                        
+                    text_prompt = ""
+                    if isinstance(raw_content, list):
+                        for item in raw_content:
+                            if isinstance(item, dict) and item.get('type') == 'text':
+                                text_prompt = item.get('text', '')
+                                break
+                    else:
+                        text_prompt = str(raw_content)
+                        
+                    text_prompt = text_prompt.strip()
                     
                     self.server.last_interaction = time.time()
                     
@@ -142,33 +153,37 @@ class LlamaProxyHandler(BaseHTTPRequestHandler):
                             self.server.process_manager.start_server(self.server.config_manager.get_config())
                             time.sleep(4)
                     
-                    if "/draw " in prompt or prompt.startswith("/draw"):
+                    if "/draw " in text_prompt or text_prompt.startswith("/draw"):
                         self.log_ui("[INFO] Intercepted /draw command. Initiating AI image generation pipeline...")
-                        self.handle_draw_request(prompt.replace("/draw", "").strip(), payload, is_art=False)
+                        self.handle_draw_request(text_prompt.replace("/draw", "").strip(), payload, is_art=False)
                         return
-                    if "/art " in prompt or prompt.startswith("/art"):
+                    if "/art " in text_prompt or text_prompt.startswith("/art"):
                         self.log_ui("[INFO] Intercepted /art command. Initiating enhanced AI image generation pipeline...")
-                        self.handle_draw_request(prompt.replace("/art", "").strip(), payload, is_art=True)
+                        self.handle_draw_request(text_prompt.replace("/art", "").strip(), payload, is_art=True)
                         return
-                    if prompt.strip() == "/hook":
+                    if text_prompt.startswith("/guess"):
+                        self.log_ui("[INFO] Intercepted /guess command. Initiating visual analysis and generation pipeline...")
+                        self.handle_draw_request("", payload, is_art=False, is_guess=True)
+                        return
+                    if text_prompt == "/hook":
                         self.handle_hook_request(payload)
                         return
-                    if prompt.strip() == "/api":
+                    if text_prompt == "/api":
                         self.handle_api_request(payload)
                         return
-                    if prompt.strip() in ["/eject", "/unload"]:
+                    if text_prompt in ["/eject", "/unload"]:
                         self.handle_eject_request(payload)
                         return
-                    if prompt.strip() in ["/sys", "/hw"]:
+                    if text_prompt in ["/sys", "/hw"]:
                         self.handle_sys_request(payload)
                         return
-                    if prompt.strip() == "/models":
+                    if text_prompt == "/models":
                         self.handle_models_request(payload)
                         return
-                    if prompt.strip() == "/clear":
+                    if text_prompt == "/clear":
                         self.handle_clear_request(payload)
                         return
-                    if prompt.strip() == "/compact":
+                    if text_prompt == "/compact":
                         self.handle_compact_request(payload)
                         return
                 except:
@@ -484,14 +499,14 @@ This server flawlessly intercepts standard OpenAI API calls (`/v1/chat/completio
             self.end_headers()
             self.wfile.write(b"{}")
 
-    def handle_draw_request(self, original_prompt, payload, is_art=False):
+    def handle_draw_request(self, original_prompt, payload, is_art=False, is_guess=False):
         self.server.is_generating_image = True
         try:
-            self._do_handle_draw_request(original_prompt, payload, is_art)
+            self._do_handle_draw_request(original_prompt, payload, is_art, is_guess)
         finally:
             self.server.is_generating_image = False
             
-    def _do_handle_draw_request(self, original_prompt, payload, is_art):
+    def _do_handle_draw_request(self, original_prompt, payload, is_art, is_guess):
         is_stream = payload.get('stream', False)
         
         # Manually extract user's negative prompt if provided via '|'
@@ -502,7 +517,9 @@ This server flawlessly intercepts standard OpenAI API calls (`/v1/chat/completio
             user_pos = parts[0].strip()
             user_neg = parts[1].strip()
 
-        if is_art:
+        if is_guess:
+            system_injection = "\n\n(SYSTEM: You are a Stable Diffusion prompt engineer. Analyze the provided image visually. Write a highly detailed, descriptive, comma-separated image generation positive prompt that describes the image accurately. AND automatically generate a robust, highly detailed negative prompt that avoids bad anatomy or flaws. Output STRICTLY in this exact format:\nPOSITIVE: <detailed positive prompt>\nNEGATIVE: <robust negative prompt>\nDo not output anything else, DO NOT REPEAT WORDS.)"
+        elif is_art:
             if user_neg:
                 system_injection = f"\n\n(SYSTEM: You are a Stable Diffusion prompt engineer. Analyze my request. I have provided a positive and negative prompt. Enhance both to be highly detailed and descriptive. Output STRICTLY in this exact format:\nPOSITIVE: <detailed positive prompt, comma-separated>\nNEGATIVE: <robust negative prompt, comma-separated>\nDo not output anything else, no conversational filler, DO NOT REPEAT WORDS.)\n\nRequest Positive: {user_pos}\nRequest Negative: {user_neg}"
             else:
@@ -511,7 +528,15 @@ This server flawlessly intercepts standard OpenAI API calls (`/v1/chat/completio
             system_injection = f"\n\n(SYSTEM: You are a Stable Diffusion prompt engineer. Write a highly detailed, descriptive, comma-separated image generation positive prompt based on my request. Do not output anything else, no conversational filler.)\n\nRequest: {user_pos}"
         
         if 'messages' in payload and len(payload['messages']) > 0:
-            payload['messages'][-1]['content'] = system_injection
+            last_content = payload['messages'][-1]['content']
+            if isinstance(last_content, list):
+                # Multimodal payload (image + text)
+                for item in last_content:
+                    if isinstance(item, dict) and item.get('type') == 'text':
+                        item['text'] = system_injection
+                        break
+            else:
+                payload['messages'][-1]['content'] = system_injection
         elif 'prompt' in payload:
             payload['prompt'] = system_injection
             
@@ -593,7 +618,7 @@ This server flawlessly intercepts standard OpenAI API calls (`/v1/chat/completio
             
             default_neg = "ugly, blurry, low quality, deformed, mutated, bad anatomy, bad proportions, poorly drawn face, poorly drawn hands, extra limbs, cloned face, disfigured, gross proportions"
             
-            if is_art:
+            if is_art or is_guess:
                 pos_prompt = user_pos
                 neg_prompt = user_neg if user_neg else default_neg
                 gen_text = generated_prompt.strip()
