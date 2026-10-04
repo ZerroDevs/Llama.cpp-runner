@@ -384,17 +384,25 @@ This server flawlessly intercepts standard OpenAI API calls (`/v1/chat/completio
     def _do_handle_draw_request(self, original_prompt, payload):
         is_stream = payload.get('stream', False)
         
+        # Manually extract user's negative prompt if provided via '|'
+        user_neg = ""
+        user_pos = original_prompt
+        if "|" in original_prompt:
+            parts = original_prompt.split("|", 1)
+            user_pos = parts[0].strip()
+            user_neg = parts[1].strip()
+
         # Modify payload to ask LLM for prompt safely without breaking chat templates
-        system_injection = "\n\n(SYSTEM: You are a Stable Diffusion prompt engineer. Analyze my request. If I provided a negative prompt, enhance it. If I didn't, generate an appropriate robust negative prompt. Output STRICTLY in this exact format:\nPOSITIVE: <detailed positive prompt, comma-separated, max 30 words>\nNEGATIVE: <robust negative prompt, comma-separated, max 30 words>\nDo not output anything else, no conversational filler, DO NOT REPEAT WORDS.)"
+        system_injection = f"\n\n(SYSTEM: You are a Stable Diffusion prompt engineer. Write a highly detailed, descriptive, comma-separated image generation positive prompt based on my request. Do not output anything else, no conversational filler.)\n\nRequest: {user_pos}"
         
         if 'messages' in payload and len(payload['messages']) > 0:
-            payload['messages'][-1]['content'] += system_injection
+            payload['messages'][-1]['content'] = system_injection
         elif 'prompt' in payload:
-            payload['prompt'] += system_injection
+            payload['prompt'] = system_injection
             
         payload['stream'] = True
-        payload['max_tokens'] = 200
-        payload['presence_penalty'] = 1.0
+        payload['max_tokens'] = 300
+        payload['presence_penalty'] = 0.5
         
         self.send_response(200)
         self.send_header('Content-Type', 'text/event-stream' if is_stream else 'application/json')
@@ -466,31 +474,14 @@ This server flawlessly intercepts standard OpenAI API calls (`/v1/chat/completio
             width = int(fresh_cfg.get("swarm_width", 1024))
             height = int(fresh_cfg.get("swarm_height", 1024))
             
-            pos_prompt = original_prompt
-            neg_prompt = "ugly, blurry, low quality"
-            
-            gen_text = generated_prompt.strip()
-            if "POSITIVE:" in gen_text or "NEGATIVE:" in gen_text:
-                lines = gen_text.split('\n')
-                p_lines = []
-                n_lines = []
-                current = None
-                for line in lines:
-                    if line.startswith("POSITIVE:"):
-                        current = 'P'
-                        p_lines.append(line.replace("POSITIVE:", "").strip())
-                    elif line.startswith("NEGATIVE:"):
-                        current = 'N'
-                        n_lines.append(line.replace("NEGATIVE:", "").strip())
-                    elif current == 'P':
-                        p_lines.append(line.strip())
-                    elif current == 'N':
-                        n_lines.append(line.strip())
-                        
-                if p_lines: pos_prompt = " ".join(p_lines).strip()
-                if n_lines: neg_prompt = " ".join(n_lines).strip()
-            else:
-                pos_prompt = gen_text if gen_text else original_prompt
+            pos_prompt = generated_prompt.strip()
+            if pos_prompt.startswith("POSITIVE:"):
+                pos_prompt = pos_prompt.replace("POSITIVE:", "", 1).strip()
+            if not pos_prompt:
+                pos_prompt = user_pos
+                
+            default_neg = "ugly, blurry, low quality, deformed, mutated, bad anatomy, bad proportions, poorly drawn face, poorly drawn hands, extra limbs, cloned face, disfigured, gross proportions"
+            neg_prompt = user_neg if user_neg else default_neg
                 
             swarm_url = f"{base_url}/API/GenerateText2Image"
             swarm_payload = {
