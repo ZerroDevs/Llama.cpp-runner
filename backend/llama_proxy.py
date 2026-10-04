@@ -185,13 +185,16 @@ class LlamaProxyHandler(BaseHTTPRequestHandler):
             host = "127.0.0.1"
         port = cfg.get("port", 8080)
         
+        model_path = cfg.get("model_path", "")
+        model_name = os.path.basename(model_path) if model_path else "local-model"
+        
         msg = f"""Here is how to connect external AI agents (like **Cline** or **Hermes**) to this server:
 
 ### **API Configuration**
 *   **API Provider:** `OpenAI Compatible`
 *   **Base URL:** `http://{host}:{port}/v1`
 *   **API Key:** `sk-llama-runner` *(or literally anything, it doesn't matter)*
-*   **Model ID:** `local-model` *(or leave blank)*
+*   **Model ID:** `{model_name}` *(or leave blank)*
 
 This server flawlessly intercepts standard OpenAI API calls (`/v1/chat/completions`) and pipes them through to the loaded `.gguf` model. You can safely drop the Base URL above into any OpenAI-compatible client!"""
 
