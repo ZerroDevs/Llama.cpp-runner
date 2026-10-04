@@ -615,7 +615,7 @@ This server flawlessly intercepts standard OpenAI API calls (`/v1/chat/completio
                                     my_port = self.server.config.get("port", 8080) if hasattr(self.server, 'config') else 8080
                                     send_chunk(f"\n\n![Generated Image](http://127.0.0.1:{my_port}/local_image?path={safe_path})\n\n")
                                 else:
-                                    send_chunk(f"\n*SwarmUI failed to generate a valid image. (The prompt might have triggered an internal error or NSFW filter).*\n")
+                                    send_chunk(f"\n*SwarmUI failed to generate a valid image. (The prompt might have triggered an internal error or (NSFW) filter).*\n")
                             except Exception:
                                 send_chunk(f"\n*SwarmUI failed to generate a valid image.* \n")
                 else:
