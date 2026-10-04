@@ -388,14 +388,17 @@ This server flawlessly intercepts standard OpenAI API calls (`/v1/chat/completio
                 import requests
                 with open(image_path, 'rb') as f:
                     files = {'file': ('image.jpg', f, 'image/jpeg')}
+                    pos = pos_prompt if pos_prompt else "N/A"
+                    neg = neg_prompt if neg_prompt else "N/A"
                     payload = {
                         "content": "**New Image Generated!**",
                         "embeds": [{
                             "title": "Image Metadata",
                             "color": 5814783,
+                            "image": {"url": "attachment://image.jpg"},
                             "fields": [
-                                {"name": "Positive Prompt", "value": (pos_prompt[:1020] + '...') if len(pos_prompt) > 1024 else pos_prompt},
-                                {"name": "Negative Prompt", "value": (neg_prompt[:1020] + '...') if len(neg_prompt) > 1024 else neg_prompt},
+                                {"name": "Positive Prompt", "value": (pos[:1020] + '...') if len(pos) > 1024 else pos},
+                                {"name": "Negative Prompt", "value": (neg[:1020] + '...') if len(neg) > 1024 else neg},
                                 {"name": "Resolution", "value": f"{width}x{height}", "inline": True},
                                 {"name": "CFG Scale", "value": str(cfg), "inline": True},
                                 {"name": "Steps", "value": str(steps), "inline": True}
@@ -403,9 +406,11 @@ This server flawlessly intercepts standard OpenAI API calls (`/v1/chat/completio
                         }]
                     }
                     import json
-                    requests.post(webhook_url, data={'payload_json': json.dumps(payload)}, files=files, timeout=30)
-            except Exception:
-                pass
+                    resp = requests.post(webhook_url, data={'payload_json': json.dumps(payload)}, files=files, timeout=30)
+                    if resp.status_code >= 400:
+                        print(f"Discord Webhook Error: {resp.status_code} - {resp.text}")
+            except Exception as e:
+                print(f"Discord Webhook Exception: {e}")
                 
         threading.Thread(target=_post, daemon=True).start()
 
