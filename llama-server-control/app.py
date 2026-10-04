@@ -51,6 +51,13 @@ def setup_tray(window, process_manager, swarm_manager, config_manager):
         port = config_manager.get_config().get("port", 8080)
         webbrowser.open(f"http://127.0.0.1:{port}")
 
+    def on_open_swarmui(icon, item):
+        cfg = config_manager.get_config()
+        port = cfg.get("swarm_port", 7801)
+        host = cfg.get("swarm_host", "127.0.0.1")
+        if not host: host = "127.0.0.1"
+        webbrowser.open(f"http://{host}:{port}/")
+
     def on_exit(icon, item):
         icon.stop()
         process_manager.stop_server()
@@ -69,6 +76,11 @@ def setup_tray(window, process_manager, swarm_manager, config_manager):
             on_open_web_ui,
             visible=lambda item: process_manager.check_status()
         ),
+        pystray.MenuItem(
+            'Open SwarmUI Web',
+            on_open_swarmui,
+            visible=lambda item: swarm_manager.check_status()
+        ),
         pystray.MenuItem('Exit', on_exit)
     )
     
@@ -76,16 +88,22 @@ def setup_tray(window, process_manager, swarm_manager, config_manager):
     threading.Thread(target=icon.run, daemon=True).start()
     return icon
 
-def get_base_path():
+def get_asset_path():
     if getattr(sys, 'frozen', False):
         return sys._MEIPASS
     return os.path.dirname(os.path.abspath(__file__))
 
+def get_data_path():
+    if getattr(sys, 'frozen', False):
+        return os.path.dirname(sys.executable)
+    return os.path.dirname(os.path.abspath(__file__))
+
 def main():
-    base_path = get_base_path()
-    ui_path = os.path.join(base_path, 'ui', 'index.html')
+    asset_path = get_asset_path()
+    data_path = get_data_path()
+    ui_path = os.path.join(asset_path, 'ui', 'index.html')
     
-    config_manager = ConfigManager(os.path.join(base_path, 'config.json'))
+    config_manager = ConfigManager(os.path.join(data_path, 'config.json'))
     process_manager = ProcessManager()
     swarm_manager = SwarmManager()
     api = ApiBridge(config_manager, process_manager, swarm_manager)

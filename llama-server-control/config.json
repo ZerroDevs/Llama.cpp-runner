@@ -25,6 +25,10 @@
     "swarm_port": 7801,
     "swarm_host": "127.0.0.1",
     "swarm_extra_args": "",
-    "swarm_steps": "20",
-    "swarm_cfg": "3.5"
+    "swarm_steps": "2",
+    "swarm_cfg": "3.5",
+    "swarm_width": "512",
+    "swarm_height": "512",
+    "auto_sleep": false,
+    "swarm_model": "qwen-image-2.1-UC-Q6_K.gguf"
 }

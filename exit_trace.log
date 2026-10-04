@@ -1,0 +1,1267 @@
+DEBUG:PIL.Image:Importing AvifImagePlugin
+DEBUG:PIL.Image:Importing BlpImagePlugin
+DEBUG:PIL.Image:Importing BmpImagePlugin
+DEBUG:PIL.Image:Importing BufrStubImagePlugin
+DEBUG:PIL.Image:Importing CurImagePlugin
+DEBUG:PIL.Image:Importing DcxImagePlugin
+DEBUG:PIL.Image:Importing DdsImagePlugin
+DEBUG:PIL.Image:Importing EpsImagePlugin
+DEBUG:PIL.Image:Importing FitsImagePlugin
+DEBUG:PIL.Image:Importing FliImagePlugin
+DEBUG:PIL.Image:Importing FpxImagePlugin
+DEBUG:PIL.Image:Image: failed to import FpxImagePlugin: No module named 'olefile'
+DEBUG:PIL.Image:Importing FtexImagePlugin
+DEBUG:PIL.Image:Importing GbrImagePlugin
+DEBUG:PIL.Image:Importing GifImagePlugin
+DEBUG:PIL.Image:Importing GribStubImagePlugin
+DEBUG:PIL.Image:Importing Hdf5StubImagePlugin
+DEBUG:PIL.Image:Importing IcnsImagePlugin
+DEBUG:PIL.Image:Importing IcoImagePlugin
+DEBUG:PIL.Image:Importing ImImagePlugin
+DEBUG:PIL.Image:Importing ImtImagePlugin
+DEBUG:PIL.Image:Importing IptcImagePlugin
+DEBUG:PIL.Image:Importing JpegImagePlugin
+DEBUG:PIL.Image:Importing Jpeg2KImagePlugin
+DEBUG:PIL.Image:Importing McIdasImagePlugin
+DEBUG:PIL.Image:Importing MicImagePlugin
+DEBUG:PIL.Image:Image: failed to import MicImagePlugin: No module named 'olefile'
+DEBUG:PIL.Image:Importing MpegImagePlugin
+DEBUG:PIL.Image:Importing MpoImagePlugin
+DEBUG:PIL.Image:Importing MspImagePlugin
+DEBUG:PIL.Image:Importing PalmImagePlugin
+DEBUG:PIL.Image:Importing PcdImagePlugin
+DEBUG:PIL.Image:Importing PcxImagePlugin
+DEBUG:PIL.Image:Importing PdfImagePlugin
+DEBUG:PIL.Image:Importing PixarImagePlugin
+DEBUG:PIL.Image:Importing PngImagePlugin
+DEBUG:PIL.Image:Importing PpmImagePlugin
+DEBUG:PIL.Image:Importing PsdImagePlugin
+DEBUG:PIL.Image:Importing QoiImagePlugin
+DEBUG:PIL.Image:Importing SgiImagePlugin
+DEBUG:PIL.Image:Importing SpiderImagePlugin
+DEBUG:PIL.Image:Importing SunImagePlugin
+DEBUG:PIL.Image:Importing TgaImagePlugin
+DEBUG:PIL.Image:Importing TiffImagePlugin
+DEBUG:PIL.Image:Importing WebPImagePlugin
+DEBUG:PIL.Image:Importing WmfImagePlugin
+DEBUG:PIL.Image:Importing XbmImagePlugin
+DEBUG:PIL.Image:Importing XpmImagePlugin
+DEBUG:PIL.Image:Importing XVThumbImagePlugin
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:8081
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:8081
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:8081
+DEBUG:root:on_minimized called
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:8081
+DEBUG:root:on_closing called
+DEBUG:root:stopping server and returning True
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:8081
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:8081
+DEBUG:root:on_closed called
+DEBUG:PIL.Image:Importing AvifImagePlugin
+DEBUG:PIL.Image:Importing BlpImagePlugin
+DEBUG:PIL.Image:Importing BmpImagePlugin
+DEBUG:PIL.Image:Importing BufrStubImagePlugin
+DEBUG:PIL.Image:Importing CurImagePlugin
+DEBUG:PIL.Image:Importing DcxImagePlugin
+DEBUG:PIL.Image:Importing DdsImagePlugin
+DEBUG:PIL.Image:Importing EpsImagePlugin
+DEBUG:PIL.Image:Importing FitsImagePlugin
+DEBUG:PIL.Image:Importing FliImagePlugin
+DEBUG:PIL.Image:Importing FpxImagePlugin
+DEBUG:PIL.Image:Image: failed to import FpxImagePlugin: No module named 'olefile'
+DEBUG:PIL.Image:Importing FtexImagePlugin
+DEBUG:PIL.Image:Importing GbrImagePlugin
+DEBUG:PIL.Image:Importing GifImagePlugin
+DEBUG:PIL.Image:Importing GribStubImagePlugin
+DEBUG:PIL.Image:Importing Hdf5StubImagePlugin
+DEBUG:PIL.Image:Importing IcnsImagePlugin
+DEBUG:PIL.Image:Importing IcoImagePlugin
+DEBUG:PIL.Image:Importing ImImagePlugin
+DEBUG:PIL.Image:Importing ImtImagePlugin
+DEBUG:PIL.Image:Importing IptcImagePlugin
+DEBUG:PIL.Image:Importing JpegImagePlugin
+DEBUG:PIL.Image:Importing Jpeg2KImagePlugin
+DEBUG:PIL.Image:Importing McIdasImagePlugin
+DEBUG:PIL.Image:Importing MicImagePlugin
+DEBUG:PIL.Image:Image: failed to import MicImagePlugin: No module named 'olefile'
+DEBUG:PIL.Image:Importing MpegImagePlugin
+DEBUG:PIL.Image:Importing MpoImagePlugin
+DEBUG:PIL.Image:Importing MspImagePlugin
+DEBUG:PIL.Image:Importing PalmImagePlugin
+DEBUG:PIL.Image:Importing PcdImagePlugin
+DEBUG:PIL.Image:Importing PcxImagePlugin
+DEBUG:PIL.Image:Importing PdfImagePlugin
+DEBUG:PIL.Image:Importing PixarImagePlugin
+DEBUG:PIL.Image:Importing PngImagePlugin
+DEBUG:PIL.Image:Importing PpmImagePlugin
+DEBUG:PIL.Image:Importing PsdImagePlugin
+DEBUG:PIL.Image:Importing QoiImagePlugin
+DEBUG:PIL.Image:Importing SgiImagePlugin
+DEBUG:PIL.Image:Importing SpiderImagePlugin
+DEBUG:PIL.Image:Importing SunImagePlugin
+DEBUG:PIL.Image:Importing TgaImagePlugin
+DEBUG:PIL.Image:Importing TiffImagePlugin
+DEBUG:PIL.Image:Importing WebPImagePlugin
+DEBUG:PIL.Image:Importing WmfImagePlugin
+DEBUG:PIL.Image:Importing XbmImagePlugin
+DEBUG:PIL.Image:Importing XpmImagePlugin
+DEBUG:PIL.Image:Importing XVThumbImagePlugin
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:8081
+DEBUG:urllib3.connectionpool:http://127.0.0.1:8081 "GET /sw.js HTTP/1.1" 200 2667
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:8081
+DEBUG:urllib3.connectionpool:http://127.0.0.1:8081 "GET /sw.js HTTP/1.1" 200 2667
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:8081
+DEBUG:urllib3.connectionpool:http://127.0.0.1:8081 "POST /v1/streams/lookup HTTP/1.1" 200 2
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:8081
+DEBUG:urllib3.connectionpool:http://127.0.0.1:8081 "POST /v1/streams/lookup HTTP/1.1" 200 2
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:8081
+DEBUG:urllib3.connectionpool:http://127.0.0.1:8081 "POST /v1/chat/completions HTTP/1.1" 200 None
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:http://127.0.0.1:7801 "POST /API/GetNewSession HTTP/1.1" 200 None
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:http://127.0.0.1:7801 "POST /API/ListModels HTTP/1.1" 200 None
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:8081
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:8081
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:8081
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:8081
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:8081
+DEBUG:urllib3.connectionpool:http://127.0.0.1:8081 "GET /sw.js HTTP/1.1" 200 2667
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:8081
+DEBUG:urllib3.connectionpool:http://127.0.0.1:8081 "GET /sw.js HTTP/1.1" 200 2667
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:8081
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:8081
+DEBUG:urllib3.connectionpool:http://127.0.0.1:8081 "POST /v1/streams/lookup HTTP/1.1" 503 75
+DEBUG:urllib3.connectionpool:http://127.0.0.1:8081 "POST /v1/streams/lookup HTTP/1.1" 503 75
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:8081
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:8081
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:8081
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:8081
+DEBUG:root:on_closing called
+DEBUG:root:stopping server and returning True
+DEBUG:root:on_closed called
+DEBUG:PIL.Image:Importing AvifImagePlugin
+DEBUG:PIL.Image:Importing BlpImagePlugin
+DEBUG:PIL.Image:Importing BmpImagePlugin
+DEBUG:PIL.Image:Importing BufrStubImagePlugin
+DEBUG:PIL.Image:Importing CurImagePlugin
+DEBUG:PIL.Image:Importing DcxImagePlugin
+DEBUG:PIL.Image:Importing DdsImagePlugin
+DEBUG:PIL.Image:Importing EpsImagePlugin
+DEBUG:PIL.Image:Importing FitsImagePlugin
+DEBUG:PIL.Image:Importing FliImagePlugin
+DEBUG:PIL.Image:Importing FpxImagePlugin
+DEBUG:PIL.Image:Image: failed to import FpxImagePlugin: No module named 'olefile'
+DEBUG:PIL.Image:Importing FtexImagePlugin
+DEBUG:PIL.Image:Importing GbrImagePlugin
+DEBUG:PIL.Image:Importing GifImagePlugin
+DEBUG:PIL.Image:Importing GribStubImagePlugin
+DEBUG:PIL.Image:Importing Hdf5StubImagePlugin
+DEBUG:PIL.Image:Importing IcnsImagePlugin
+DEBUG:PIL.Image:Importing IcoImagePlugin
+DEBUG:PIL.Image:Importing ImImagePlugin
+DEBUG:PIL.Image:Importing ImtImagePlugin
+DEBUG:PIL.Image:Importing IptcImagePlugin
+DEBUG:PIL.Image:Importing JpegImagePlugin
+DEBUG:PIL.Image:Importing Jpeg2KImagePlugin
+DEBUG:PIL.Image:Importing McIdasImagePlugin
+DEBUG:PIL.Image:Importing MicImagePlugin
+DEBUG:PIL.Image:Image: failed to import MicImagePlugin: No module named 'olefile'
+DEBUG:PIL.Image:Importing MpegImagePlugin
+DEBUG:PIL.Image:Importing MpoImagePlugin
+DEBUG:PIL.Image:Importing MspImagePlugin
+DEBUG:PIL.Image:Importing PalmImagePlugin
+DEBUG:PIL.Image:Importing PcdImagePlugin
+DEBUG:PIL.Image:Importing PcxImagePlugin
+DEBUG:PIL.Image:Importing PdfImagePlugin
+DEBUG:PIL.Image:Importing PixarImagePlugin
+DEBUG:PIL.Image:Importing PngImagePlugin
+DEBUG:PIL.Image:Importing PpmImagePlugin
+DEBUG:PIL.Image:Importing PsdImagePlugin
+DEBUG:PIL.Image:Importing QoiImagePlugin
+DEBUG:PIL.Image:Importing SgiImagePlugin
+DEBUG:PIL.Image:Importing SpiderImagePlugin
+DEBUG:PIL.Image:Importing SunImagePlugin
+DEBUG:PIL.Image:Importing TgaImagePlugin
+DEBUG:PIL.Image:Importing TiffImagePlugin
+DEBUG:PIL.Image:Importing WebPImagePlugin
+DEBUG:PIL.Image:Importing WmfImagePlugin
+DEBUG:PIL.Image:Importing XbmImagePlugin
+DEBUG:PIL.Image:Importing XpmImagePlugin
+DEBUG:PIL.Image:Importing XVThumbImagePlugin
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:8081
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:8081
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:8081
+DEBUG:urllib3.connectionpool:http://127.0.0.1:8081 "POST /v1/streams/lookup HTTP/1.1" 503 75
+DEBUG:urllib3.connectionpool:http://127.0.0.1:8081 "POST /v1/streams/lookup HTTP/1.1" 503 75
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:8081
+DEBUG:urllib3.connectionpool:http://127.0.0.1:8081 "GET /sw.js HTTP/1.1" 200 2667
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:8081
+DEBUG:urllib3.connectionpool:http://127.0.0.1:8081 "GET /sw.js HTTP/1.1" 200 2667
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:8081
+DEBUG:urllib3.connectionpool:http://127.0.0.1:8081 "GET /props HTTP/1.1" 503 75
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:8081
+DEBUG:urllib3.connectionpool:http://127.0.0.1:8081 "POST /v1/streams/lookup HTTP/1.1" 200 2
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:8081
+DEBUG:urllib3.connectionpool:http://127.0.0.1:8081 "GET /props HTTP/1.1" 200 10146
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:8081
+DEBUG:urllib3.connectionpool:http://127.0.0.1:8081 "POST /v1/streams/lookup HTTP/1.1" 200 2
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:8081
+DEBUG:urllib3.connectionpool:http://127.0.0.1:8081 "POST /v1/chat/completions HTTP/1.1" 200 None
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:http://127.0.0.1:7801 "POST /API/GetNewSession HTTP/1.1" 200 None
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:http://127.0.0.1:7801 "POST /API/ListModels HTTP/1.1" 200 None
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:8081
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:8081
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:8081
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:8081
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:8081
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:8081
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:8081
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:8081
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:8081
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:8081
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:8081
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:8081
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:8081
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:8081
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:8081
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:8081
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:8081
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:8081
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:8081
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:8081
+DEBUG:urllib3.connectionpool:http://127.0.0.1:7801 "POST /API/GenerateText2Image HTTP/1.1" 200 None
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:8081
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:8081
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:8081
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:8081
+DEBUG:PIL.Image:Importing AvifImagePlugin
+DEBUG:PIL.Image:Importing BlpImagePlugin
+DEBUG:PIL.Image:Importing BmpImagePlugin
+DEBUG:PIL.Image:Importing BufrStubImagePlugin
+DEBUG:PIL.Image:Importing CurImagePlugin
+DEBUG:PIL.Image:Importing DcxImagePlugin
+DEBUG:PIL.Image:Importing DdsImagePlugin
+DEBUG:PIL.Image:Importing EpsImagePlugin
+DEBUG:PIL.Image:Importing FitsImagePlugin
+DEBUG:PIL.Image:Importing FliImagePlugin
+DEBUG:PIL.Image:Importing FpxImagePlugin
+DEBUG:PIL.Image:Image: failed to import FpxImagePlugin: No module named 'olefile'
+DEBUG:PIL.Image:Importing FtexImagePlugin
+DEBUG:PIL.Image:Importing GbrImagePlugin
+DEBUG:PIL.Image:Importing GifImagePlugin
+DEBUG:PIL.Image:Importing GribStubImagePlugin
+DEBUG:PIL.Image:Importing Hdf5StubImagePlugin
+DEBUG:PIL.Image:Importing IcnsImagePlugin
+DEBUG:PIL.Image:Importing IcoImagePlugin
+DEBUG:PIL.Image:Importing ImImagePlugin
+DEBUG:PIL.Image:Importing ImtImagePlugin
+DEBUG:PIL.Image:Importing IptcImagePlugin
+DEBUG:PIL.Image:Importing JpegImagePlugin
+DEBUG:PIL.Image:Importing Jpeg2KImagePlugin
+DEBUG:PIL.Image:Importing McIdasImagePlugin
+DEBUG:PIL.Image:Importing MicImagePlugin
+DEBUG:PIL.Image:Image: failed to import MicImagePlugin: No module named 'olefile'
+DEBUG:PIL.Image:Importing MpegImagePlugin
+DEBUG:PIL.Image:Importing MpoImagePlugin
+DEBUG:PIL.Image:Importing MspImagePlugin
+DEBUG:PIL.Image:Importing PalmImagePlugin
+DEBUG:PIL.Image:Importing PcdImagePlugin
+DEBUG:PIL.Image:Importing PcxImagePlugin
+DEBUG:PIL.Image:Importing PdfImagePlugin
+DEBUG:PIL.Image:Importing PixarImagePlugin
+DEBUG:PIL.Image:Importing PngImagePlugin
+DEBUG:PIL.Image:Importing PpmImagePlugin
+DEBUG:PIL.Image:Importing PsdImagePlugin
+DEBUG:PIL.Image:Importing QoiImagePlugin
+DEBUG:PIL.Image:Importing SgiImagePlugin
+DEBUG:PIL.Image:Importing SpiderImagePlugin
+DEBUG:PIL.Image:Importing SunImagePlugin
+DEBUG:PIL.Image:Importing TgaImagePlugin
+DEBUG:PIL.Image:Importing TiffImagePlugin
+DEBUG:PIL.Image:Importing WebPImagePlugin
+DEBUG:PIL.Image:Importing WmfImagePlugin
+DEBUG:PIL.Image:Importing XbmImagePlugin
+DEBUG:PIL.Image:Importing XpmImagePlugin
+DEBUG:PIL.Image:Importing XVThumbImagePlugin
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:8081
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:8081
+DEBUG:urllib3.connectionpool:http://127.0.0.1:8081 "POST /v1/streams/lookup HTTP/1.1" 200 2
+DEBUG:urllib3.connectionpool:http://127.0.0.1:8081 "POST /v1/streams/lookup HTTP/1.1" 200 2
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:8081
+DEBUG:urllib3.connectionpool:http://127.0.0.1:8081 "GET /v1/stream?conv_id=0d99fb05-a155-4f73-b1c7-c3a23ffe693c&from=0 HTTP/1.1" 404 74
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:8081
+DEBUG:urllib3.connectionpool:http://127.0.0.1:8081 "GET /props HTTP/1.1" 200 10146
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:8081
+DEBUG:urllib3.connectionpool:http://127.0.0.1:8081 "GET /sw.js HTTP/1.1" 200 2667
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:8081
+DEBUG:urllib3.connectionpool:http://127.0.0.1:8081 "GET /sw.js HTTP/1.1" 200 2667
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:8081
+DEBUG:urllib3.connectionpool:http://127.0.0.1:8081 "GET /props HTTP/1.1" 200 10146
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:8081
+DEBUG:urllib3.connectionpool:http://127.0.0.1:8081 "POST /v1/streams/lookup HTTP/1.1" 200 2
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:8081
+DEBUG:urllib3.connectionpool:http://127.0.0.1:8081 "POST /v1/chat/completions HTTP/1.1" 200 None
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:8081
+DEBUG:urllib3.connectionpool:http://127.0.0.1:8081 "GET /props?model=E%3A%5CLlama.cpp+models%5Chub%5Cmodels--Noobito45--Qwen3.8-9B-heretic-uncensored-NVFP4-GGUF%5Csnapshots%5C6a9d3ae466e566cd3319d0cbae3e1243279b62e3%5CQwen3.8-9B-distill-heretic_nvfp4_q4_k_m.gguf&autoload=false HTTP/1.1" 200 10146
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:8081
+DEBUG:urllib3.connectionpool:http://127.0.0.1:8081 "POST /v1/chat/completions HTTP/1.1" 200 None
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:8081
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:http://127.0.0.1:7801 "POST /API/GetNewSession HTTP/1.1" 200 None
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:http://127.0.0.1:7801 "POST /API/ListModels HTTP/1.1" 200 None
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:http://127.0.0.1:7801 "POST /API/GenerateText2Image HTTP/1.1" 200 None
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:8081
+DEBUG:urllib3.connectionpool:http://127.0.0.1:8081 "GET /sw.js HTTP/1.1" 200 2667
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:8081
+DEBUG:urllib3.connectionpool:http://127.0.0.1:8081 "GET /sw.js HTTP/1.1" 200 2667
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:8081
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:8081
+DEBUG:urllib3.connectionpool:http://127.0.0.1:8081 "POST /v1/streams/lookup HTTP/1.1" 503 75
+DEBUG:urllib3.connectionpool:http://127.0.0.1:8081 "POST /v1/streams/lookup HTTP/1.1" 503 75
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:8081
+DEBUG:urllib3.connectionpool:http://127.0.0.1:8081 "POST /v1/streams/lookup HTTP/1.1" 503 75
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:8081
+DEBUG:urllib3.connectionpool:http://127.0.0.1:8081 "POST /v1/streams/lookup HTTP/1.1" 503 75
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:8081
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:8081
+DEBUG:urllib3.connectionpool:http://127.0.0.1:8081 "POST /v1/streams/lookup HTTP/1.1" 200 2
+DEBUG:urllib3.connectionpool:http://127.0.0.1:8081 "POST /v1/streams/lookup HTTP/1.1" 200 2
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:8081
+DEBUG:urllib3.connectionpool:http://127.0.0.1:8081 "POST /v1/streams/lookup HTTP/1.1" 200 2
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:8081
+DEBUG:urllib3.connectionpool:http://127.0.0.1:8081 "POST /v1/streams/lookup HTTP/1.1" 200 2
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:8081
+DEBUG:root:on_closing called
+DEBUG:root:stopping server and returning True
+DEBUG:root:on_closed called
+DEBUG:PIL.Image:Importing AvifImagePlugin
+DEBUG:PIL.Image:Importing BlpImagePlugin
+DEBUG:PIL.Image:Importing BmpImagePlugin
+DEBUG:PIL.Image:Importing BufrStubImagePlugin
+DEBUG:PIL.Image:Importing CurImagePlugin
+DEBUG:PIL.Image:Importing DcxImagePlugin
+DEBUG:PIL.Image:Importing DdsImagePlugin
+DEBUG:PIL.Image:Importing EpsImagePlugin
+DEBUG:PIL.Image:Importing FitsImagePlugin
+DEBUG:PIL.Image:Importing FliImagePlugin
+DEBUG:PIL.Image:Importing FpxImagePlugin
+DEBUG:PIL.Image:Image: failed to import FpxImagePlugin: No module named 'olefile'
+DEBUG:PIL.Image:Importing FtexImagePlugin
+DEBUG:PIL.Image:Importing GbrImagePlugin
+DEBUG:PIL.Image:Importing GifImagePlugin
+DEBUG:PIL.Image:Importing GribStubImagePlugin
+DEBUG:PIL.Image:Importing Hdf5StubImagePlugin
+DEBUG:PIL.Image:Importing IcnsImagePlugin
+DEBUG:PIL.Image:Importing IcoImagePlugin
+DEBUG:PIL.Image:Importing ImImagePlugin
+DEBUG:PIL.Image:Importing ImtImagePlugin
+DEBUG:PIL.Image:Importing IptcImagePlugin
+DEBUG:PIL.Image:Importing JpegImagePlugin
+DEBUG:PIL.Image:Importing Jpeg2KImagePlugin
+DEBUG:PIL.Image:Importing McIdasImagePlugin
+DEBUG:PIL.Image:Importing MicImagePlugin
+DEBUG:PIL.Image:Image: failed to import MicImagePlugin: No module named 'olefile'
+DEBUG:PIL.Image:Importing MpegImagePlugin
+DEBUG:PIL.Image:Importing MpoImagePlugin
+DEBUG:PIL.Image:Importing MspImagePlugin
+DEBUG:PIL.Image:Importing PalmImagePlugin
+DEBUG:PIL.Image:Importing PcdImagePlugin
+DEBUG:PIL.Image:Importing PcxImagePlugin
+DEBUG:PIL.Image:Importing PdfImagePlugin
+DEBUG:PIL.Image:Importing PixarImagePlugin
+DEBUG:PIL.Image:Importing PngImagePlugin
+DEBUG:PIL.Image:Importing PpmImagePlugin
+DEBUG:PIL.Image:Importing PsdImagePlugin
+DEBUG:PIL.Image:Importing QoiImagePlugin
+DEBUG:PIL.Image:Importing SgiImagePlugin
+DEBUG:PIL.Image:Importing SpiderImagePlugin
+DEBUG:PIL.Image:Importing SunImagePlugin
+DEBUG:PIL.Image:Importing TgaImagePlugin
+DEBUG:PIL.Image:Importing TiffImagePlugin
+DEBUG:PIL.Image:Importing WebPImagePlugin
+DEBUG:PIL.Image:Importing WmfImagePlugin
+DEBUG:PIL.Image:Importing XbmImagePlugin
+DEBUG:PIL.Image:Importing XpmImagePlugin
+DEBUG:PIL.Image:Importing XVThumbImagePlugin
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:8081
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:8081
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:8081
+DEBUG:urllib3.connectionpool:http://127.0.0.1:8081 "POST /v1/streams/lookup HTTP/1.1" 200 2
+DEBUG:urllib3.connectionpool:http://127.0.0.1:8081 "GET /sw.js HTTP/1.1" 200 2667
+DEBUG:urllib3.connectionpool:http://127.0.0.1:8081 "POST /v1/streams/lookup HTTP/1.1" 200 2
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:8081
+DEBUG:urllib3.connectionpool:http://127.0.0.1:8081 "GET /sw.js HTTP/1.1" 200 2667
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:8081
+DEBUG:urllib3.connectionpool:http://127.0.0.1:8081 "POST /v1/chat/completions HTTP/1.1" 200 None
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:http://127.0.0.1:7801 "POST /API/GetNewSession HTTP/1.1" 200 None
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:http://127.0.0.1:7801 "POST /API/ListModels HTTP/1.1" 200 None
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:http://127.0.0.1:7801 "POST /API/GenerateText2Image HTTP/1.1" 200 None
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:8081
+DEBUG:urllib3.connectionpool:http://127.0.0.1:8081 "POST /v1/streams/lookup HTTP/1.1" 503 75
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:8081
+DEBUG:urllib3.connectionpool:http://127.0.0.1:8081 "POST /v1/streams/lookup HTTP/1.1" 503 75
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:8081
+DEBUG:urllib3.connectionpool:http://127.0.0.1:8081 "GET /sw.js HTTP/1.1" 200 2667
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:8081
+DEBUG:urllib3.connectionpool:http://127.0.0.1:8081 "GET /sw.js HTTP/1.1" 200 2667
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:8081
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:8081
+DEBUG:urllib3.connectionpool:http://127.0.0.1:8081 "POST /v1/streams/lookup HTTP/1.1" 200 2
+DEBUG:urllib3.connectionpool:http://127.0.0.1:8081 "POST /v1/streams/lookup HTTP/1.1" 200 2
+DEBUG:root:on_minimized called
+DEBUG:root:on_closing called
+DEBUG:root:stopping server and returning True
+DEBUG:PIL.Image:Importing AvifImagePlugin
+DEBUG:PIL.Image:Importing BlpImagePlugin
+DEBUG:PIL.Image:Importing BmpImagePlugin
+DEBUG:PIL.Image:Importing BufrStubImagePlugin
+DEBUG:PIL.Image:Importing CurImagePlugin
+DEBUG:PIL.Image:Importing DcxImagePlugin
+DEBUG:PIL.Image:Importing DdsImagePlugin
+DEBUG:PIL.Image:Importing EpsImagePlugin
+DEBUG:PIL.Image:Importing FitsImagePlugin
+DEBUG:PIL.Image:Importing FliImagePlugin
+DEBUG:PIL.Image:Importing FpxImagePlugin
+DEBUG:PIL.Image:Image: failed to import FpxImagePlugin: No module named 'olefile'
+DEBUG:PIL.Image:Importing FtexImagePlugin
+DEBUG:PIL.Image:Importing GbrImagePlugin
+DEBUG:PIL.Image:Importing GifImagePlugin
+DEBUG:PIL.Image:Importing GribStubImagePlugin
+DEBUG:PIL.Image:Importing Hdf5StubImagePlugin
+DEBUG:PIL.Image:Importing IcnsImagePlugin
+DEBUG:PIL.Image:Importing IcoImagePlugin
+DEBUG:PIL.Image:Importing ImImagePlugin
+DEBUG:PIL.Image:Importing ImtImagePlugin
+DEBUG:PIL.Image:Importing IptcImagePlugin
+DEBUG:PIL.Image:Importing JpegImagePlugin
+DEBUG:PIL.Image:Importing Jpeg2KImagePlugin
+DEBUG:PIL.Image:Importing McIdasImagePlugin
+DEBUG:PIL.Image:Importing MicImagePlugin
+DEBUG:PIL.Image:Image: failed to import MicImagePlugin: No module named 'olefile'
+DEBUG:PIL.Image:Importing MpegImagePlugin
+DEBUG:PIL.Image:Importing MpoImagePlugin
+DEBUG:PIL.Image:Importing MspImagePlugin
+DEBUG:PIL.Image:Importing PalmImagePlugin
+DEBUG:PIL.Image:Importing PcdImagePlugin
+DEBUG:PIL.Image:Importing PcxImagePlugin
+DEBUG:PIL.Image:Importing PdfImagePlugin
+DEBUG:PIL.Image:Importing PixarImagePlugin
+DEBUG:PIL.Image:Importing PngImagePlugin
+DEBUG:PIL.Image:Importing PpmImagePlugin
+DEBUG:PIL.Image:Importing PsdImagePlugin
+DEBUG:PIL.Image:Importing QoiImagePlugin
+DEBUG:PIL.Image:Importing SgiImagePlugin
+DEBUG:PIL.Image:Importing SpiderImagePlugin
+DEBUG:PIL.Image:Importing SunImagePlugin
+DEBUG:PIL.Image:Importing TgaImagePlugin
+DEBUG:PIL.Image:Importing TiffImagePlugin
+DEBUG:PIL.Image:Importing WebPImagePlugin
+DEBUG:PIL.Image:Importing WmfImagePlugin
+DEBUG:PIL.Image:Importing XbmImagePlugin
+DEBUG:PIL.Image:Importing XpmImagePlugin
+DEBUG:PIL.Image:Importing XVThumbImagePlugin
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:8081
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:8081
+DEBUG:urllib3.connectionpool:http://127.0.0.1:8081 "POST /v1/streams/lookup HTTP/1.1" 200 2
+DEBUG:urllib3.connectionpool:http://127.0.0.1:8081 "POST /v1/streams/lookup HTTP/1.1" 200 2
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:8081
+DEBUG:urllib3.connectionpool:http://127.0.0.1:8081 "POST /v1/chat/completions HTTP/1.1" 200 None
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:http://127.0.0.1:7801 "POST /API/GetNewSession HTTP/1.1" 200 None
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:http://127.0.0.1:7801 "POST /API/ListModels HTTP/1.1" 200 None
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:8081
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:8081
+DEBUG:urllib3.connectionpool:http://127.0.0.1:7801 "POST /API/GenerateText2Image HTTP/1.1" 200 None
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:8081
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:8081
+DEBUG:urllib3.connectionpool:http://127.0.0.1:8081 "POST /v1/streams/lookup HTTP/1.1" 503 75
+DEBUG:urllib3.connectionpool:http://127.0.0.1:8081 "POST /v1/streams/lookup HTTP/1.1" 503 75
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:8081
+DEBUG:urllib3.connectionpool:http://127.0.0.1:8081 "POST /v1/streams/lookup HTTP/1.1" 503 75
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:8081
+DEBUG:urllib3.connectionpool:http://127.0.0.1:8081 "POST /v1/streams/lookup HTTP/1.1" 503 75
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:8081
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:8081
+DEBUG:urllib3.connectionpool:http://127.0.0.1:8081 "POST /v1/streams/lookup HTTP/1.1" 200 2
+DEBUG:urllib3.connectionpool:http://127.0.0.1:8081 "POST /v1/streams/lookup HTTP/1.1" 200 2
+DEBUG:root:on_closing called
+DEBUG:root:stopping server and returning True
+DEBUG:root:on_closed called
+DEBUG:PIL.Image:Importing AvifImagePlugin
+DEBUG:PIL.Image:Importing BlpImagePlugin
+DEBUG:PIL.Image:Importing BmpImagePlugin
+DEBUG:PIL.Image:Importing BufrStubImagePlugin
+DEBUG:PIL.Image:Importing CurImagePlugin
+DEBUG:PIL.Image:Importing DcxImagePlugin
+DEBUG:PIL.Image:Importing DdsImagePlugin
+DEBUG:PIL.Image:Importing EpsImagePlugin
+DEBUG:PIL.Image:Importing FitsImagePlugin
+DEBUG:PIL.Image:Importing FliImagePlugin
+DEBUG:PIL.Image:Importing FpxImagePlugin
+DEBUG:PIL.Image:Image: failed to import FpxImagePlugin: No module named 'olefile'
+DEBUG:PIL.Image:Importing FtexImagePlugin
+DEBUG:PIL.Image:Importing GbrImagePlugin
+DEBUG:PIL.Image:Importing GifImagePlugin
+DEBUG:PIL.Image:Importing GribStubImagePlugin
+DEBUG:PIL.Image:Importing Hdf5StubImagePlugin
+DEBUG:PIL.Image:Importing IcnsImagePlugin
+DEBUG:PIL.Image:Importing IcoImagePlugin
+DEBUG:PIL.Image:Importing ImImagePlugin
+DEBUG:PIL.Image:Importing ImtImagePlugin
+DEBUG:PIL.Image:Importing IptcImagePlugin
+DEBUG:PIL.Image:Importing JpegImagePlugin
+DEBUG:PIL.Image:Importing Jpeg2KImagePlugin
+DEBUG:PIL.Image:Importing McIdasImagePlugin
+DEBUG:PIL.Image:Importing MicImagePlugin
+DEBUG:PIL.Image:Image: failed to import MicImagePlugin: No module named 'olefile'
+DEBUG:PIL.Image:Importing MpegImagePlugin
+DEBUG:PIL.Image:Importing MpoImagePlugin
+DEBUG:PIL.Image:Importing MspImagePlugin
+DEBUG:PIL.Image:Importing PalmImagePlugin
+DEBUG:PIL.Image:Importing PcdImagePlugin
+DEBUG:PIL.Image:Importing PcxImagePlugin
+DEBUG:PIL.Image:Importing PdfImagePlugin
+DEBUG:PIL.Image:Importing PixarImagePlugin
+DEBUG:PIL.Image:Importing PngImagePlugin
+DEBUG:PIL.Image:Importing PpmImagePlugin
+DEBUG:PIL.Image:Importing PsdImagePlugin
+DEBUG:PIL.Image:Importing QoiImagePlugin
+DEBUG:PIL.Image:Importing SgiImagePlugin
+DEBUG:PIL.Image:Importing SpiderImagePlugin
+DEBUG:PIL.Image:Importing SunImagePlugin
+DEBUG:PIL.Image:Importing TgaImagePlugin
+DEBUG:PIL.Image:Importing TiffImagePlugin
+DEBUG:PIL.Image:Importing WebPImagePlugin
+DEBUG:PIL.Image:Importing WmfImagePlugin
+DEBUG:PIL.Image:Importing XbmImagePlugin
+DEBUG:PIL.Image:Importing XpmImagePlugin
+DEBUG:PIL.Image:Importing XVThumbImagePlugin
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:8081
+DEBUG:urllib3.connectionpool:http://127.0.0.1:8081 "GET /sw.js HTTP/1.1" 200 2667
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:8081
+DEBUG:urllib3.connectionpool:http://127.0.0.1:8081 "GET /sw.js HTTP/1.1" 200 2667
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:8081
+DEBUG:urllib3.connectionpool:http://127.0.0.1:8081 "POST /v1/streams/lookup HTTP/1.1" 200 2
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:8081
+DEBUG:urllib3.connectionpool:http://127.0.0.1:8081 "POST /v1/streams/lookup HTTP/1.1" 200 2
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:8081
+DEBUG:urllib3.connectionpool:http://127.0.0.1:8081 "GET /props?model=E%3A%5CLlama.cpp+models%5Chub%5Cmodels--Noobito45--Qwen3.8-9B-heretic-uncensored-NVFP4-GGUF%5Csnapshots%5C6a9d3ae466e566cd3319d0cbae3e1243279b62e3%5CQwen3.8-9B-distill-heretic_nvfp4_q4_k_m.gguf&autoload=false HTTP/1.1" 200 10146
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:8081
+DEBUG:urllib3.connectionpool:http://127.0.0.1:8081 "POST /v1/streams/lookup HTTP/1.1" 200 2
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:8081
+DEBUG:urllib3.connectionpool:http://127.0.0.1:8081 "GET /props HTTP/1.1" 200 10146
+DEBUG:root:on_minimized called
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:8081
+DEBUG:urllib3.connectionpool:http://127.0.0.1:8081 "GET /props HTTP/1.1" 200 10146
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:8081
+DEBUG:urllib3.connectionpool:http://127.0.0.1:8081 "POST /v1/streams/lookup HTTP/1.1" 200 2
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:8081
+DEBUG:urllib3.connectionpool:http://127.0.0.1:8081 "POST /v1/chat/completions HTTP/1.1" 200 None
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:http://127.0.0.1:7801 "POST /API/GetNewSession HTTP/1.1" 200 None
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:http://127.0.0.1:7801 "POST /API/ListModels HTTP/1.1" 200 None
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:8081
+DEBUG:urllib3.connectionpool:http://127.0.0.1:7801 "POST /API/GenerateText2Image HTTP/1.1" 200 None
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:http://127.0.0.1:7801 "GET /View/local/raw/2026-10-04/1804001-%60%60%60low%20quality%20cat%2C%20blurry%20cat%2C%20low%20res-qwen-image-21-UC-Q6_K.png HTTP/1.1" 200 193348
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:8081
+DEBUG:urllib3.connectionpool:http://127.0.0.1:8081 "GET /sw.js HTTP/1.1" 200 2667
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:8081
+DEBUG:urllib3.connectionpool:http://127.0.0.1:8081 "GET /sw.js HTTP/1.1" 200 2667
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:8081
+DEBUG:urllib3.connectionpool:http://127.0.0.1:8081 "GET /sw.js HTTP/1.1" 200 2667
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:8081
+DEBUG:urllib3.connectionpool:http://127.0.0.1:8081 "GET /sw.js HTTP/1.1" 200 2667
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:8081
+DEBUG:urllib3.connectionpool:http://127.0.0.1:8081 "GET /sw.js HTTP/1.1" 200 2667
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:8081
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:8081
+DEBUG:urllib3.connectionpool:http://127.0.0.1:8081 "POST /v1/streams/lookup HTTP/1.1" 200 2
+DEBUG:urllib3.connectionpool:http://127.0.0.1:8081 "POST /v1/streams/lookup HTTP/1.1" 200 2
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:8081
+DEBUG:urllib3.connectionpool:http://127.0.0.1:8081 "POST /v1/streams/lookup HTTP/1.1" 200 2
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:8081
+DEBUG:urllib3.connectionpool:http://127.0.0.1:8081 "POST /v1/streams/lookup HTTP/1.1" 200 2
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:8081
+DEBUG:urllib3.connectionpool:http://127.0.0.1:8081 "POST /v1/streams/lookup HTTP/1.1" 200 2
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:8081
+DEBUG:urllib3.connectionpool:http://127.0.0.1:8081 "POST /v1/streams/lookup HTTP/1.1" 200 2
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:8081
+DEBUG:urllib3.connectionpool:http://127.0.0.1:8081 "POST /v1/streams/lookup HTTP/1.1" 200 2
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:8081
+DEBUG:urllib3.connectionpool:http://127.0.0.1:8081 "POST /v1/chat/completions HTTP/1.1" 200 None
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:http://127.0.0.1:7801 "POST /API/GetNewSession HTTP/1.1" 200 None
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:http://127.0.0.1:7801 "POST /API/ListModels HTTP/1.1" 200 None
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:http://127.0.0.1:7801 "POST /API/GenerateText2Image HTTP/1.1" 200 None
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:http://127.0.0.1:7801 "GET /View/local/raw/2026-10-04/1807001-low%20quality%20cat%2C%20low%20resolution%2C%20pixelat-qwen-image-21-UC-Q6_K.png HTTP/1.1" 200 814827
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:8081
+DEBUG:urllib3.connectionpool:http://127.0.0.1:8081 "GET /sw.js HTTP/1.1" 200 2667
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:8081
+DEBUG:urllib3.connectionpool:http://127.0.0.1:8081 "GET /sw.js HTTP/1.1" 200 2667
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:8081
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:8081
+DEBUG:urllib3.connectionpool:http://127.0.0.1:8081 "POST /v1/streams/lookup HTTP/1.1" 200 2
+DEBUG:urllib3.connectionpool:http://127.0.0.1:8081 "POST /v1/streams/lookup HTTP/1.1" 200 2
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:8081
+DEBUG:urllib3.connectionpool:http://127.0.0.1:8081 "GET /sw.js HTTP/1.1" 200 2667
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:8081
+DEBUG:urllib3.connectionpool:http://127.0.0.1:8081 "POST /v1/streams/lookup HTTP/1.1" 200 2
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:8081
+DEBUG:urllib3.connectionpool:http://127.0.0.1:8081 "GET /sw.js HTTP/1.1" 200 2667
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:8081
+DEBUG:urllib3.connectionpool:http://127.0.0.1:8081 "GET /props HTTP/1.1" 200 10146
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:8081
+DEBUG:urllib3.connectionpool:http://127.0.0.1:8081 "GET /props HTTP/1.1" 200 10146
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:8081
+DEBUG:urllib3.connectionpool:http://127.0.0.1:8081 "POST /v1/streams/lookup HTTP/1.1" 200 2
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:8081
+DEBUG:urllib3.connectionpool:http://127.0.0.1:8081 "POST /v1/chat/completions HTTP/1.1" 200 None
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:http://127.0.0.1:7801 "POST /API/GetNewSession HTTP/1.1" 200 None
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:http://127.0.0.1:7801 "POST /API/ListModels HTTP/1.1" 200 None
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:8081
+DEBUG:urllib3.connectionpool:http://127.0.0.1:7801 "POST /API/GenerateText2Image HTTP/1.1" 200 None
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:http://127.0.0.1:7801 "GET /View/local/raw/2026-10-04/1809001-pussycat%2C%20adorable%20fluffy%20kitten%2C%20soft%20w-qwen-image-21-UC-Q6_K.png HTTP/1.1" 200 431697
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:8081
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:8081
+DEBUG:urllib3.connectionpool:http://127.0.0.1:8081 "POST /v1/streams/lookup HTTP/1.1" 503 75
+DEBUG:urllib3.connectionpool:http://127.0.0.1:8081 "POST /v1/streams/lookup HTTP/1.1" 503 75
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:8081
+DEBUG:urllib3.connectionpool:http://127.0.0.1:8081 "GET /sw.js HTTP/1.1" 200 2667
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:8081
+DEBUG:urllib3.connectionpool:http://127.0.0.1:8081 "GET /sw.js HTTP/1.1" 200 2667
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:8081
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:8081
+DEBUG:urllib3.connectionpool:http://127.0.0.1:8081 "POST /v1/streams/lookup HTTP/1.1" 200 2
+DEBUG:urllib3.connectionpool:http://127.0.0.1:8081 "POST /v1/streams/lookup HTTP/1.1" 200 2
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:8081
+DEBUG:urllib3.connectionpool:http://127.0.0.1:8081 "GET /sw.js HTTP/1.1" 200 2667
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:8081
+DEBUG:urllib3.connectionpool:http://127.0.0.1:8081 "GET /sw.js HTTP/1.1" 200 2667
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:8081
+DEBUG:urllib3.connectionpool:http://127.0.0.1:8081 "GET /sw.js HTTP/1.1" 200 2667
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:8081
+DEBUG:urllib3.connectionpool:http://127.0.0.1:8081 "GET /sw.js HTTP/1.1" 200 2667
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:8081
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:8081
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:8081
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:8081
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:8081
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:8081
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:8081
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:8081
+DEBUG:PIL.Image:Importing AvifImagePlugin
+DEBUG:PIL.Image:Importing BlpImagePlugin
+DEBUG:PIL.Image:Importing BmpImagePlugin
+DEBUG:PIL.Image:Importing BufrStubImagePlugin
+DEBUG:PIL.Image:Importing CurImagePlugin
+DEBUG:PIL.Image:Importing DcxImagePlugin
+DEBUG:PIL.Image:Importing DdsImagePlugin
+DEBUG:PIL.Image:Importing EpsImagePlugin
+DEBUG:PIL.Image:Importing FitsImagePlugin
+DEBUG:PIL.Image:Importing FliImagePlugin
+DEBUG:PIL.Image:Importing FpxImagePlugin
+DEBUG:PIL.Image:Image: failed to import FpxImagePlugin: No module named 'olefile'
+DEBUG:PIL.Image:Importing FtexImagePlugin
+DEBUG:PIL.Image:Importing GbrImagePlugin
+DEBUG:PIL.Image:Importing GifImagePlugin
+DEBUG:PIL.Image:Importing GribStubImagePlugin
+DEBUG:PIL.Image:Importing Hdf5StubImagePlugin
+DEBUG:PIL.Image:Importing IcnsImagePlugin
+DEBUG:PIL.Image:Importing IcoImagePlugin
+DEBUG:PIL.Image:Importing ImImagePlugin
+DEBUG:PIL.Image:Importing ImtImagePlugin
+DEBUG:PIL.Image:Importing IptcImagePlugin
+DEBUG:PIL.Image:Importing JpegImagePlugin
+DEBUG:PIL.Image:Importing Jpeg2KImagePlugin
+DEBUG:PIL.Image:Importing McIdasImagePlugin
+DEBUG:PIL.Image:Importing MicImagePlugin
+DEBUG:PIL.Image:Image: failed to import MicImagePlugin: No module named 'olefile'
+DEBUG:PIL.Image:Importing MpegImagePlugin
+DEBUG:PIL.Image:Importing MpoImagePlugin
+DEBUG:PIL.Image:Importing MspImagePlugin
+DEBUG:PIL.Image:Importing PalmImagePlugin
+DEBUG:PIL.Image:Importing PcdImagePlugin
+DEBUG:PIL.Image:Importing PcxImagePlugin
+DEBUG:PIL.Image:Importing PdfImagePlugin
+DEBUG:PIL.Image:Importing PixarImagePlugin
+DEBUG:PIL.Image:Importing PngImagePlugin
+DEBUG:PIL.Image:Importing PpmImagePlugin
+DEBUG:PIL.Image:Importing PsdImagePlugin
+DEBUG:PIL.Image:Importing QoiImagePlugin
+DEBUG:PIL.Image:Importing SgiImagePlugin
+DEBUG:PIL.Image:Importing SpiderImagePlugin
+DEBUG:PIL.Image:Importing SunImagePlugin
+DEBUG:PIL.Image:Importing TgaImagePlugin
+DEBUG:PIL.Image:Importing TiffImagePlugin
+DEBUG:PIL.Image:Importing WebPImagePlugin
+DEBUG:PIL.Image:Importing WmfImagePlugin
+DEBUG:PIL.Image:Importing XbmImagePlugin
+DEBUG:PIL.Image:Importing XpmImagePlugin
+DEBUG:PIL.Image:Importing XVThumbImagePlugin
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:8081
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:http://127.0.0.1:7801 "POST /API/GetNewSession HTTP/1.1" 200 None
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:http://127.0.0.1:7801 "POST /API/ListModels HTTP/1.1" 200 None
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:http://127.0.0.1:7801 "POST /API/GetNewSession HTTP/1.1" 200 None
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:http://127.0.0.1:7801 "POST /API/ListModels HTTP/1.1" 200 None
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:http://127.0.0.1:7801 "POST /API/GetNewSession HTTP/1.1" 200 None
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:http://127.0.0.1:7801 "POST /API/ListModels HTTP/1.1" 200 None
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:http://127.0.0.1:7801 "POST /API/GetNewSession HTTP/1.1" 200 None
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:http://127.0.0.1:7801 "POST /API/ListModels HTTP/1.1" 200 None
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:http://127.0.0.1:7801 "POST /API/GetNewSession HTTP/1.1" 200 None
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:http://127.0.0.1:7801 "POST /API/ListModels HTTP/1.1" 200 None
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:http://127.0.0.1:7801 "POST /API/GetNewSession HTTP/1.1" 200 None
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:http://127.0.0.1:7801 "POST /API/ListModels HTTP/1.1" 200 None
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:http://127.0.0.1:7801 "POST /API/GetNewSession HTTP/1.1" 200 None
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:http://127.0.0.1:7801 "POST /API/ListModels HTTP/1.1" 200 None
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:http://127.0.0.1:7801 "POST /API/GetNewSession HTTP/1.1" 200 None
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:http://127.0.0.1:7801 "POST /API/ListModels HTTP/1.1" 200 None
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:http://127.0.0.1:7801 "POST /API/GetNewSession HTTP/1.1" 200 None
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:http://127.0.0.1:7801 "POST /API/ListModels HTTP/1.1" 200 None
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:http://127.0.0.1:7801 "POST /API/GetNewSession HTTP/1.1" 200 None
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:http://127.0.0.1:7801 "POST /API/ListModels HTTP/1.1" 200 None
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:http://127.0.0.1:7801 "POST /API/GetNewSession HTTP/1.1" 200 None
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:http://127.0.0.1:7801 "POST /API/ListModels HTTP/1.1" 200 None
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:http://127.0.0.1:7801 "POST /API/GetNewSession HTTP/1.1" 200 None
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:http://127.0.0.1:7801 "POST /API/ListModels HTTP/1.1" 200 None
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:http://127.0.0.1:7801 "POST /API/GetNewSession HTTP/1.1" 200 None
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:http://127.0.0.1:7801 "POST /API/ListModels HTTP/1.1" 200 None
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:http://127.0.0.1:7801 "POST /API/GetNewSession HTTP/1.1" 200 None
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:http://127.0.0.1:7801 "POST /API/ListModels HTTP/1.1" 200 None
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:http://127.0.0.1:7801 "POST /API/GetNewSession HTTP/1.1" 200 None
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:http://127.0.0.1:7801 "POST /API/ListModels HTTP/1.1" 200 None
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:http://127.0.0.1:7801 "POST /API/GetNewSession HTTP/1.1" 200 None
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:http://127.0.0.1:7801 "POST /API/ListModels HTTP/1.1" 200 None
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:http://127.0.0.1:7801 "POST /API/GetNewSession HTTP/1.1" 200 None
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:http://127.0.0.1:7801 "POST /API/ListModels HTTP/1.1" 200 None
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:http://127.0.0.1:7801 "POST /API/GetNewSession HTTP/1.1" 200 None
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:http://127.0.0.1:7801 "POST /API/ListModels HTTP/1.1" 200 None
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:http://127.0.0.1:7801 "POST /API/GetNewSession HTTP/1.1" 200 None
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:http://127.0.0.1:7801 "POST /API/ListModels HTTP/1.1" 200 None
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:http://127.0.0.1:7801 "POST /API/GetNewSession HTTP/1.1" 200 None
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:http://127.0.0.1:7801 "POST /API/ListModels HTTP/1.1" 200 None
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:http://127.0.0.1:7801 "POST /API/GetNewSession HTTP/1.1" 200 None
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:http://127.0.0.1:7801 "POST /API/ListModels HTTP/1.1" 200 None
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:http://127.0.0.1:7801 "POST /API/GetNewSession HTTP/1.1" 200 None
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:http://127.0.0.1:7801 "POST /API/ListModels HTTP/1.1" 200 None
+DEBUG:root:on_closing called
+DEBUG:root:stopping server and returning True
+DEBUG:root:on_closed called
+DEBUG:PIL.Image:Importing AvifImagePlugin
+DEBUG:PIL.Image:Importing BlpImagePlugin
+DEBUG:PIL.Image:Importing BmpImagePlugin
+DEBUG:PIL.Image:Importing BufrStubImagePlugin
+DEBUG:PIL.Image:Importing CurImagePlugin
+DEBUG:PIL.Image:Importing DcxImagePlugin
+DEBUG:PIL.Image:Importing DdsImagePlugin
+DEBUG:PIL.Image:Importing EpsImagePlugin
+DEBUG:PIL.Image:Importing FitsImagePlugin
+DEBUG:PIL.Image:Importing FliImagePlugin
+DEBUG:PIL.Image:Importing FpxImagePlugin
+DEBUG:PIL.Image:Image: failed to import FpxImagePlugin: No module named 'olefile'
+DEBUG:PIL.Image:Importing FtexImagePlugin
+DEBUG:PIL.Image:Importing GbrImagePlugin
+DEBUG:PIL.Image:Importing GifImagePlugin
+DEBUG:PIL.Image:Importing GribStubImagePlugin
+DEBUG:PIL.Image:Importing Hdf5StubImagePlugin
+DEBUG:PIL.Image:Importing IcnsImagePlugin
+DEBUG:PIL.Image:Importing IcoImagePlugin
+DEBUG:PIL.Image:Importing ImImagePlugin
+DEBUG:PIL.Image:Importing ImtImagePlugin
+DEBUG:PIL.Image:Importing IptcImagePlugin
+DEBUG:PIL.Image:Importing JpegImagePlugin
+DEBUG:PIL.Image:Importing Jpeg2KImagePlugin
+DEBUG:PIL.Image:Importing McIdasImagePlugin
+DEBUG:PIL.Image:Importing MicImagePlugin
+DEBUG:PIL.Image:Image: failed to import MicImagePlugin: No module named 'olefile'
+DEBUG:PIL.Image:Importing MpegImagePlugin
+DEBUG:PIL.Image:Importing MpoImagePlugin
+DEBUG:PIL.Image:Importing MspImagePlugin
+DEBUG:PIL.Image:Importing PalmImagePlugin
+DEBUG:PIL.Image:Importing PcdImagePlugin
+DEBUG:PIL.Image:Importing PcxImagePlugin
+DEBUG:PIL.Image:Importing PdfImagePlugin
+DEBUG:PIL.Image:Importing PixarImagePlugin
+DEBUG:PIL.Image:Importing PngImagePlugin
+DEBUG:PIL.Image:Importing PpmImagePlugin
+DEBUG:PIL.Image:Importing PsdImagePlugin
+DEBUG:PIL.Image:Importing QoiImagePlugin
+DEBUG:PIL.Image:Importing SgiImagePlugin
+DEBUG:PIL.Image:Importing SpiderImagePlugin
+DEBUG:PIL.Image:Importing SunImagePlugin
+DEBUG:PIL.Image:Importing TgaImagePlugin
+DEBUG:PIL.Image:Importing TiffImagePlugin
+DEBUG:PIL.Image:Importing WebPImagePlugin
+DEBUG:PIL.Image:Importing WmfImagePlugin
+DEBUG:PIL.Image:Importing XbmImagePlugin
+DEBUG:PIL.Image:Importing XpmImagePlugin
+DEBUG:PIL.Image:Importing XVThumbImagePlugin
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:8081
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:httpcore2.connection:connect_tcp.started host='huggingface.co' port=443 local_address=None timeout=None socket_options=None
+DEBUG:httpcore2.connection:connect_tcp.complete return_value=<httpcore2._backends.sync.SyncStream object at 0x000001F9D0982270>
+DEBUG:httpcore2.connection:start_tls.started ssl_context=<truststore._api.SSLContext object at 0x000001F9B362CEB0> server_hostname='huggingface.co' timeout=None
+DEBUG:httpcore2.connection:start_tls.complete return_value=<httpcore2._backends.sync.SyncStream object at 0x000001F9B34F2850>
+DEBUG:httpcore2.http11:send_request_headers.started request=<Request [b'GET']>
+DEBUG:httpcore2.http11:send_request_headers.complete
+DEBUG:httpcore2.http11:send_request_body.started request=<Request [b'GET']>
+DEBUG:httpcore2.http11:send_request_body.complete
+DEBUG:httpcore2.http11:receive_response_headers.started request=<Request [b'GET']>
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:8081
+DEBUG:root:on_closing called
+DEBUG:root:stopping server and returning True
+DEBUG:httpcore2.http11:receive_response_headers.complete return_value=(b'HTTP/1.1', 500, b'Internal Server Error', [(b'Content-Type', b'application/json; charset=utf-8'), (b'Content-Length', b'80'), (b'Connection', b'keep-alive'), (b'Date', b'Sun, 04 Oct 2026 16:21:12 GMT'), (b'ETag', b'W/"50-9qrwU+BNI4SD0Fe32p/nofkmv0c"'), (b'X-Powered-By', b'huggingface-moon'), (b'X-Request-Id', b'Root=1-6ac27cda-4d16430141c422c333f88f78;78dfbbf9-538c-4f6b-9c96-44ad28683b77'), (b'RateLimit', b'"api";r=499;t=26'), (b'RateLimit-Policy', b'"fixed window";"api";q=500;w=300'), (b'cross-origin-opener-policy', b'same-origin'), (b'Referrer-Policy', b'strict-origin-when-cross-origin'), (b'Access-Control-Max-Age', b'86400'), (b'Access-Control-Allow-Origin', b'https://huggingface.co'), (b'Vary', b'Origin'), (b'Access-Control-Expose-Headers', b'X-Repo-Commit,X-Request-Id,X-Error-Code,X-Error-Message,X-Total-Count,ETag,Link,Accept-Ranges,Content-Range,X-Linked-Size,X-Linked-ETag,X-Xet-Hash'), (b'Server-Timing', b''), (b'X-Error-Message', b"Internal Error - We're working hard to fix this as soon as possible!"), (b'X-Cache', b'Error from cloudfront'), (b'Via', b'1.1 a920b52b21663335428d74c1b3de31cc.cloudfront.net (CloudFront)'), (b'X-Amz-Cf-Pop', b'BCN50-P1'), (b'Alt-Svc', b'h3=":443"; ma=86400'), (b'X-Amz-Cf-Id', b'4nIX8Y3dDuDihzPFqliYw0jGl2NszlEWf5LayyVbesiPhPh-x7Q_OA=='), (b'Strict-Transport-Security', b'max-age=31536000')])
+INFO:httpx2:HTTP Request: GET https://huggingface.co/api/models?filter=gguf&sort=downloads&limit=12 "HTTP/1.1 500 Internal Server Error"
+DEBUG:httpcore2.http11:receive_response_body.started request=<Request [b'GET']>
+DEBUG:httpcore2.http11:receive_response_body.complete
+DEBUG:httpcore2.http11:response_closed.started
+DEBUG:httpcore2.http11:response_closed.complete
+WARNING:huggingface_hub.utils._http:HTTP Error 500 thrown while requesting GET https://huggingface.co/api/models
+WARNING:huggingface_hub.utils._http:Retrying in 1s [Retry 1/5].
+DEBUG:httpcore2.http11:send_request_headers.started request=<Request [b'GET']>
+DEBUG:httpcore2.http11:send_request_headers.complete
+DEBUG:httpcore2.http11:send_request_body.started request=<Request [b'GET']>
+DEBUG:httpcore2.http11:send_request_body.complete
+DEBUG:httpcore2.http11:receive_response_headers.started request=<Request [b'GET']>
+DEBUG:root:on_closed called
+DEBUG:PIL.Image:Importing AvifImagePlugin
+DEBUG:PIL.Image:Importing BlpImagePlugin
+DEBUG:PIL.Image:Importing BmpImagePlugin
+DEBUG:PIL.Image:Importing BufrStubImagePlugin
+DEBUG:PIL.Image:Importing CurImagePlugin
+DEBUG:PIL.Image:Importing DcxImagePlugin
+DEBUG:PIL.Image:Importing DdsImagePlugin
+DEBUG:PIL.Image:Importing EpsImagePlugin
+DEBUG:PIL.Image:Importing FitsImagePlugin
+DEBUG:PIL.Image:Importing FliImagePlugin
+DEBUG:PIL.Image:Importing FpxImagePlugin
+DEBUG:PIL.Image:Image: failed to import FpxImagePlugin: No module named 'olefile'
+DEBUG:PIL.Image:Importing FtexImagePlugin
+DEBUG:PIL.Image:Importing GbrImagePlugin
+DEBUG:PIL.Image:Importing GifImagePlugin
+DEBUG:PIL.Image:Importing GribStubImagePlugin
+DEBUG:PIL.Image:Importing Hdf5StubImagePlugin
+DEBUG:PIL.Image:Importing IcnsImagePlugin
+DEBUG:PIL.Image:Importing IcoImagePlugin
+DEBUG:PIL.Image:Importing ImImagePlugin
+DEBUG:PIL.Image:Importing ImtImagePlugin
+DEBUG:PIL.Image:Importing IptcImagePlugin
+DEBUG:PIL.Image:Importing JpegImagePlugin
+DEBUG:PIL.Image:Importing Jpeg2KImagePlugin
+DEBUG:PIL.Image:Importing McIdasImagePlugin
+DEBUG:PIL.Image:Importing MicImagePlugin
+DEBUG:PIL.Image:Image: failed to import MicImagePlugin: No module named 'olefile'
+DEBUG:PIL.Image:Importing MpegImagePlugin
+DEBUG:PIL.Image:Importing MpoImagePlugin
+DEBUG:PIL.Image:Importing MspImagePlugin
+DEBUG:PIL.Image:Importing PalmImagePlugin
+DEBUG:PIL.Image:Importing PcdImagePlugin
+DEBUG:PIL.Image:Importing PcxImagePlugin
+DEBUG:PIL.Image:Importing PdfImagePlugin
+DEBUG:PIL.Image:Importing PixarImagePlugin
+DEBUG:PIL.Image:Importing PngImagePlugin
+DEBUG:PIL.Image:Importing PpmImagePlugin
+DEBUG:PIL.Image:Importing PsdImagePlugin
+DEBUG:PIL.Image:Importing QoiImagePlugin
+DEBUG:PIL.Image:Importing SgiImagePlugin
+DEBUG:PIL.Image:Importing SpiderImagePlugin
+DEBUG:PIL.Image:Importing SunImagePlugin
+DEBUG:PIL.Image:Importing TgaImagePlugin
+DEBUG:PIL.Image:Importing TiffImagePlugin
+DEBUG:PIL.Image:Importing WebPImagePlugin
+DEBUG:PIL.Image:Importing WmfImagePlugin
+DEBUG:PIL.Image:Importing XbmImagePlugin
+DEBUG:PIL.Image:Importing XpmImagePlugin
+DEBUG:PIL.Image:Importing XVThumbImagePlugin
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:http://127.0.0.1:7801 "POST /API/GetNewSession HTTP/1.1" 200 None
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:http://127.0.0.1:7801 "POST /API/ListModels HTTP/1.1" 200 None
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:http://127.0.0.1:7801 "POST /API/GetNewSession HTTP/1.1" 200 None
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:http://127.0.0.1:7801 "POST /API/ListModels HTTP/1.1" 200 None
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:http://127.0.0.1:7801 "POST /API/GetNewSession HTTP/1.1" 200 None
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:http://127.0.0.1:7801 "POST /API/ListModels HTTP/1.1" 200 None
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:http://127.0.0.1:7801 "POST /API/GetNewSession HTTP/1.1" 200 None
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:http://127.0.0.1:7801 "POST /API/ListModels HTTP/1.1" 200 None
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:http://127.0.0.1:7801 "POST /API/GetNewSession HTTP/1.1" 200 None
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:http://127.0.0.1:7801 "POST /API/ListModels HTTP/1.1" 200 None
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:http://127.0.0.1:7801 "POST /API/GetNewSession HTTP/1.1" 200 None
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:http://127.0.0.1:7801 "POST /API/ListModels HTTP/1.1" 200 None
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:http://127.0.0.1:7801 "POST /API/GetNewSession HTTP/1.1" 200 None
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:http://127.0.0.1:7801 "POST /API/ListModels HTTP/1.1" 200 None
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:http://127.0.0.1:7801 "POST /API/GetNewSession HTTP/1.1" 200 None
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:http://127.0.0.1:7801 "POST /API/ListModels HTTP/1.1" 200 None
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:8081
+DEBUG:PIL.Image:Importing AvifImagePlugin
+DEBUG:PIL.Image:Importing BlpImagePlugin
+DEBUG:PIL.Image:Importing BmpImagePlugin
+DEBUG:PIL.Image:Importing BufrStubImagePlugin
+DEBUG:PIL.Image:Importing CurImagePlugin
+DEBUG:PIL.Image:Importing DcxImagePlugin
+DEBUG:PIL.Image:Importing DdsImagePlugin
+DEBUG:PIL.Image:Importing EpsImagePlugin
+DEBUG:PIL.Image:Importing FitsImagePlugin
+DEBUG:PIL.Image:Importing FliImagePlugin
+DEBUG:PIL.Image:Importing FpxImagePlugin
+DEBUG:PIL.Image:Image: failed to import FpxImagePlugin: No module named 'olefile'
+DEBUG:PIL.Image:Importing FtexImagePlugin
+DEBUG:PIL.Image:Importing GbrImagePlugin
+DEBUG:PIL.Image:Importing GifImagePlugin
+DEBUG:PIL.Image:Importing GribStubImagePlugin
+DEBUG:PIL.Image:Importing Hdf5StubImagePlugin
+DEBUG:PIL.Image:Importing IcnsImagePlugin
+DEBUG:PIL.Image:Importing IcoImagePlugin
+DEBUG:PIL.Image:Importing ImImagePlugin
+DEBUG:PIL.Image:Importing ImtImagePlugin
+DEBUG:PIL.Image:Importing IptcImagePlugin
+DEBUG:PIL.Image:Importing JpegImagePlugin
+DEBUG:PIL.Image:Importing Jpeg2KImagePlugin
+DEBUG:PIL.Image:Importing McIdasImagePlugin
+DEBUG:PIL.Image:Importing MicImagePlugin
+DEBUG:PIL.Image:Image: failed to import MicImagePlugin: No module named 'olefile'
+DEBUG:PIL.Image:Importing MpegImagePlugin
+DEBUG:PIL.Image:Importing MpoImagePlugin
+DEBUG:PIL.Image:Importing MspImagePlugin
+DEBUG:PIL.Image:Importing PalmImagePlugin
+DEBUG:PIL.Image:Importing PcdImagePlugin
+DEBUG:PIL.Image:Importing PcxImagePlugin
+DEBUG:PIL.Image:Importing PdfImagePlugin
+DEBUG:PIL.Image:Importing PixarImagePlugin
+DEBUG:PIL.Image:Importing PngImagePlugin
+DEBUG:PIL.Image:Importing PpmImagePlugin
+DEBUG:PIL.Image:Importing PsdImagePlugin
+DEBUG:PIL.Image:Importing QoiImagePlugin
+DEBUG:PIL.Image:Importing SgiImagePlugin
+DEBUG:PIL.Image:Importing SpiderImagePlugin
+DEBUG:PIL.Image:Importing SunImagePlugin
+DEBUG:PIL.Image:Importing TgaImagePlugin
+DEBUG:PIL.Image:Importing TiffImagePlugin
+DEBUG:PIL.Image:Importing WebPImagePlugin
+DEBUG:PIL.Image:Importing WmfImagePlugin
+DEBUG:PIL.Image:Importing XbmImagePlugin
+DEBUG:PIL.Image:Importing XpmImagePlugin
+DEBUG:PIL.Image:Importing XVThumbImagePlugin
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:8081
+DEBUG:PIL.Image:Importing AvifImagePlugin
+DEBUG:PIL.Image:Importing BlpImagePlugin
+DEBUG:PIL.Image:Importing BmpImagePlugin
+DEBUG:PIL.Image:Importing BufrStubImagePlugin
+DEBUG:PIL.Image:Importing CurImagePlugin
+DEBUG:PIL.Image:Importing DcxImagePlugin
+DEBUG:PIL.Image:Importing DdsImagePlugin
+DEBUG:PIL.Image:Importing EpsImagePlugin
+DEBUG:PIL.Image:Importing FitsImagePlugin
+DEBUG:PIL.Image:Importing FliImagePlugin
+DEBUG:PIL.Image:Importing FpxImagePlugin
+DEBUG:PIL.Image:Image: failed to import FpxImagePlugin: No module named 'olefile'
+DEBUG:PIL.Image:Importing FtexImagePlugin
+DEBUG:PIL.Image:Importing GbrImagePlugin
+DEBUG:PIL.Image:Importing GifImagePlugin
+DEBUG:PIL.Image:Importing GribStubImagePlugin
+DEBUG:PIL.Image:Importing Hdf5StubImagePlugin
+DEBUG:PIL.Image:Importing IcnsImagePlugin
+DEBUG:PIL.Image:Importing IcoImagePlugin
+DEBUG:PIL.Image:Importing ImImagePlugin
+DEBUG:PIL.Image:Importing ImtImagePlugin
+DEBUG:PIL.Image:Importing IptcImagePlugin
+DEBUG:PIL.Image:Importing JpegImagePlugin
+DEBUG:PIL.Image:Importing Jpeg2KImagePlugin
+DEBUG:PIL.Image:Importing McIdasImagePlugin
+DEBUG:PIL.Image:Importing MicImagePlugin
+DEBUG:PIL.Image:Image: failed to import MicImagePlugin: No module named 'olefile'
+DEBUG:PIL.Image:Importing MpegImagePlugin
+DEBUG:PIL.Image:Importing MpoImagePlugin
+DEBUG:PIL.Image:Importing MspImagePlugin
+DEBUG:PIL.Image:Importing PalmImagePlugin
+DEBUG:PIL.Image:Importing PcdImagePlugin
+DEBUG:PIL.Image:Importing PcxImagePlugin
+DEBUG:PIL.Image:Importing PdfImagePlugin
+DEBUG:PIL.Image:Importing PixarImagePlugin
+DEBUG:PIL.Image:Importing PngImagePlugin
+DEBUG:PIL.Image:Importing PpmImagePlugin
+DEBUG:PIL.Image:Importing PsdImagePlugin
+DEBUG:PIL.Image:Importing QoiImagePlugin
+DEBUG:PIL.Image:Importing SgiImagePlugin
+DEBUG:PIL.Image:Importing SpiderImagePlugin
+DEBUG:PIL.Image:Importing SunImagePlugin
+DEBUG:PIL.Image:Importing TgaImagePlugin
+DEBUG:PIL.Image:Importing TiffImagePlugin
+DEBUG:PIL.Image:Importing WebPImagePlugin
+DEBUG:PIL.Image:Importing WmfImagePlugin
+DEBUG:PIL.Image:Importing XbmImagePlugin
+DEBUG:PIL.Image:Importing XpmImagePlugin
+DEBUG:PIL.Image:Importing XVThumbImagePlugin
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:PIL.Image:Importing AvifImagePlugin
+DEBUG:PIL.Image:Importing BlpImagePlugin
+DEBUG:PIL.Image:Importing BmpImagePlugin
+DEBUG:PIL.Image:Importing BufrStubImagePlugin
+DEBUG:PIL.Image:Importing CurImagePlugin
+DEBUG:PIL.Image:Importing DcxImagePlugin
+DEBUG:PIL.Image:Importing DdsImagePlugin
+DEBUG:PIL.Image:Importing EpsImagePlugin
+DEBUG:PIL.Image:Importing FitsImagePlugin
+DEBUG:PIL.Image:Importing FliImagePlugin
+DEBUG:PIL.Image:Importing FpxImagePlugin
+DEBUG:PIL.Image:Image: failed to import FpxImagePlugin: No module named 'olefile'
+DEBUG:PIL.Image:Importing FtexImagePlugin
+DEBUG:PIL.Image:Importing GbrImagePlugin
+DEBUG:PIL.Image:Importing GifImagePlugin
+DEBUG:PIL.Image:Importing GribStubImagePlugin
+DEBUG:PIL.Image:Importing Hdf5StubImagePlugin
+DEBUG:PIL.Image:Importing IcnsImagePlugin
+DEBUG:PIL.Image:Importing IcoImagePlugin
+DEBUG:PIL.Image:Importing ImImagePlugin
+DEBUG:PIL.Image:Importing ImtImagePlugin
+DEBUG:PIL.Image:Importing IptcImagePlugin
+DEBUG:PIL.Image:Importing JpegImagePlugin
+DEBUG:PIL.Image:Importing Jpeg2KImagePlugin
+DEBUG:PIL.Image:Importing McIdasImagePlugin
+DEBUG:PIL.Image:Importing MicImagePlugin
+DEBUG:PIL.Image:Image: failed to import MicImagePlugin: No module named 'olefile'
+DEBUG:PIL.Image:Importing MpegImagePlugin
+DEBUG:PIL.Image:Importing MpoImagePlugin
+DEBUG:PIL.Image:Importing MspImagePlugin
+DEBUG:PIL.Image:Importing PalmImagePlugin
+DEBUG:PIL.Image:Importing PcdImagePlugin
+DEBUG:PIL.Image:Importing PcxImagePlugin
+DEBUG:PIL.Image:Importing PdfImagePlugin
+DEBUG:PIL.Image:Importing PixarImagePlugin
+DEBUG:PIL.Image:Importing PngImagePlugin
+DEBUG:PIL.Image:Importing PpmImagePlugin
+DEBUG:PIL.Image:Importing PsdImagePlugin
+DEBUG:PIL.Image:Importing QoiImagePlugin
+DEBUG:PIL.Image:Importing SgiImagePlugin
+DEBUG:PIL.Image:Importing SpiderImagePlugin
+DEBUG:PIL.Image:Importing SunImagePlugin
+DEBUG:PIL.Image:Importing TgaImagePlugin
+DEBUG:PIL.Image:Importing TiffImagePlugin
+DEBUG:PIL.Image:Importing WebPImagePlugin
+DEBUG:PIL.Image:Importing WmfImagePlugin
+DEBUG:PIL.Image:Importing XbmImagePlugin
+DEBUG:PIL.Image:Importing XpmImagePlugin
+DEBUG:PIL.Image:Importing XVThumbImagePlugin
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:8081
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:http://127.0.0.1:7801 "POST /API/GetNewSession HTTP/1.1" 200 None
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:http://127.0.0.1:7801 "POST /API/ListModels HTTP/1.1" 200 None
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:http://127.0.0.1:7801 "POST /API/GetNewSession HTTP/1.1" 200 None
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:http://127.0.0.1:7801 "POST /API/ListModels HTTP/1.1" 200 None
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:http://127.0.0.1:7801 "POST /API/GetNewSession HTTP/1.1" 200 None
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:http://127.0.0.1:7801 "POST /API/ListModels HTTP/1.1" 200 None
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:http://127.0.0.1:7801 "POST /API/GetNewSession HTTP/1.1" 200 None
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:http://127.0.0.1:7801 "POST /API/ListModels HTTP/1.1" 200 None
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:http://127.0.0.1:7801 "POST /API/GetNewSession HTTP/1.1" 200 None
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:http://127.0.0.1:7801 "POST /API/ListModels HTTP/1.1" 200 None
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:http://127.0.0.1:7801 "POST /API/GetNewSession HTTP/1.1" 200 None
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:http://127.0.0.1:7801 "POST /API/ListModels HTTP/1.1" 200 None
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:http://127.0.0.1:7801 "POST /API/GetNewSession HTTP/1.1" 200 None
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:http://127.0.0.1:7801 "POST /API/ListModels HTTP/1.1" 200 None
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:http://127.0.0.1:7801 "POST /API/GetNewSession HTTP/1.1" 200 None
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:http://127.0.0.1:7801 "POST /API/ListModels HTTP/1.1" 200 None
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:8081
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:8081
+DEBUG:root:on_closing called
+DEBUG:root:stopping server and returning True
+DEBUG:root:on_closed called
+DEBUG:PIL.Image:Importing AvifImagePlugin
+DEBUG:PIL.Image:Importing BlpImagePlugin
+DEBUG:PIL.Image:Importing BmpImagePlugin
+DEBUG:PIL.Image:Importing BufrStubImagePlugin
+DEBUG:PIL.Image:Importing CurImagePlugin
+DEBUG:PIL.Image:Importing DcxImagePlugin
+DEBUG:PIL.Image:Importing DdsImagePlugin
+DEBUG:PIL.Image:Importing EpsImagePlugin
+DEBUG:PIL.Image:Importing FitsImagePlugin
+DEBUG:PIL.Image:Importing FliImagePlugin
+DEBUG:PIL.Image:Importing FpxImagePlugin
+DEBUG:PIL.Image:Image: failed to import FpxImagePlugin: No module named 'olefile'
+DEBUG:PIL.Image:Importing FtexImagePlugin
+DEBUG:PIL.Image:Importing GbrImagePlugin
+DEBUG:PIL.Image:Importing GifImagePlugin
+DEBUG:PIL.Image:Importing GribStubImagePlugin
+DEBUG:PIL.Image:Importing Hdf5StubImagePlugin
+DEBUG:PIL.Image:Importing IcnsImagePlugin
+DEBUG:PIL.Image:Importing IcoImagePlugin
+DEBUG:PIL.Image:Importing ImImagePlugin
+DEBUG:PIL.Image:Importing ImtImagePlugin
+DEBUG:PIL.Image:Importing IptcImagePlugin
+DEBUG:PIL.Image:Importing JpegImagePlugin
+DEBUG:PIL.Image:Importing Jpeg2KImagePlugin
+DEBUG:PIL.Image:Importing McIdasImagePlugin
+DEBUG:PIL.Image:Importing MicImagePlugin
+DEBUG:PIL.Image:Image: failed to import MicImagePlugin: No module named 'olefile'
+DEBUG:PIL.Image:Importing MpegImagePlugin
+DEBUG:PIL.Image:Importing MpoImagePlugin
+DEBUG:PIL.Image:Importing MspImagePlugin
+DEBUG:PIL.Image:Importing PalmImagePlugin
+DEBUG:PIL.Image:Importing PcdImagePlugin
+DEBUG:PIL.Image:Importing PcxImagePlugin
+DEBUG:PIL.Image:Importing PdfImagePlugin
+DEBUG:PIL.Image:Importing PixarImagePlugin
+DEBUG:PIL.Image:Importing PngImagePlugin
+DEBUG:PIL.Image:Importing PpmImagePlugin
+DEBUG:PIL.Image:Importing PsdImagePlugin
+DEBUG:PIL.Image:Importing QoiImagePlugin
+DEBUG:PIL.Image:Importing SgiImagePlugin
+DEBUG:PIL.Image:Importing SpiderImagePlugin
+DEBUG:PIL.Image:Importing SunImagePlugin
+DEBUG:PIL.Image:Importing TgaImagePlugin
+DEBUG:PIL.Image:Importing TiffImagePlugin
+DEBUG:PIL.Image:Importing WebPImagePlugin
+DEBUG:PIL.Image:Importing WmfImagePlugin
+DEBUG:PIL.Image:Importing XbmImagePlugin
+DEBUG:PIL.Image:Importing XpmImagePlugin
+DEBUG:PIL.Image:Importing XVThumbImagePlugin
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:8081
+DEBUG:root:on_closing called
+DEBUG:root:stopping server and returning True
+DEBUG:PIL.Image:Importing AvifImagePlugin
+DEBUG:PIL.Image:Importing BlpImagePlugin
+DEBUG:PIL.Image:Importing BmpImagePlugin
+DEBUG:PIL.Image:Importing BufrStubImagePlugin
+DEBUG:PIL.Image:Importing CurImagePlugin
+DEBUG:PIL.Image:Importing DcxImagePlugin
+DEBUG:PIL.Image:Importing DdsImagePlugin
+DEBUG:PIL.Image:Importing EpsImagePlugin
+DEBUG:PIL.Image:Importing FitsImagePlugin
+DEBUG:PIL.Image:Importing FliImagePlugin
+DEBUG:PIL.Image:Importing FpxImagePlugin
+DEBUG:PIL.Image:Image: failed to import FpxImagePlugin: No module named 'olefile'
+DEBUG:PIL.Image:Importing FtexImagePlugin
+DEBUG:PIL.Image:Importing GbrImagePlugin
+DEBUG:PIL.Image:Importing GifImagePlugin
+DEBUG:PIL.Image:Importing GribStubImagePlugin
+DEBUG:PIL.Image:Importing Hdf5StubImagePlugin
+DEBUG:PIL.Image:Importing IcnsImagePlugin
+DEBUG:PIL.Image:Importing IcoImagePlugin
+DEBUG:PIL.Image:Importing ImImagePlugin
+DEBUG:PIL.Image:Importing ImtImagePlugin
+DEBUG:PIL.Image:Importing IptcImagePlugin
+DEBUG:PIL.Image:Importing JpegImagePlugin
+DEBUG:PIL.Image:Importing Jpeg2KImagePlugin
+DEBUG:PIL.Image:Importing McIdasImagePlugin
+DEBUG:PIL.Image:Importing MicImagePlugin
+DEBUG:PIL.Image:Image: failed to import MicImagePlugin: No module named 'olefile'
+DEBUG:PIL.Image:Importing MpegImagePlugin
+DEBUG:PIL.Image:Importing MpoImagePlugin
+DEBUG:PIL.Image:Importing MspImagePlugin
+DEBUG:PIL.Image:Importing PalmImagePlugin
+DEBUG:PIL.Image:Importing PcdImagePlugin
+DEBUG:PIL.Image:Importing PcxImagePlugin
+DEBUG:PIL.Image:Importing PdfImagePlugin
+DEBUG:PIL.Image:Importing PixarImagePlugin
+DEBUG:PIL.Image:Importing PngImagePlugin
+DEBUG:PIL.Image:Importing PpmImagePlugin
+DEBUG:PIL.Image:Importing PsdImagePlugin
+DEBUG:PIL.Image:Importing QoiImagePlugin
+DEBUG:PIL.Image:Importing SgiImagePlugin
+DEBUG:PIL.Image:Importing SpiderImagePlugin
+DEBUG:PIL.Image:Importing SunImagePlugin
+DEBUG:PIL.Image:Importing TgaImagePlugin
+DEBUG:PIL.Image:Importing TiffImagePlugin
+DEBUG:PIL.Image:Importing WebPImagePlugin
+DEBUG:PIL.Image:Importing WmfImagePlugin
+DEBUG:PIL.Image:Importing XbmImagePlugin
+DEBUG:PIL.Image:Importing XpmImagePlugin
+DEBUG:PIL.Image:Importing XVThumbImagePlugin

@@ -37,7 +37,11 @@ const configMap = {
     'swarm_host': document.getElementById('cfg-swarm_host'),
     'swarm_extra_args': document.getElementById('cfg-swarm_extra_args'),
     'swarm_steps': document.getElementById('cfg-swarm_steps'),
-    'swarm_cfg': document.getElementById('cfg-swarm_cfg')
+    'swarm_cfg': document.getElementById('cfg-swarm_cfg'),
+    'swarm_width': document.getElementById('cfg-swarm_width'),
+    'swarm_height': document.getElementById('cfg-swarm_height'),
+    'auto_sleep': document.getElementById('cfg-auto_sleep'),
+    'swarm_model': document.getElementById('cfg-swarm_model')
 };
 
 const valSwarmSteps = document.getElementById('val-swarm_steps');
@@ -51,6 +55,56 @@ configMap.swarm_cfg.addEventListener('input', (e) => {
     valSwarmCfg.textContent = parseFloat(e.target.value).toFixed(1);
     saveConfig();
 });
+
+const valSwarmWidth = document.getElementById('val-swarm_width');
+configMap.swarm_width.addEventListener('input', (e) => {
+    valSwarmWidth.textContent = e.target.value;
+    saveConfig();
+});
+
+const valSwarmHeight = document.getElementById('val-swarm_height');
+configMap.swarm_height.addEventListener('input', (e) => {
+    valSwarmHeight.textContent = e.target.value;
+    saveConfig();
+});
+
+configMap.auto_sleep.addEventListener('change', (e) => {
+    saveConfig();
+    if (window.showToast) {
+        window.showToast(`Auto-Sleep LLM: ${e.target.checked ? 'Enabled' : 'Disabled'}`);
+    }
+});
+configMap.swarm_model.addEventListener('change', saveConfig);
+
+async function refreshSwarmModels() {
+    const btn = document.getElementById('btn-refresh-swarm-models');
+    if (btn) btn.classList.add('opacity-50', 'pointer-events-none');
+    
+    configMap.swarm_model.innerHTML = '<option value="">Loading models...</option>';
+    const models = await window.pywebview.api.get_swarm_models();
+    
+    configMap.swarm_model.innerHTML = '';
+    if (!models || models.length === 0) {
+        configMap.swarm_model.innerHTML = '<option value="">No models found (Check SwarmUI)</option>';
+    } else {
+        models.forEach(m => {
+            const opt = document.createElement('option');
+            opt.value = m;
+            opt.textContent = m;
+            configMap.swarm_model.appendChild(opt);
+        });
+        
+        if (appConfig.swarm_model && models.includes(appConfig.swarm_model)) {
+            configMap.swarm_model.value = appConfig.swarm_model;
+        } else {
+            configMap.swarm_model.value = models[0];
+            saveConfig();
+        }
+    }
+    if (btn) btn.classList.remove('opacity-50', 'pointer-events-none');
+}
+
+document.getElementById('btn-refresh-swarm-models')?.addEventListener('click', refreshSwarmModels);
 
 const sliderGpu = document.getElementById('cfg-gpu_layers-slider');
 
@@ -66,6 +120,7 @@ window.addEventListener('pywebviewready', async () => {
     applyTranslations(appConfig.language || 'en');
     checkBinaryPresence();
     updateNetworkInfo();
+    refreshSwarmModels();
     
     setInterval(pollStatus, 1000);
     setInterval(pollSwarmStatus, 1000);
@@ -74,6 +129,75 @@ window.addEventListener('pywebviewready', async () => {
 
 let allGalleryImages = [];
 let galleryGroups = {};
+
+let isSelectionMode = false;
+let selectedImages = new Set();
+
+const btnToggleSelect = document.getElementById('btn-toggle-select');
+const btnBulkDelete = document.getElementById('btn-bulk-delete');
+const btnBulkCancel = document.getElementById('btn-bulk-cancel');
+const bulkActions = document.getElementById('bulk-actions');
+const bulkCount = document.getElementById('bulk-count');
+
+if (btnToggleSelect) {
+    btnToggleSelect.addEventListener('click', () => {
+        isSelectionMode = !isSelectionMode;
+        if (!isSelectionMode) {
+            selectedImages.clear();
+        }
+        updateBulkUI();
+        renderSwarmGallery();
+    });
+}
+
+if (btnBulkCancel) {
+    btnBulkCancel.addEventListener('click', () => {
+        isSelectionMode = false;
+        selectedImages.clear();
+        updateBulkUI();
+        renderSwarmGallery();
+    });
+}
+
+if (btnBulkDelete) {
+    btnBulkDelete.addEventListener('click', async () => {
+        if (selectedImages.size === 0) return;
+        if (!confirm(`Are you sure you want to delete ${selectedImages.size} images?`)) return;
+        
+        btnBulkDelete.disabled = true;
+        btnBulkDelete.innerHTML = '<i data-lucide="loader" class="animate-spin w-4 h-4 text-red-500"></i>';
+        if (window.lucide) window.lucide.createIcons();
+        
+        try {
+            const paths = Array.from(selectedImages);
+            await window.pywebview.api.delete_images(paths);
+            isSelectionMode = false;
+            selectedImages.clear();
+            updateBulkUI();
+            await loadSwarmGallery();
+        } catch (e) {
+            if (window.showToast) window.showToast('Failed to delete some images');
+        } finally {
+            btnBulkDelete.disabled = false;
+            btnBulkDelete.innerHTML = '<i data-lucide="trash-2" class="w-4 h-4"></i>';
+            if (window.lucide) window.lucide.createIcons();
+        }
+    });
+}
+
+function updateBulkUI() {
+    if (!bulkActions || !btnToggleSelect) return;
+    if (isSelectionMode) {
+        bulkActions.classList.remove('hidden');
+        bulkActions.classList.add('flex');
+        btnToggleSelect.classList.add('bg-indigo-500/20', 'text-indigo-400');
+        bulkCount.textContent = selectedImages.size;
+    } else {
+        bulkActions.classList.add('hidden');
+        bulkActions.classList.remove('flex');
+        btnToggleSelect.classList.remove('bg-indigo-500/20', 'text-indigo-400');
+    }
+}
 
 async function loadSwarmGallery() {
     const gallery = document.getElementById('swarm-gallery');
@@ -161,9 +285,36 @@ function renderSwarmGallery() {
         
         galleryGroups[folderName].forEach(img => {
             const imgDiv = document.createElement('div');
-            imgDiv.className = 'aspect-square rounded-xl overflow-hidden border border-border shadow-sm group relative cursor-pointer bg-card flex items-center justify-center';
-            imgDiv.innerHTML = `<img src="${img.data}" loading="lazy" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">`;
-            imgDiv.onclick = () => openImageModal(img);
+            const isSelected = selectedImages.has(img.path);
+            
+            imgDiv.className = `aspect-square rounded-xl overflow-hidden border ${isSelected ? 'border-brand ring-2 ring-brand' : 'border-border'} shadow-sm group relative cursor-pointer bg-card flex items-center justify-center transition-all`;
+            
+            let checkHtml = `<div class="select-check absolute top-2 right-2 bg-brand text-white rounded-full p-1 shadow-lg z-10 ${isSelected ? '' : 'hidden'}">
+                <i data-lucide="check" class="w-3 h-3 text-white"></i>
+            </div>`;
+            
+            imgDiv.innerHTML = `${checkHtml}<img src="${img.data}" loading="lazy" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">`;
+            
+            imgDiv.onclick = (e) => {
+                if (isSelectionMode) {
+                    if (selectedImages.has(img.path)) {
+                        selectedImages.delete(img.path);
+                        imgDiv.classList.remove('border-brand', 'ring-2', 'ring-brand');
+                        imgDiv.classList.add('border-border');
+                        const check = imgDiv.querySelector('.select-check');
+                        if (check) check.classList.add('hidden');
+                    } else {
+                        selectedImages.add(img.path);
+                        imgDiv.classList.remove('border-border');
+                        imgDiv.classList.add('border-brand', 'ring-2', 'ring-brand');
+                        const check = imgDiv.querySelector('.select-check');
+                        if (check) check.classList.remove('hidden');
+                    }
+                    updateBulkUI();
+                } else {
+                    openImageModal(img);
+                }
+            };
             grid.appendChild(imgDiv);
         });
         
@@ -263,23 +414,45 @@ function openImageModal(img) {
                      try { params = JSON.parse(res.metadata.sui_image_params); } catch(e){}
                 }
 
-                const displayKeys = ['prompt', 'negativeprompt', 'steps', 'cfgscale'];
+                // Calculate resolution string if available
+                if (params.width && params.height) {
+                    const gcd = (a, b) => b ? gcd(b, a % b) : a;
+                    const divisor = gcd(params.width, params.height);
+                    params.resolution = `${params.width}x${params.height} (${params.width/divisor}:${params.height/divisor})`;
+                }
+                
+                // Merge generation time from top-level metadata if present
+                if (res.metadata["Generation Time"]) {
+                    params.generation_time = res.metadata["Generation Time"];
+                }
+
+                const displayKeys = ['prompt', 'negativeprompt', 'resolution', 'seed', 'steps', 'cfgscale', 'generation_time'];
+                
+                const labels = {
+                    'prompt': 'PROMPT',
+                    'negativeprompt': 'NEGATIVE PROMPT',
+                    'resolution': 'RESOLUTION',
+                    'seed': 'SEED',
+                    'steps': 'STEPS',
+                    'cfgscale': 'CFG SCALE',
+                    'generation_time': 'GENERATION TIME'
+                };
                 
                 modalMetadata.innerHTML = '';
                 let hasData = false;
                 
                 displayKeys.forEach(k => {
-                    if (params[k] !== undefined && params[k] !== null) {
+                    if (params[k] !== undefined && params[k] !== null && params[k] !== '') {
                         hasData = true;
                         const div = document.createElement('div');
                         div.className = 'mb-3 group cursor-pointer hover:bg-white/5 p-2 rounded-lg transition-colors';
                         
                         const titleSpan = document.createElement('span');
                         titleSpan.className = 'text-textMuted block text-[10px] uppercase tracking-wider mb-1 flex items-center justify-between';
-                        titleSpan.innerHTML = `${k} <i data-lucide="copy" class="w-3 h-3 opacity-0 group-hover:opacity-100 transition-opacity"></i>`;
+                        titleSpan.innerHTML = `${labels[k] || k} <i data-lucide="copy" class="w-3 h-3 opacity-0 group-hover:opacity-100 transition-opacity"></i>`;
                         
                         const valSpan = document.createElement('span');
-                        valSpan.className = 'text-brand font-medium';
+                        valSpan.className = 'text-brand font-medium block break-words';
                         valSpan.textContent = params[k];
                         
                         div.appendChild(titleSpan);
@@ -287,7 +460,7 @@ function openImageModal(img) {
                         
                         div.addEventListener('click', () => {
                             navigator.clipboard.writeText(String(params[k])).then(() => {
-                                window.showToast(`Copied ${k}!`);
+                                window.showToast(`Copied ${labels[k] || k}!`);
                             });
                         });
                         
@@ -700,6 +873,7 @@ async function pollStatus() {
 }
 
 function updateStatusUI(running) {
+    const btnCopyUrl = document.getElementById('btn-copyurl');
     if (isRunning && !running) {
         // Just stopped
         btnWebchat.disabled = true;
@@ -710,6 +884,13 @@ function updateStatusUI(running) {
         btnStop.classList.remove('hidden');
         btnStop.classList.add('flex');
         
+        btnWebchat.classList.remove('opacity-50', 'pointer-events-none');
+        btnWebchat.disabled = false;
+        if (btnCopyUrl) {
+            btnCopyUrl.classList.remove('opacity-50', 'pointer-events-none');
+            btnCopyUrl.disabled = false;
+        }
+        
         statusDot.classList.remove('bg-red-500');
         statusDot.classList.add('pulsating-dot');
         statusText.innerHTML = translations[currentLang].status_running;
@@ -718,10 +899,16 @@ function updateStatusUI(running) {
         btnStop.classList.remove('flex');
         btnStart.classList.remove('hidden');
         
+        btnWebchat.classList.add('opacity-50', 'pointer-events-none');
+        btnWebchat.disabled = true;
+        if (btnCopyUrl) {
+            btnCopyUrl.classList.add('opacity-50', 'pointer-events-none');
+            btnCopyUrl.disabled = true;
+        }
+        
         statusDot.classList.remove('pulsating-dot');
         statusDot.classList.add('bg-red-500');
         statusText.innerHTML = translations[currentLang].status_stopped;
-        btnWebchat.disabled = true;
     }
 }
 
@@ -779,6 +966,20 @@ async function pollSwarmStatus() {
     updateSwarmStatusUI(running);
 }
 
+const btnOpenSwarm = document.getElementById('btn-open-swarmui-web');
+if (btnOpenSwarm) {
+    btnOpenSwarm.addEventListener('click', async () => {
+        let port = configMap.swarm_port.value || 7801;
+        let host = configMap.swarm_host.value || '127.0.0.1';
+        let url = `http://${host}:${port}/`;
+        if (window.pywebview) {
+            await window.pywebview.api.open_web_chat(url);
+        } else {
+            window.open(url, '_blank');
+        }
+    });
+}
+
 function updateSwarmStatusUI(running) {
     const btnStart = document.getElementById('btn-start-swarm');
     const btnStop = document.getElementById('btn-stop-swarm');
@@ -790,6 +991,7 @@ function updateSwarmStatusUI(running) {
         btnStart.classList.add('hidden');
         btnStop.classList.remove('hidden');
         btnStop.classList.add('flex');
+        if (btnOpenSwarm) btnOpenSwarm.classList.remove('hidden');
         
         statusDot.classList.remove('bg-red-500');
         statusDot.classList.add('pulsating-dot');
@@ -798,6 +1000,7 @@ function updateSwarmStatusUI(running) {
         btnStop.classList.add('hidden');
         btnStop.classList.remove('flex');
         btnStart.classList.remove('hidden');
+        if (btnOpenSwarm) btnOpenSwarm.classList.add('hidden');
         
         statusDot.classList.remove('pulsating-dot');
         statusDot.classList.add('bg-red-500');

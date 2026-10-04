@@ -56,6 +56,9 @@ class ApiBridge:
             return result[0]
         return None
 
+    def get_swarm_models(self):
+        return ["qwen-image-2.1-UC-Q6_K.gguf"]
+
     def select_model(self):
         if not self._window:
             return None
@@ -206,6 +209,17 @@ class ApiBridge:
         except:
             pass
         return {"status": "error"}
+
+    def delete_images(self, paths):
+        deleted = 0
+        for path in paths:
+            try:
+                if os.path.exists(path) and "SwarmUI" in path:
+                    os.remove(path)
+                    deleted += 1
+            except:
+                pass
+        return {"status": "success", "deleted": deleted}
 
     def open_image_folder(self, path):
         try:

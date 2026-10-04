@@ -102,6 +102,36 @@ class LlamaProxyHandler(BaseHTTPRequestHandler):
                     elif 'prompt' in payload:
                         prompt = payload['prompt']
                     
+                    self.server.last_interaction = time.time()
+                    
+                    if not self.server.process_manager.check_status():
+                        is_stream = payload.get('stream', False)
+                        if is_stream:
+                            self.send_response(200)
+                            self.send_header('Content-Type', 'text/event-stream')
+                            self.send_header('Cache-Control', 'no-cache')
+                            self.end_headers()
+                            
+                            def send_chunk(text):
+                                chunk_data = json.dumps({"choices": [{"delta": {"content": text}}]})
+                                self.wfile.write(f"data: {chunk_data}\n\n".encode('utf-8'))
+                                self.wfile.flush()
+                                
+                            send_chunk("*Waking up LLM from Auto-Sleep...*\n\n")
+                            self.server.process_manager.start_server(self.server.config_manager.get_config())
+                            
+                            max_retries = 30
+                            while max_retries > 0 and not self.server.process_manager.check_status():
+                                time.sleep(1)
+                                send_chunk("")
+                                max_retries -= 1
+                                
+                            time.sleep(3) # Wait for Llama server to bind
+                            send_chunk("*LLM restored! Processing request...*\n\n")
+                        else:
+                            self.server.process_manager.start_server(self.server.config_manager.get_config())
+                            time.sleep(4)
+                    
                     if "/draw " in prompt or prompt.startswith("/draw"):
                         self.handle_draw_request(prompt.replace("/draw", "").strip(), payload)
                         return
@@ -208,24 +238,24 @@ class LlamaProxyHandler(BaseHTTPRequestHandler):
             
         # 2. Call SwarmUI
         try:
+            fresh_cfg = self.server.config_manager.get_config()
+            port = fresh_cfg.get("swarm_port", 7801)
+            host = fresh_cfg.get("swarm_host", "127.0.0.1")
+            if not host: host = "127.0.0.1"
+            base_url = f"http://{host}:{port}"
+            
             send_chunk("*Generating image on GPU...*\n")
-            session_resp = requests.post("http://127.0.0.1:7801/API/GetNewSession", json={}, timeout=10)
+            session_resp = requests.post(f"{base_url}/API/GetNewSession", json={}, timeout=10)
             session_id = session_resp.json().get("session_id", "local") if session_resp.status_code == 200 else "local"
 
-            model_name = "qwen-image-2.1-UC-Q6_K.gguf" # User's requested fallback
-            try:
-                m_resp = requests.post("http://127.0.0.1:7801/API/ListModels", json={"session_id": session_id, "path": ""}, timeout=5)
-                if m_resp.status_code == 200:
-                    models = m_resp.json().get("models", [])
-                    if models:
-                        model_name = models[0].get("name", "qwen-image-2.1-UC-Q6_K.gguf")
-            except Exception as e:
-                pass
+            model_name = "qwen-image-2.1-UC-Q6_K.gguf"
 
-            steps = int(self.server.config.get("swarm_steps", 20))
-            cfg_scale = float(self.server.config.get("swarm_cfg", 7.0))
+            steps = int(fresh_cfg.get("swarm_steps", 20))
+            cfg_scale = float(fresh_cfg.get("swarm_cfg", 7.0))
+            width = int(fresh_cfg.get("swarm_width", 1024))
+            height = int(fresh_cfg.get("swarm_height", 1024))
             
-            swarm_url = "http://127.0.0.1:7801/API/GenerateText2Image"
+            swarm_url = f"{base_url}/API/GenerateText2Image"
             swarm_payload = {
                 "session_id": session_id,
                 "prompt": generated_prompt.strip() if generated_prompt.strip() else original_prompt,
@@ -233,12 +263,32 @@ class LlamaProxyHandler(BaseHTTPRequestHandler):
                 "images": 1,
                 "donotsave": False,
                 "steps": steps,
-                "cfg_scale": cfg_scale
+                "cfgscale": cfg_scale,
+                "width": width,
+                "height": height
             }
             if model_name:
                 swarm_payload["model"] = model_name
                 
-            s_resp = requests.post(swarm_url, json=swarm_payload, timeout=120)
+            import threading
+            s_result = {}
+            def fetch_swarm():
+                try:
+                    s_result['resp'] = requests.post(swarm_url, json=swarm_payload, timeout=1200)
+                except Exception as e:
+                    s_result['error'] = e
+
+            swarm_thread = threading.Thread(target=fetch_swarm)
+            swarm_thread.start()
+            
+            while swarm_thread.is_alive():
+                send_chunk("") # Send empty chunk to keep SSE connection alive
+                swarm_thread.join(timeout=2.0)
+                
+            if 'error' in s_result:
+                raise s_result['error']
+                
+            s_resp = s_result['resp']
             if s_resp.status_code == 200:
                 s_data = s_resp.json()
                 if 'images' in s_data and len(s_data['images']) > 0:
@@ -253,18 +303,53 @@ class LlamaProxyHandler(BaseHTTPRequestHandler):
                     else:
                         if image_val.startswith("data:image"):
                             image_val = image_val.split(",")[1]
-                        if len(image_val) % 4 != 0:
-                            image_val += "=" * (4 - len(image_val) % 4)
-                        import base64
-                        img_data = base64.b64decode(image_val)
                         
-                        cache_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'ui', 'generated_cache')
-                        os.makedirs(cache_dir, exist_ok=True)
-                        img_name = f"swarm_{uuid.uuid4().hex[:8]}.jpg"
-                        with open(os.path.join(cache_dir, img_name), 'wb') as f:
-                            f.write(img_data)
-                        
-                        send_chunk(f"\n\n![Generated Image](/generated_cache/{img_name})\n\n")
+                        try:
+                            # Attempt base64 decode
+                            import base64
+                            b64_val = image_val
+                            pad = len(b64_val) % 4
+                            if pad != 0:
+                                b64_val += "=" * (4 - pad)
+                            img_data = base64.b64decode(b64_val)
+                            
+                            cache_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'ui', 'generated_cache')
+                            os.makedirs(cache_dir, exist_ok=True)
+                            img_name = f"swarm_{uuid.uuid4().hex[:8]}.jpg"
+                            full_path = os.path.join(cache_dir, img_name)
+                            with open(full_path, 'wb') as f:
+                                f.write(img_data)
+                            
+                            import urllib.parse
+                            safe_path = urllib.parse.quote(full_path)
+                            send_chunk(f"\n\n![Generated Image](/local_image?path={safe_path})\n\n")
+                        except Exception:
+                            # Fallback: SwarmUI likely returned a relative file path (like 'ViewImage?image=Output/xyz.png')
+                            import urllib.parse
+                            base_url = "http://127.0.0.1:7801"
+                            if not image_val.startswith("/"):
+                                image_val = "/" + image_val
+                            
+                            # Download the image from SwarmUI server to bypass CORS in UI
+                            safe_url = urllib.parse.quote(image_val, safe='/?=&')
+                            swarm_img_url = f"{base_url}{safe_url}"
+                            
+                            try:
+                                img_resp = requests.get(swarm_img_url, timeout=10)
+                                if img_resp.status_code == 200:
+                                    cache_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'ui', 'generated_cache')
+                                    os.makedirs(cache_dir, exist_ok=True)
+                                    img_name = f"swarm_{uuid.uuid4().hex[:8]}.jpg"
+                                    full_path = os.path.join(cache_dir, img_name)
+                                    with open(full_path, 'wb') as f:
+                                        f.write(img_resp.content)
+                                    
+                                    safe_path = urllib.parse.quote(full_path)
+                                    send_chunk(f"\n\n![Generated Image](/local_image?path={safe_path})\n\n")
+                                else:
+                                    send_chunk(f"\n\n![Generated Image]({swarm_img_url})\n\n")
+                            except Exception:
+                                send_chunk(f"\n\n![Generated Image]({swarm_img_url})\n\n")
                 else:
                     send_chunk(f"\n*SwarmUI returned: {s_resp.text}*")
             else:
@@ -303,6 +388,21 @@ class LlamaProxyServer(threading.Thread):
         self.process_manager = process_manager
         self.config_manager = config_manager
         self.httpd = None
+        self.last_interaction = time.time()
+        self._sleep_checker_thread = threading.Thread(target=self._auto_sleep_loop, daemon=True)
+        self._sleep_checker_thread.start()
+
+    def _auto_sleep_loop(self):
+        while True:
+            time.sleep(10)
+            try:
+                config = self.config_manager.get_config()
+                if config.get("auto_sleep", False):
+                    if time.time() - self.last_interaction > 600:
+                        if self.process_manager.check_status() and not getattr(self.httpd, 'is_generating_image', False):
+                            self.process_manager.stop_server()
+            except Exception:
+                pass
 
     def run(self):
         config = self.config_manager.get_config()
