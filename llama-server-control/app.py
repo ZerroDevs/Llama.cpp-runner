@@ -12,6 +12,7 @@ logging.basicConfig(filename='exit_trace.log', level=logging.DEBUG)
 from backend.config_manager import ConfigManager
 from backend.process_manager import ProcessManager
 from backend.swarm_manager import SwarmManager
+from backend.llama_proxy import LlamaProxyServer
 
 try:
     import pystray
@@ -102,10 +103,14 @@ def main():
     process_manager.set_window(window)
     swarm_manager.set_window(window)
 
+    proxy_server = LlamaProxyServer(process_manager, config_manager)
+    proxy_server.start()
+
     def force_cleanup(signum=None, frame=None):
         logging.debug(f"force_cleanup called with signum={signum}")
         process_manager.stop_server()
         swarm_manager.stop_swarm()
+        proxy_server.stop()
         os._exit(0)
 
     atexit.register(process_manager.stop_server)
@@ -141,12 +146,14 @@ def main():
             logging.debug("stopping server and returning True")
             process_manager.stop_server()
             swarm_manager.stop_swarm()
+            proxy_server.stop()
             return True
             
         def on_closed():
             logging.debug("on_closed called")
             process_manager.stop_server()
             swarm_manager.stop_swarm()
+            proxy_server.stop()
             tray_icon.stop()
             os._exit(0)
             
@@ -172,11 +179,13 @@ def main():
         def on_closing():
             process_manager.stop_server()
             swarm_manager.stop_swarm()
+            proxy_server.stop()
             return True
             
         def on_closed():
             process_manager.stop_server()
             swarm_manager.stop_swarm()
+            proxy_server.stop()
             os._exit(0)
             
         window.events.closing += on_closing

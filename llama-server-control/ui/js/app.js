@@ -35,8 +35,22 @@ const configMap = {
     'swarm_launcher_path': document.getElementById('cfg-swarm_launcher_path'),
     'swarm_port': document.getElementById('cfg-swarm_port'),
     'swarm_host': document.getElementById('cfg-swarm_host'),
-    'swarm_extra_args': document.getElementById('cfg-swarm_extra_args')
+    'swarm_extra_args': document.getElementById('cfg-swarm_extra_args'),
+    'swarm_steps': document.getElementById('cfg-swarm_steps'),
+    'swarm_cfg': document.getElementById('cfg-swarm_cfg')
 };
+
+const valSwarmSteps = document.getElementById('val-swarm_steps');
+configMap.swarm_steps.addEventListener('input', (e) => {
+    valSwarmSteps.textContent = e.target.value;
+    saveConfig();
+});
+
+const valSwarmCfg = document.getElementById('val-swarm_cfg');
+configMap.swarm_cfg.addEventListener('input', (e) => {
+    valSwarmCfg.textContent = parseFloat(e.target.value).toFixed(1);
+    saveConfig();
+});
 
 const sliderGpu = document.getElementById('cfg-gpu_layers-slider');
 
@@ -55,7 +69,308 @@ window.addEventListener('pywebviewready', async () => {
     
     setInterval(pollStatus, 1000);
     setInterval(pollSwarmStatus, 1000);
+    setTimeout(loadSwarmGallery, 1000);
 });
+
+let allGalleryImages = [];
+let galleryGroups = {};
+
+async function loadSwarmGallery() {
+    const gallery = document.getElementById('swarm-gallery');
+    const filterSelect = document.getElementById('gallery-folder-filter');
+    if (!gallery || !filterSelect) return;
+    
+    gallery.innerHTML = '<div class="col-span-full text-center text-textMuted py-8 text-sm"><i data-lucide="loader" class="w-5 h-5 animate-spin mx-auto mb-2"></i>Loading images...</div>';
+    if (window.lucide) window.lucide.createIcons();
+    
+    try {
+        allGalleryImages = await window.pywebview.api.get_swarm_images();
+        if (allGalleryImages && allGalleryImages.length > 0) {
+            // Group by folder
+            galleryGroups = {};
+            allGalleryImages.forEach(img => {
+                const f = img.folder || 'Unknown Date';
+                if (!galleryGroups[f]) galleryGroups[f] = [];
+                galleryGroups[f].push(img);
+            });
+            
+            // Populate select
+            const currentFilter = filterSelect.value;
+            filterSelect.innerHTML = '<option value="all">All Folders</option>';
+            const sortedFolders = Object.keys(galleryGroups).sort((a,b) => b.localeCompare(a));
+            
+            sortedFolders.forEach(f => {
+                const opt = document.createElement('option');
+                opt.value = f;
+                opt.textContent = `${f} (${galleryGroups[f].length})`;
+                filterSelect.appendChild(opt);
+            });
+            
+            // Restore selection if still exists
+            if (sortedFolders.includes(currentFilter)) {
+                filterSelect.value = currentFilter;
+            } else {
+                filterSelect.value = 'all';
+            }
+            
+            renderSwarmGallery();
+        } else {
+            gallery.innerHTML = '<div class="col-span-full text-center text-textMuted py-8 text-sm">No images found or SwarmUI not configured.</div>';
+        }
+    } catch (e) {
+        gallery.innerHTML = '<div class="col-span-full text-center text-red-500 py-8 text-sm">Error loading images.</div>';
+    }
+}
+
+function renderSwarmGallery() {
+    const gallery = document.getElementById('swarm-gallery');
+    const filterSelect = document.getElementById('gallery-folder-filter');
+    if (!gallery || !filterSelect) return;
+    
+    gallery.innerHTML = '';
+    
+    let foldersToRender = [];
+    if (filterSelect.value === 'all') {
+        foldersToRender = Object.keys(galleryGroups).sort((a,b) => b.localeCompare(a));
+    } else {
+        foldersToRender = [filterSelect.value];
+    }
+    
+    if (foldersToRender.length === 0) {
+        gallery.innerHTML = '<div class="col-span-full text-center text-textMuted py-8 text-sm">No images in this folder.</div>';
+        return;
+    }
+    
+    foldersToRender.forEach(folderName => {
+        const groupContainer = document.createElement('div');
+        groupContainer.className = 'space-y-4 mb-6';
+        
+        // Header with count badge
+        const count = galleryGroups[folderName].length;
+        const header = document.createElement('div');
+        header.className = 'flex items-center justify-between border-b border-border pb-2';
+        header.innerHTML = `
+            <h4 class="font-bold text-lg text-textPrimary flex items-center gap-2">
+                <i data-lucide="folder-open" class="w-5 h-5 text-brand"></i> ${folderName}
+            </h4>
+            <span class="bg-base px-2.5 py-0.5 rounded-full text-xs font-semibold text-textMuted border border-border">${count} Images</span>
+        `;
+        
+        const grid = document.createElement('div');
+        grid.className = 'grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4';
+        
+        galleryGroups[folderName].forEach(img => {
+            const imgDiv = document.createElement('div');
+            imgDiv.className = 'aspect-square rounded-xl overflow-hidden border border-border shadow-sm group relative cursor-pointer bg-card flex items-center justify-center';
+            imgDiv.innerHTML = `<img src="${img.data}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">`;
+            imgDiv.onclick = () => openImageModal(img);
+            grid.appendChild(imgDiv);
+        });
+        
+        groupContainer.appendChild(header);
+        groupContainer.appendChild(grid);
+        gallery.appendChild(groupContainer);
+    });
+    
+    if (window.lucide) window.lucide.createIcons();
+}
+
+let currentModalImage = null;
+let scale = 1, panX = 0, panY = 0;
+let isDragging = false, startX, startY;
+
+const modal = document.getElementById('image-modal');
+const modalImage = document.getElementById('modal-image');
+const modalMetadata = document.getElementById('modal-metadata');
+
+// Zoom and Pan Logic
+modalImage.parentElement.addEventListener('wheel', (e) => {
+    e.preventDefault();
+    scale += e.deltaY * -0.002;
+    scale = Math.min(Math.max(0.5, scale), 5);
+    updateTransform();
+});
+
+modalImage.parentElement.addEventListener('mousedown', (e) => {
+    if (scale > 1) {
+        isDragging = true;
+        startX = e.clientX - panX;
+        startY = e.clientY - panY;
+        modalImage.parentElement.style.cursor = 'grabbing';
+    }
+});
+
+window.addEventListener('mousemove', (e) => {
+    if (!isDragging) return;
+    panX = e.clientX - startX;
+    panY = e.clientY - startY;
+    updateTransform();
+});
+
+window.addEventListener('mouseup', () => {
+    isDragging = false;
+    modalImage.parentElement.style.cursor = scale > 1 ? 'grab' : 'default';
+});
+
+function updateTransform() {
+    modalImage.style.transform = `translate(${panX}px, ${panY}px) scale(${scale})`;
+    modalImage.parentElement.style.cursor = scale > 1 ? (isDragging ? 'grabbing' : 'grab') : 'default';
+}
+
+function resetTransform() {
+    scale = 1; panX = 0; panY = 0;
+    updateTransform();
+    modalImage.style.transform = '';
+}
+
+function openImageModal(img) {
+    currentModalImage = img;
+    modalImage.src = img.data;
+    resetTransform();
+    
+    modal.classList.remove('hidden');
+    // slight delay to allow display:flex to take effect before opacity transition
+    setTimeout(() => {
+        modal.classList.remove('opacity-0');
+        modal.classList.add('opacity-100');
+    }, 10);
+    
+    modalMetadata.innerHTML = '<div class="animate-pulse">Loading metadata...</div>';
+    
+    window.pywebview.api.get_image_metadata(img.path).then(res => {
+        if(res.status === 'success') {
+            try {
+                let params = {};
+                
+                // SwarmUI might store the JSON under 'parameters' or 'sui_image_params'
+                for (const val of Object.values(res.metadata)) {
+                    if (typeof val === 'string' && val.trim().startsWith('{')) {
+                        try {
+                            const parsed = JSON.parse(val);
+                            if (parsed.sui_image_params) {
+                                params = parsed.sui_image_params;
+                                break;
+                            } else if (parsed.prompt) {
+                                params = parsed;
+                                break;
+                            }
+                        } catch(e) {}
+                    }
+                }
+                
+                // Fallback if not found inside JSON wrapper
+                if (!params.prompt && res.metadata.sui_image_params) {
+                     try { params = JSON.parse(res.metadata.sui_image_params); } catch(e){}
+                }
+
+                const displayKeys = ['prompt', 'negativeprompt', 'steps', 'cfgscale'];
+                
+                modalMetadata.innerHTML = '';
+                let hasData = false;
+                
+                displayKeys.forEach(k => {
+                    if (params[k] !== undefined && params[k] !== null) {
+                        hasData = true;
+                        const div = document.createElement('div');
+                        div.className = 'mb-3 group cursor-pointer hover:bg-white/5 p-2 rounded-lg transition-colors';
+                        
+                        const titleSpan = document.createElement('span');
+                        titleSpan.className = 'text-textMuted block text-[10px] uppercase tracking-wider mb-1 flex items-center justify-between';
+                        titleSpan.innerHTML = `${k} <i data-lucide="copy" class="w-3 h-3 opacity-0 group-hover:opacity-100 transition-opacity"></i>`;
+                        
+                        const valSpan = document.createElement('span');
+                        valSpan.className = 'text-brand font-medium';
+                        valSpan.textContent = params[k];
+                        
+                        div.appendChild(titleSpan);
+                        div.appendChild(valSpan);
+                        
+                        div.addEventListener('click', () => {
+                            navigator.clipboard.writeText(String(params[k])).then(() => {
+                                window.showToast(`Copied ${k}!`);
+                            });
+                        });
+                        
+                        modalMetadata.appendChild(div);
+                    }
+                });
+                
+                if (!hasData) {
+                    modalMetadata.innerHTML = '<span class="text-textMuted">No prompt data found.</span>';
+                }
+                if (window.lucide) window.lucide.createIcons();
+            } catch(e) {
+                modalMetadata.innerHTML = '<span class="text-red-400">Error parsing metadata.</span>';
+            }
+        } else {
+            modalMetadata.innerHTML = '<span class="text-red-400">Failed to load metadata.</span>';
+        }
+    });
+}
+
+function closeImageModal() {
+    modal.classList.remove('opacity-100');
+    modal.classList.add('opacity-0');
+    setTimeout(() => {
+        modal.classList.add('hidden');
+        currentModalImage = null;
+        modalImage.src = '';
+    }, 300); // match transition duration
+}
+
+document.getElementById('modal-btn-close')?.addEventListener('click', closeImageModal);
+document.getElementById('modal-btn-folder')?.addEventListener('click', () => {
+    if(currentModalImage) window.pywebview.api.open_image_folder(currentModalImage.path);
+});
+document.getElementById('modal-btn-delete')?.addEventListener('click', async () => {
+    if(currentModalImage && confirm("Delete this image?")) {
+        const res = await window.pywebview.api.delete_image(currentModalImage.path);
+        if(res.status === 'success') {
+            closeImageModal();
+            loadSwarmGallery();
+            window.showToast("Image deleted.");
+        }
+    }
+});
+document.getElementById('modal-btn-copy')?.addEventListener('click', async () => {
+    if(currentModalImage) {
+        try {
+            const r = await fetch(currentModalImage.data);
+            const blob = await r.blob();
+            await navigator.clipboard.write([new ClipboardItem({[blob.type]: blob})]);
+            window.showToast("Image copied to clipboard!");
+        } catch(e) {
+            window.showToast("Failed to copy image.");
+        }
+    }
+});
+
+document.getElementById('modal-btn-fullscreen')?.addEventListener('click', () => {
+    const wrapper = modalImage.parentElement;
+    if (!document.fullscreenElement) {
+        if (wrapper.requestFullscreen) {
+            wrapper.requestFullscreen();
+        } else if (wrapper.webkitRequestFullscreen) {
+            wrapper.webkitRequestFullscreen();
+        } else if (wrapper.msRequestFullscreen) {
+            wrapper.msRequestFullscreen();
+        }
+    } else {
+        if (document.exitFullscreen) {
+            document.exitFullscreen();
+        }
+    }
+});
+
+const btnRefreshGallery = document.getElementById('btn-refresh-gallery');
+if (btnRefreshGallery) {
+    btnRefreshGallery.addEventListener('click', loadSwarmGallery);
+}
+
+const filterSelect = document.getElementById('gallery-folder-filter');
+if (filterSelect) {
+    filterSelect.addEventListener('change', renderSwarmGallery);
+}
 
 function loadConfigToUI() {
     for (const [key, el] of Object.entries(configMap)) {
@@ -69,9 +384,18 @@ function loadConfigToUI() {
             el.value = val;
         }
     }
+    
     sliderGpu.value = appConfig.gpu_layers ?? 99;
+    
+    if (appConfig.swarm_steps) {
+        configMap.swarm_steps.value = appConfig.swarm_steps;
+        valSwarmSteps.textContent = appConfig.swarm_steps;
+    }
+    if (appConfig.swarm_cfg) {
+        configMap.swarm_cfg.value = appConfig.swarm_cfg;
+        valSwarmCfg.textContent = parseFloat(appConfig.swarm_cfg).toFixed(1);
+    }
 }
-
 async function saveConfig() {
     for (const [key, el] of Object.entries(configMap)) {
         if (!el) continue;
@@ -424,9 +748,9 @@ document.getElementById('btn-copyurl').addEventListener('click', () => {
 window.showToast = function(msg) {
     const toast = document.getElementById('toast');
     document.getElementById('toast-msg').innerText = msg;
-    toast.classList.remove('opacity-0', 'translate-y-2');
+    toast.classList.remove('opacity-0', 'translate-y-4');
     setTimeout(() => {
-        toast.classList.add('opacity-0', 'translate-y-2');
+        toast.classList.add('opacity-0', 'translate-y-4');
     }, 3000);
 }
 

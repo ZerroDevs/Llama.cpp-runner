@@ -2,6 +2,7 @@ import webview
 import os
 import webbrowser
 import socket
+import time
 from backend.hardware_monitor import HardwareMonitor
 from backend.model_scanner import ModelScanner
 from backend.startup_manager import StartupManager
@@ -155,3 +156,110 @@ class ApiBridge:
         port = self.get_config().get("swarm_port", 7801)
         webbrowser.open(f"http://127.0.0.1:{port}")
         return {"status": "success"}
+
+    def get_swarm_images(self):
+        try:
+            config = self.get_config()
+            swarm_bat = config.get('swarm_launcher_path', '')
+            if not swarm_bat or not os.path.exists(swarm_bat):
+                return []
+            
+            swarm_dir = os.path.dirname(swarm_bat)
+            raw_dir = os.path.join(swarm_dir, 'Output', 'local', 'raw')
+            if not os.path.exists(raw_dir):
+                return []
+            
+            image_files = []
+            for root, dirs, files in os.walk(raw_dir):
+                for f in files:
+                    if f.lower().endswith(('.png', '.jpg', '.jpeg', '.webp')):
+                        image_files.append(os.path.join(root, f))
+                        
+            image_files.sort(key=lambda x: os.path.getmtime(x), reverse=True)
+            image_files = image_files[:100] # Limit to 100
+            
+            result = []
+            import base64
+            for img_path in image_files:
+                try:
+                    with open(img_path, 'rb') as f:
+                        b64 = base64.b64encode(f.read()).decode('utf-8')
+                        ext = os.path.splitext(img_path)[1].lower().replace('.', '')
+                        if ext == 'jpg': ext = 'jpeg'
+                        
+                        # Get folder name securely
+                        folder = os.path.basename(os.path.dirname(img_path))
+                        
+                        result.append({
+                            "path": img_path,
+                            "folder": folder,
+                            "data": f"data:image/{ext};base64,{b64}"
+                        })
+                except:
+                    pass
+            return result
+        except:
+            return []
+
+    def delete_image(self, path):
+        try:
+            if os.path.exists(path) and "SwarmUI" in path:
+                os.remove(path)
+                return {"status": "success"}
+        except:
+            pass
+        return {"status": "error"}
+
+    def open_image_folder(self, path):
+        try:
+            if os.path.exists(path):
+                import subprocess
+                # Select the file in explorer
+                subprocess.Popen(f'explorer /select,"{path}"')
+                return {"status": "success"}
+        except:
+            pass
+        return {"status": "error"}
+
+    def get_image_metadata(self, path):
+        try:
+            stats = os.stat(path)
+            metadata = {
+                "File Size": f"{stats.st_size / 1024:.2f} KB",
+                "Created": time.ctime(stats.st_ctime)
+            }
+            if path.lower().endswith(".png"):
+                with open(path, 'rb') as f:
+                    if f.read(8) == b'\x89PNG\r\n\x1a\n':
+                        while True:
+                            try:
+                                length_bytes = f.read(4)
+                                if len(length_bytes) != 4: break
+                                length = int.from_bytes(length_bytes, 'big')
+                                chunk_type = f.read(4)
+                                chunk_data = f.read(length)
+                                crc = f.read(4)
+                                
+                                if chunk_type == b'tEXt':
+                                    parts = chunk_data.split(b'\0', 1)
+                                    if len(parts) == 2:
+                                        k = parts[0].decode('latin-1', 'ignore').strip()
+                                        v = parts[1].decode('latin-1', 'ignore').strip()
+                                        if k and v: metadata[k] = v
+                                elif chunk_type == b'iTXt':
+                                    null1 = chunk_data.find(b'\0')
+                                    if null1 != -1:
+                                        k = chunk_data[:null1].decode('latin-1', 'ignore').strip()
+                                        null2 = chunk_data.find(b'\0', null1 + 3)
+                                        if null2 != -1:
+                                            null3 = chunk_data.find(b'\0', null2 + 1)
+                                            if null3 != -1:
+                                                v = chunk_data[null3 + 1:].decode('utf-8', 'ignore').strip()
+                                                if k and v: metadata[k] = v
+                                elif chunk_type == b'IEND':
+                                    break
+                            except:
+                                break
+            return {"status": "success", "metadata": metadata}
+        except Exception as e:
+            return {"status": "error", "message": str(e)}

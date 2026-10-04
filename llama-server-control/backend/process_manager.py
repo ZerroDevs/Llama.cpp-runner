@@ -40,7 +40,7 @@ class ProcessManager:
             
         cmd.extend(["-c", str(config.get("context_size", 8192))])
         cmd.extend(["-ngl", str(config.get("gpu_layers", 99))])
-        cmd.extend(["--port", str(config.get("port", 8080))])
+        cmd.extend(["--port", str(int(config.get("port", 8080)) + 1)])
         
         if config.get("flash_attention"):
             cmd.extend(["-fa", "on"])
@@ -71,7 +71,8 @@ class ProcessManager:
         if not binary or not os.path.exists(binary):
             return {"status": "error", "message": "Server binary not found. Please locate llama-server.exe"}
             
-        port = int(config.get("port", 8080))
+        port = int(config.get("port", 8080)) + 1 # Internal port for proxy
+
         host = config.get("host", "127.0.0.1")
         if self.is_port_in_use(port, host):
             return {"status": "error", "message": f"Port {port} is already in use on {host}."}

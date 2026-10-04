@@ -23,6 +23,9 @@ class SwarmManager:
         # SwarmUI launch-windows.bat doesn't typically accept all args natively unless passed to the underlying program, 
         # but we pass what the user provides in extra_args.
         custom_args = config.get("swarm_extra_args", "").strip()
+        if "--launch_mode" not in custom_args:
+            cmd.extend(["--launch_mode", "none"])
+            
         if custom_args:
             import shlex
             cmd.extend(shlex.split(custom_args))
