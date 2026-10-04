@@ -12,6 +12,15 @@ class LlamaProxyHandler(BaseHTTPRequestHandler):
     def log_message(self, format, *args):
         pass # Suppress logging to keep console clean
 
+    def log_ui(self, msg):
+        if hasattr(self.server, 'process_manager') and getattr(self.server.process_manager, 'window', None):
+            try:
+                import json
+                safe_msg = json.dumps(msg)
+                self.server.process_manager.window.evaluate_js(f"window.receiveLog({safe_msg})")
+            except Exception:
+                pass
+
     def forward_request(self):
         # We forward to the internal llama-server port (public port + 1)
         internal_port = self.server.config.get("port", 8080) + 1
@@ -134,9 +143,11 @@ class LlamaProxyHandler(BaseHTTPRequestHandler):
                             time.sleep(4)
                     
                     if "/draw " in prompt or prompt.startswith("/draw"):
+                        self.log_ui("[INFO] Intercepted /draw command. Initiating AI image generation pipeline...")
                         self.handle_draw_request(prompt.replace("/draw", "").strip(), payload, is_art=False)
                         return
                     if "/art " in prompt or prompt.startswith("/art"):
+                        self.log_ui("[INFO] Intercepted /art command. Initiating enhanced AI image generation pipeline...")
                         self.handle_draw_request(prompt.replace("/art", "").strip(), payload, is_art=True)
                         return
                     if prompt.strip() == "/hook":
@@ -385,16 +396,7 @@ This server flawlessly intercepts standard OpenAI API calls (`/v1/chat/completio
         webhook_url = self.server.config.get("discord_webhook", "")
         if not webhook_url: return
         
-        def log_ui(msg):
-            if hasattr(self.server, 'process_manager') and getattr(self.server.process_manager, 'window', None):
-                try:
-                    import json
-                    safe_msg = json.dumps(msg)
-                    self.server.process_manager.window.evaluate_js(f"window.receiveLog({safe_msg})")
-                except Exception:
-                    pass
-
-        log_ui("[INFO] Preparing to send image to Discord Webhook...")
+        self.log_ui("[INFO] Preparing to send generated image to Discord Webhook...")
         
         import threading
         def _post():
@@ -441,11 +443,11 @@ This server flawlessly intercepts standard OpenAI API calls (`/v1/chat/completio
                     import json
                     resp = requests.post(webhook_url, data={'payload_json': json.dumps(payload)}, files=files, timeout=30)
                     if resp.status_code >= 400:
-                        log_ui(f"[ERR] Discord Webhook Error: {resp.status_code} - {resp.text}")
+                        self.log_ui(f"[ERR] Discord Webhook Error: {resp.status_code} - {resp.text}")
                     else:
-                        log_ui("[INFO] Successfully sent generated image to Discord Webhook.")
+                        self.log_ui("[INFO] Successfully sent generated image to Discord Webhook.")
             except Exception as e:
-                log_ui(f"[ERR] Discord Webhook Exception: {str(e)}")
+                self.log_ui(f"[ERR] Discord Webhook Exception: {str(e)}")
                 
         threading.Thread(target=_post, daemon=True).start()
 
@@ -578,6 +580,7 @@ This server flawlessly intercepts standard OpenAI API calls (`/v1/chat/completio
             base_url = f"http://{host}:{port}"
             
             send_chunk("*Generating image on GPU...*\n\n")
+            self.log_ui("[INFO] Requesting new session from SwarmUI API...")
             session_resp = requests.post(f"{base_url}/API/GetNewSession", json={}, timeout=10)
             session_id = session_resp.json().get("session_id", "local") if session_resp.status_code == 200 else "local"
 
@@ -640,6 +643,7 @@ This server flawlessly intercepts standard OpenAI API calls (`/v1/chat/completio
             import threading
             s_result = {}
             def fetch_swarm():
+                self.log_ui(f"[INFO] Dispatching {width}x{height} image request to SwarmUI (cfg: {cfg_scale}, steps: {steps})...")
                 try:
                     s_result['resp'] = requests.post(swarm_url, json=swarm_payload, timeout=1200)
                 except Exception as e:
@@ -681,6 +685,7 @@ This server flawlessly intercepts standard OpenAI API calls (`/v1/chat/completio
                             img_data = base64.b64decode(b64_val)
                             
                             if len(img_data) < 1000:
+                                self.log_ui("[ERR] Decoded base64 image data is suspiciously small (<1000 bytes). Validation failed.")
                                 raise ValueError("Decoded image is too small to be valid")
                                 
                             cache_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'ui', 'generated_cache')
@@ -689,6 +694,8 @@ This server flawlessly intercepts standard OpenAI API calls (`/v1/chat/completio
                             full_path = os.path.join(cache_dir, img_name)
                             with open(full_path, 'wb') as f:
                                 f.write(img_data)
+                            
+                            self.log_ui(f"[INFO] Successfully saved generated image to cache: {img_name}")
                             
                             import urllib.parse
                             safe_path = urllib.parse.quote(full_path)
@@ -708,6 +715,7 @@ This server flawlessly intercepts standard OpenAI API calls (`/v1/chat/completio
                             swarm_img_url = f"{base_url}{safe_url}"
                             
                             try:
+                                self.log_ui(f"[INFO] Attempting fallback download directly from SwarmUI: {swarm_img_url}")
                                 img_resp = requests.get(swarm_img_url, timeout=10)
                                 if img_resp.status_code == 200 and len(img_resp.content) > 1000:
                                     cache_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'ui', 'generated_cache')
