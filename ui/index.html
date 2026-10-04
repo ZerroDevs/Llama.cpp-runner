@@ -156,7 +156,9 @@
                             <span>Model Path (-m)</span>
                         </label>
                         <div class="flex gap-2">
-                            <input type="text" id="cfg-model_path" class="flex-1 input-field" readonly placeholder="Optional. Leave empty to start without a model.">
+                            <select id="cfg-model_path" class="flex-1 input-field bg-bgDark">
+                                <option value="">Optional. Start without a model.</option>
+                            </select>
                             <button id="btn-clear-model" class="btn-secondary px-3 group" title="Clear Model Path">
                                 <i data-lucide="x" class="w-4 h-4 text-textMuted group-hover:text-red-400"></i>
                             </button>
@@ -175,7 +177,9 @@
                     <div class="form-group">
                         <label class="block text-sm font-semibold mb-2" data-i18n="lbl_vision">Vision Projector (-mmproj) <span class="text-xs text-textMuted font-normal mx-2">(Optional)</span></label>
                         <div class="flex gap-2">
-                            <input type="text" id="cfg-vision_projector" class="flex-1 input-field" readonly placeholder="C:\path\to\mmproj.gguf">
+                            <select id="cfg-vision_projector" class="flex-1 input-field bg-bgDark">
+                                <option value="">None</option>
+                            </select>
                             <button id="btn-browse-vision" class="btn-secondary px-6" data-i18n="btn_browse">Browse</button>
                         </div>
                     </div>

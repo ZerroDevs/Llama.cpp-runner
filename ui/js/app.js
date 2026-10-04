@@ -122,6 +122,9 @@ window.addEventListener('pywebviewready', async () => {
     updateNetworkInfo();
     refreshSwarmModels();
     
+    if (typeof backgroundScanModels === 'function') {
+        backgroundScanModels();
+    }
     setInterval(pollStatus, 1000);
     setInterval(pollSwarmStatus, 1000);
     // Swarm gallery is now lazy-loaded on tab click to save RAM at startup
@@ -604,6 +607,21 @@ function loadConfigToUI() {
             let val = appConfig[key] ?? '';
             if (key === 'swarm_port' && (val === 0 || val === '')) val = 7801;
             if (key === 'swarm_host' && val === '') val = '127.0.0.1';
+            
+            if (el.tagName === 'SELECT' && val !== '') {
+                let exists = false;
+                for(let i=0; i<el.options.length; i++) {
+                    if (el.options[i].value === val) {
+                        exists = true; break;
+                    }
+                }
+                if (!exists) {
+                    const opt = document.createElement('option');
+                    opt.value = val;
+                    opt.text = val.split('\\').pop().split('/').pop() || val;
+                    el.appendChild(opt);
+                }
+            }
             el.value = val;
         }
     }
@@ -802,7 +820,20 @@ document.getElementById('btn-browse-model').addEventListener('click', async () =
     if (!window.pywebview) return;
     const path = await window.pywebview.api.select_model();
     if (path) {
-        configMap.model_path.value = path;
+        const el = configMap.model_path;
+        if (el.tagName === 'SELECT') {
+            let exists = false;
+            for(let i=0; i<el.options.length; i++) {
+                if (el.options[i].value === path) { exists = true; break; }
+            }
+            if (!exists) {
+                const opt = document.createElement('option');
+                opt.value = path;
+                opt.text = path.split('\\').pop().split('/').pop() || path;
+                el.appendChild(opt);
+            }
+        }
+        el.value = path;
         saveConfig();
     }
 });
@@ -833,7 +864,20 @@ document.getElementById('btn-browse-vision').addEventListener('click', async () 
     if (!window.pywebview) return;
     const path = await window.pywebview.api.select_mmproj();
     if (path) {
-        configMap.vision_projector.value = path;
+        const el = configMap.vision_projector;
+        if (el.tagName === 'SELECT') {
+            let exists = false;
+            for(let i=0; i<el.options.length; i++) {
+                if (el.options[i].value === path) { exists = true; break; }
+            }
+            if (!exists) {
+                const opt = document.createElement('option');
+                opt.value = path;
+                opt.text = path.split('\\').pop().split('/').pop() || path;
+                el.appendChild(opt);
+            }
+        }
+        el.value = path;
         saveConfig();
     }
 });
