@@ -385,14 +385,16 @@ This server flawlessly intercepts standard OpenAI API calls (`/v1/chat/completio
         is_stream = payload.get('stream', False)
         
         # Modify payload to ask LLM for prompt safely without breaking chat templates
-        system_injection = "\n\n(SYSTEM: You are a Stable Diffusion prompt engineer. Analyze my request. If I provided a negative prompt, enhance it. If I didn't, generate an appropriate robust negative prompt. Output STRICTLY in this exact format:\nPOSITIVE: <detailed positive prompt, comma-separated>\nNEGATIVE: <robust negative prompt, comma-separated>\nDo not output anything else, no conversational filler.)"
+        system_injection = "\n\n(SYSTEM: You are a Stable Diffusion prompt engineer. Analyze my request. If I provided a negative prompt, enhance it. If I didn't, generate an appropriate robust negative prompt. Output STRICTLY in this exact format:\nPOSITIVE: <detailed positive prompt, comma-separated, max 30 words>\nNEGATIVE: <robust negative prompt, comma-separated, max 30 words>\nDo not output anything else, no conversational filler, DO NOT REPEAT WORDS.)"
         
         if 'messages' in payload and len(payload['messages']) > 0:
             payload['messages'][-1]['content'] += system_injection
         elif 'prompt' in payload:
             payload['prompt'] += system_injection
             
-        payload['stream'] = True # Force internal stream so we can intercept it
+        payload['stream'] = True
+        payload['max_tokens'] = 200
+        payload['presence_penalty'] = 1.0
         
         self.send_response(200)
         self.send_header('Content-Type', 'text/event-stream' if is_stream else 'application/json')
