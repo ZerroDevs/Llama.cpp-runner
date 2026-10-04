@@ -889,8 +889,12 @@ print(res.choices[0].message.content)</pre>
         </div>
         <div class="flex-1 flex gap-8 min-h-0">
             <!-- Image Area -->
-            <div class="flex-1 flex items-center justify-center min-w-0 bg-black rounded-xl overflow-hidden shadow-2xl border border-white/10">
+            <div class="flex-1 flex items-center justify-center min-w-0 bg-black rounded-xl overflow-hidden shadow-2xl border border-white/10 relative group">
                 <img id="modal-image" src="" class="max-w-full max-h-full object-contain">
+                <button id="btn-exit-fullscreen" class="hidden absolute top-6 right-6 bg-black/60 hover:bg-black/90 text-white p-3 rounded-full backdrop-blur-md transition-all shadow-2xl border border-white/20 z-50 flex items-center gap-2">
+                    <i data-lucide="minimize" class="w-5 h-5"></i>
+                    <span class="font-bold text-sm pr-1">Exit Fullscreen</span>
+                </button>
             </div>
             <!-- Info Area -->
             <div class="w-80 shrink-0 bg-card rounded-xl border border-border p-5 flex flex-col gap-4 overflow-y-auto">

@@ -588,6 +588,22 @@ document.getElementById('modal-btn-fullscreen')?.addEventListener('click', () =>
     }
 });
 
+document.addEventListener('fullscreenchange', () => {
+    const exitBtn = document.getElementById('btn-exit-fullscreen');
+    if (!exitBtn) return;
+    if (document.fullscreenElement) {
+        exitBtn.classList.remove('hidden');
+    } else {
+        exitBtn.classList.add('hidden');
+    }
+});
+
+document.getElementById('btn-exit-fullscreen')?.addEventListener('click', () => {
+    if (document.exitFullscreen) {
+        document.exitFullscreen();
+    }
+});
+
 const btnRefreshGallery = document.getElementById('btn-refresh-gallery');
 if (btnRefreshGallery) {
     btnRefreshGallery.addEventListener('click', loadSwarmGallery);
