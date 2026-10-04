@@ -40,7 +40,8 @@ Our vision is to build the absolute lightest, most performant, zero-waste local 
 ### 💬 Chat Interface & Personas
 - **Local AI Chat:** Chat directly with your loaded models right in the app.
 - **Proxy Slash Commands:** The backend proxy features an internal interception engine that allows you to type slash commands directly into your chat window (or external clients like Cline/Hermes) for instant control:
-  - `/draw <prompt> | <negative>`: Auto-ejects the LLM, fires up SwarmUI to generate an image natively on the GPU, pipes it back into the chat, and wakes the LLM. Automatically generates a robust negative prompt using the LLM if none is provided after the `|` symbol.
+  - `/draw <prompt> | <negative>`: Auto-ejects the LLM, fires up SwarmUI to generate an image natively on the GPU, pipes it back into the chat, and wakes the LLM. The LLM enhances your positive prompt but takes your negative prompt exactly as-is. (Auto-generates negative tags if omitted).
+  - `/art <prompt> | <negative>`: Identical to `/draw`, but forces the LLM to creatively rewrite and enhance BOTH your positive and negative prompts.
   - `/api`: Dynamically outputs a markdown guide with your precise Host, Port, and Model ID for connecting external agents.
   - `/eject` (or `/unload`): Instantly unloads the model to free 100% VRAM while keeping the API alive.
   - `/sys` (or `/hw`): Returns a live system hardware telemetry snapshot (VRAM, RAM, CPU).
