@@ -416,7 +416,7 @@ This server flawlessly intercepts standard OpenAI API calls (`/v1/chat/completio
                 self.wfile.write(f"data: {json.dumps(chunk)}\n\n".encode('utf-8'))
                 self.wfile.flush()
 
-        send_chunk("*Engineering prompt with Llama...*\n\n> ")
+        send_chunk("*Engineering prompt with Llama...*\n\n")
         
         internal_port = self.server.config.get("port", 8080) + 1
         url = f"http://127.0.0.1:{internal_port}{self.path}"
@@ -439,19 +439,20 @@ This server flawlessly intercepts standard OpenAI API calls (`/v1/chat/completio
                                 if not content and 'text' in data['choices'][0]:
                                     content = data['choices'][0]['text']
                                 if content:
+                                    safe_content = content.replace("```", "")
                                     generated_prompt += content
-                                    send_chunk(content)
+                                    send_chunk(safe_content)
                         except:
                             pass
         except Exception as e:
             send_chunk(f"\n*[Error generating prompt: {e}]*\n")
             generated_prompt = original_prompt # fallback
             
-        send_chunk("\n\n")
+        send_chunk("\n\n---\n\n")
 
         # 1. Stop Server to free VRAM
         if self.server.process_manager:
-            send_chunk("*Llama server stopped. Unloading from VRAM...*\n")
+            send_chunk("*Llama server stopped. Unloading from VRAM...*\n\n")
             self.server.process_manager.stop_server()
             time.sleep(2) # Give it time to fully flush VRAM
             
@@ -463,7 +464,7 @@ This server flawlessly intercepts standard OpenAI API calls (`/v1/chat/completio
             if not host: host = "127.0.0.1"
             base_url = f"http://{host}:{port}"
             
-            send_chunk("*Generating image on GPU...*\n")
+            send_chunk("*Generating image on GPU...*\n\n")
             session_resp = requests.post(f"{base_url}/API/GetNewSession", json={}, timeout=10)
             session_id = session_resp.json().get("session_id", "local") if session_resp.status_code == 200 else "local"
 
@@ -475,8 +476,8 @@ This server flawlessly intercepts standard OpenAI API calls (`/v1/chat/completio
             height = int(fresh_cfg.get("swarm_height", 1024))
             
             pos_prompt = generated_prompt.strip()
-            if pos_prompt.startswith("POSITIVE:"):
-                pos_prompt = pos_prompt.replace("POSITIVE:", "", 1).strip()
+            if "POSITIVE:" in pos_prompt:
+                pos_prompt = pos_prompt.split("POSITIVE:")[-1].strip()
             if not pos_prompt:
                 pos_prompt = user_pos
                 
