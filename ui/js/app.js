@@ -807,6 +807,15 @@ document.getElementById('btn-browse-model').addEventListener('click', async () =
     }
 });
 
+const btnClearModel = document.getElementById('btn-clear-model');
+if (btnClearModel) {
+    btnClearModel.addEventListener('click', () => {
+        configMap.model_path.value = '';
+        saveConfig();
+        if (window.showToast) window.showToast('Model path cleared. Server will start without a model.');
+    });
+}
+
 document.getElementById('btn-browse-lora').addEventListener('click', async () => {
     if (!window.pywebview) return;
     const path = await window.pywebview.api.select_model(); // reuse select_model for gguf

@@ -152,9 +152,14 @@
                     </div>
 
                     <div class="form-group">
-                        <label class="block text-sm font-semibold mb-2" data-i18n="lbl_model">Model Path (-m)</label>
+                        <label class="block text-sm font-semibold mb-2 flex items-center justify-between" data-i18n="lbl_model">
+                            <span>Model Path (-m)</span>
+                        </label>
                         <div class="flex gap-2">
-                            <input type="text" id="cfg-model_path" class="flex-1 input-field" readonly placeholder="C:\path\to\model.gguf">
+                            <input type="text" id="cfg-model_path" class="flex-1 input-field" readonly placeholder="Optional. Leave empty to start without a model.">
+                            <button id="btn-clear-model" class="btn-secondary px-3 group" title="Clear Model Path">
+                                <i data-lucide="x" class="w-4 h-4 text-textMuted group-hover:text-red-400"></i>
+                            </button>
                             <button id="btn-browse-model" class="btn-secondary px-6" data-i18n="btn_browse">Browse</button>
                         </div>
                     </div>

@@ -71,7 +71,7 @@ function renderModelsGrid(models) {
         `;
         
         const loadBtn = card.querySelector('.load-btn');
-        loadBtn.addEventListener('click', () => {
+        loadBtn.addEventListener('click', async () => {
             if (isProjector) {
                 configMap.vision_projector.value = model.path;
             } else {
@@ -88,8 +88,24 @@ function renderModelsGrid(models) {
             setTimeout(() => el.classList.remove('ring-2', 'ring-brand'), 1500);
             
             if (!isProjector) {
-                // Flash toast
-                if (window.showToast) window.showToast('Model selected! Click Start Server.');
+                const isRunning = await window.pywebview.api.check_status();
+                if (isRunning) {
+                    if (window.showToast) window.showToast('Restarting server with new model...');
+                    const btnStop = document.getElementById('btn-stop-server');
+                    const btnStart = document.getElementById('btn-start-server');
+                    
+                    btnStop.click();
+                    
+                    let retries = 20;
+                    while (retries > 0 && await window.pywebview.api.check_status()) {
+                        await new Promise(r => setTimeout(r, 250));
+                        retries--;
+                    }
+                    
+                    btnStart.click();
+                } else {
+                    if (window.showToast) window.showToast('Model selected! Click Start Server.');
+                }
             }
         });
         
