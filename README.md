@@ -39,6 +39,14 @@ Our vision is to build the absolute lightest, most performant, zero-waste local 
 
 ### 💬 Chat Interface & Personas
 - **Local AI Chat:** Chat directly with your loaded models right in the app.
+- **Proxy Slash Commands:** The backend proxy features an internal interception engine that allows you to type slash commands directly into your chat window (or external clients like Cline/Hermes) for instant control:
+  - `/draw <prompt>`: Auto-ejects the LLM, fires up SwarmUI to generate an image natively on the GPU, pipes it back into the chat, and wakes the LLM.
+  - `/api`: Dynamically outputs a markdown guide with your precise Host, Port, and Model ID for connecting external agents.
+  - `/eject` (or `/unload`): Instantly unloads the model to free 100% VRAM while keeping the API alive.
+  - `/sys` (or `/hw`): Returns a live system hardware telemetry snapshot (VRAM, RAM, CPU).
+  - `/models`: Scans and lists all `.gguf` files available in your models directory.
+  - `/clear`: Wipes the backend stateless memory cache.
+  - `/compact`: Condenses massive chat payloads dynamically into a dense summary block, saving huge amounts of context space.
 - **Persona Generator:** Inject custom system prompts to change AI behavior. Don't know what to write? Give the AI a tiny hint (e.g. "Grumpy Pirate") and the app will ask the loaded model to *generate its own rich system prompt* to adopt the persona!
 
 ### 📊 System Monitoring

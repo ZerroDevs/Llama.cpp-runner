@@ -652,6 +652,64 @@ print(res.choices[0].message.content)</pre>
                         </label>
                     </div>
                 </div>
+
+                <div class="card p-6 rounded-xl border border-border space-y-4 mt-6">
+                    <h2 class="text-xl font-bold text-brand flex items-center gap-2">
+                        <i data-lucide="terminal" class="w-5 h-5"></i> Chat Commands
+                    </h2>
+                    <p class="text-textMuted mb-4">You can type the following commands directly into the Web Chat (or any external client) to trigger built-in backend proxy features instantly:</p>
+                    <div class="grid gap-3">
+                        <div class="bg-base p-3 rounded-lg border border-border flex items-start gap-3">
+                            <code class="text-brand font-bold bg-brand/10 px-2 py-1 rounded text-xs mt-0.5">/draw &lt;prompt&gt;</code>
+                            <div>
+                                <p class="font-semibold text-sm text-text">Image Generation</p>
+                                <p class="text-xs text-textMuted mt-1">Intercepts prompt, unloads the LLM to free VRAM, asks SwarmUI to generate the image, returns it to chat, and reloads the LLM.</p>
+                            </div>
+                        </div>
+                        <div class="bg-base p-3 rounded-lg border border-border flex items-start gap-3">
+                            <code class="text-brand font-bold bg-brand/10 px-2 py-1 rounded text-xs mt-0.5">/api</code>
+                            <div>
+                                <p class="font-semibold text-sm text-text">API Setup Guide</p>
+                                <p class="text-xs text-textMuted mt-1">Dynamically generates a markdown guide showing the exact Host, Port, and Model ID needed to connect external tools (like Cline or Hermes).</p>
+                            </div>
+                        </div>
+                        <div class="bg-base p-3 rounded-lg border border-border flex items-start gap-3">
+                            <code class="text-brand font-bold bg-brand/10 px-2 py-1 rounded text-xs mt-0.5">/eject</code> <span class="text-xs text-textMuted mt-1.5 ml-[-6px]">or</span> <code class="text-brand font-bold bg-brand/10 px-2 py-1 rounded text-xs mt-0.5">/unload</code>
+                            <div>
+                                <p class="font-semibold text-sm text-text">Free GPU VRAM</p>
+                                <p class="text-xs text-textMuted mt-1">Instantly unloads the active model from your GPU, freeing 100% of the VRAM for games or heavy workloads. (API stays alive).</p>
+                            </div>
+                        </div>
+                        <div class="bg-base p-3 rounded-lg border border-border flex items-start gap-3">
+                            <code class="text-brand font-bold bg-brand/10 px-2 py-1 rounded text-xs mt-0.5">/sys</code> <span class="text-xs text-textMuted mt-1.5 ml-[-6px]">or</span> <code class="text-brand font-bold bg-brand/10 px-2 py-1 rounded text-xs mt-0.5">/hw</code>
+                            <div>
+                                <p class="font-semibold text-sm text-text">Hardware Telemetry</p>
+                                <p class="text-xs text-textMuted mt-1">Polls the system and returns a live snapshot of GPU VRAM, System RAM, and CPU Usage.</p>
+                            </div>
+                        </div>
+                        <div class="bg-base p-3 rounded-lg border border-border flex items-start gap-3">
+                            <code class="text-brand font-bold bg-brand/10 px-2 py-1 rounded text-xs mt-0.5">/models</code>
+                            <div>
+                                <p class="font-semibold text-sm text-text">List Models</p>
+                                <p class="text-xs text-textMuted mt-1">Scans your configured models folder and returns a list of all available `.gguf` files.</p>
+                            </div>
+                        </div>
+                        <div class="bg-base p-3 rounded-lg border border-border flex items-start gap-3">
+                            <code class="text-brand font-bold bg-brand/10 px-2 py-1 rounded text-xs mt-0.5">/clear</code>
+                            <div>
+                                <p class="font-semibold text-sm text-text">Wipe Server Memory</p>
+                                <p class="text-xs text-textMuted mt-1">Issues a command to wipe the backend stateless memory cache.</p>
+                            </div>
+                        </div>
+                        <div class="bg-base p-3 rounded-lg border border-border flex items-start gap-3">
+                            <code class="text-brand font-bold bg-brand/10 px-2 py-1 rounded text-xs mt-0.5">/compact</code>
+                            <div>
+                                <p class="font-semibold text-sm text-text">Compress Chat History</p>
+                                <p class="text-xs text-textMuted mt-1">Extracts the giant chat payload, forces the LLM to summarize it densely, and provides a compacted memory block to start a new chat with.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
 
             <!-- Tab: SwarmUI -->
