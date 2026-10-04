@@ -250,12 +250,15 @@ class LlamaProxyHandler(BaseHTTPRequestHandler):
             self.send_assistant_message("*Models directory not configured or not found.*", payload.get('stream', False))
             return
             
-        models = [f for f in os.listdir(models_dir) if f.endswith('.gguf')]
+        from backend.model_scanner import ModelScanner
+        scan_result = ModelScanner.scan_directory(models_dir)
+        models = scan_result.get("models", [])
+        
         if not models:
-            self.send_assistant_message("*No `.gguf` models found in directory.*", payload.get('stream', False))
+            self.send_assistant_message("*No `.gguf` models found in directory or subdirectories.*", payload.get('stream', False))
             return
             
-        msg = "### Available Models\n" + "\n".join([f"- `{m}`" for m in models])
+        msg = "### Available Models\n" + "\n".join([f"- `{m['name']}` ({m['size_gb']} GB, {'Vision' if m['is_mmproj'] else 'LLM'})" for m in models])
         self.send_assistant_message(msg, payload.get('stream', False))
 
     def handle_clear_request(self, payload):
