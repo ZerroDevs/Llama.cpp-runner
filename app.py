@@ -5,6 +5,7 @@ import threading
 import atexit
 import signal
 import logging
+import ctypes
 from backend.api_bridge import ApiBridge
 
 logging.basicConfig(filename='exit_trace.log', level=logging.DEBUG)
@@ -108,13 +109,28 @@ def main():
     swarm_manager = SwarmManager()
     api = ApiBridge(config_manager, process_manager, swarm_manager)
     
+    window_width = 1200
+    window_height = 850
+    x = 0
+    y = 0
+    try:
+        user32 = ctypes.windll.user32
+        screen_width = user32.GetSystemMetrics(0)
+        screen_height = user32.GetSystemMetrics(1)
+        x = max(0, (screen_width - window_width) // 2)
+        y = max(0, (screen_height - window_height) // 2)
+    except Exception:
+        pass
+
     window = webview.create_window(
         'Llama Server Control',
         f'file://{ui_path}',
         js_api=api,
-        width=1200,
-        height=850,
-        min_size=(1000, 700)
+        width=window_width,
+        height=window_height,
+        min_size=(1000, 700),
+        x=x,
+        y=y
     )
     
     api.set_window(window)
