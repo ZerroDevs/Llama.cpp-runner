@@ -518,7 +518,7 @@ This server flawlessly intercepts standard OpenAI API calls (`/v1/chat/completio
             user_neg = parts[1].strip()
 
         if is_guess:
-            system_injection = "\n\n(SYSTEM: You are a Stable Diffusion prompt engineer. Analyze the provided image visually. Write a highly detailed, descriptive, comma-separated image generation positive prompt that describes the image accurately. AND automatically generate a robust, highly detailed negative prompt that avoids bad anatomy or flaws. Output STRICTLY in this exact format:\nPOSITIVE: <detailed positive prompt>\nNEGATIVE: <robust negative prompt>\nDo not output anything else, DO NOT REPEAT WORDS.)"
+            system_injection = "\n\n(SYSTEM: You are a Stable Diffusion prompt engineer. Visually analyze the attached image in detail. Generate a highly descriptive, comma-separated image generation prompt based strictly on this image. DO NOT write conversational text like 'Here is a prompt...'. Output STRICTLY in this exact format:\nPOSITIVE: <highly detailed positive prompt>\nNEGATIVE: <robust negative prompt>)"
         elif is_art:
             if user_neg:
                 system_injection = f"\n\n(SYSTEM: You are a Stable Diffusion prompt engineer. Analyze my request. I have provided a positive and negative prompt. Enhance both to be highly detailed and descriptive. Output STRICTLY in this exact format:\nPOSITIVE: <detailed positive prompt, comma-separated>\nNEGATIVE: <robust negative prompt, comma-separated>\nDo not output anything else, no conversational filler, DO NOT REPEAT WORDS.)\n\nRequest Positive: {user_pos}\nRequest Negative: {user_neg}"
@@ -641,6 +641,12 @@ This server flawlessly intercepts standard OpenAI API calls (`/v1/chat/completio
                             
                     if p_lines: pos_prompt = " ".join(p_lines).strip()
                     if n_lines: neg_prompt = " ".join(n_lines).strip()
+                else:
+                    if is_guess:
+                        # Fallback: if the LLM completely ignored the formatting, use its entire response as the positive prompt
+                        cleaned = gen_text.replace("Here is a prompt", "").replace("Prompt:", "").strip(' "\'\n\r')
+                        if cleaned:
+                            pos_prompt = cleaned
             else:
                 pos_prompt = generated_prompt.strip()
                 if "POSITIVE:" in pos_prompt:
