@@ -960,6 +960,7 @@ document.querySelectorAll('.nav-btn').forEach(btn => {
 
 const btnStart = document.getElementById('btn-start');
 const btnStop = document.getElementById('btn-stop');
+const btnEject = document.getElementById('btn-eject');
 const statusDot = document.getElementById('status-dot');
 const statusText = document.getElementById('status-text');
 const btnWebchat = document.getElementById('btn-webchat');
@@ -986,6 +987,10 @@ function updateStatusUI(running) {
         btnStart.classList.add('hidden');
         btnStop.classList.remove('hidden');
         btnStop.classList.add('flex');
+        if(btnEject) {
+            btnEject.classList.remove('hidden');
+            btnEject.classList.add('flex');
+        }
         
         btnWebchat.classList.remove('opacity-50', 'pointer-events-none');
         btnWebchat.disabled = false;
@@ -1000,6 +1005,10 @@ function updateStatusUI(running) {
     } else {
         btnStop.classList.add('hidden');
         btnStop.classList.remove('flex');
+        if(btnEject) {
+            btnEject.classList.add('hidden');
+            btnEject.classList.remove('flex');
+        }
         btnStart.classList.remove('hidden');
         
         btnWebchat.classList.add('opacity-50', 'pointer-events-none');
@@ -1038,6 +1047,37 @@ btnStop.addEventListener('click', async () => {
         updateStatusUI(false);
     }
 });
+
+if (btnEject) {
+    btnEject.addEventListener('click', async () => {
+        if (!window.pywebview) return;
+        const isRunning = await window.pywebview.api.check_status();
+        if (isRunning) {
+            if (window.showToast) window.showToast('Ejecting model...');
+            await window.pywebview.api.stop_server();
+            
+            let retries = 20;
+            while (retries > 0 && await window.pywebview.api.check_status()) {
+                await new Promise(r => setTimeout(r, 250));
+                retries--;
+            }
+            
+            // Override config to empty model
+            const currentConfig = { ...appConfig };
+            currentConfig.model_path = '';
+            currentConfig.vision_projector = '';
+            
+            await window.pywebview.api.start_server(currentConfig);
+            
+            // Clear UI
+            configMap.model_path.value = '';
+            configMap.vision_projector.value = '';
+            saveConfig();
+            
+            if (window.showToast) window.showToast('Model ejected. API still running.');
+        }
+    });
+}
 
 btnWebchat.addEventListener('click', () => {
     if (!window.pywebview) return;
