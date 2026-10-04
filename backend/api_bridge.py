@@ -24,6 +24,15 @@ class ApiBridge:
     def set_window(self, window):
         self._window = window
 
+    def log_ui(self, msg):
+        if self._window:
+            try:
+                import json
+                safe_msg = json.dumps(msg)
+                self._window.evaluate_js(f"window.receiveLog({safe_msg})")
+            except Exception:
+                pass
+
     def get_config(self):
         return self._config_manager.get_config()
 
@@ -226,8 +235,10 @@ class ApiBridge:
     def send_to_webhook(self, paths):
         webhook_url = self.get_config().get("discord_webhook", "")
         if not webhook_url:
+            self.log_ui("[WARN] [Webhook] No Discord Webhook URL configured in settings.")
             return {"status": "error", "message": "No Discord Webhook URL configured in settings."}
             
+        self.log_ui(f"[INFO] [Webhook] Preparing to send {len(paths)} images to Discord...")
         import threading
         def _dispatch_bulk():
             import requests
@@ -245,9 +256,13 @@ class ApiBridge:
                                 }]
                             }
                             import json
-                            requests.post(webhook_url, data={'payload_json': json.dumps(payload)}, files=files, timeout=30)
+                            resp = requests.post(webhook_url, data={'payload_json': json.dumps(payload)}, files=files, timeout=30)
+                            if resp.status_code >= 400:
+                                self.log_ui(f"[ERR] [Webhook] Error: {resp.status_code} - {resp.text}")
+                            else:
+                                self.log_ui(f"[INFO] [Webhook] Successfully sent image: {os.path.basename(path)}")
                 except Exception as e:
-                    pass
+                    self.log_ui(f"[ERR] [Webhook] Exception while sending: {str(e)}")
                     
         threading.Thread(target=_dispatch_bulk, daemon=True).start()
         return {"status": "success"}
