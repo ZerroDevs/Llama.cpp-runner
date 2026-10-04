@@ -4704,3 +4704,1621 @@ WARNING:pywebview:OPEN_DIALOG is deprecated and will be removed in a future vers
 DEBUG:root:on_closing called
 DEBUG:root:stopping server and returning True
 DEBUG:root:on_closed called
+DEBUG:PIL.Image:Importing AvifImagePlugin
+DEBUG:PIL.Image:Importing BlpImagePlugin
+DEBUG:PIL.Image:Importing BmpImagePlugin
+DEBUG:PIL.Image:Importing BufrStubImagePlugin
+DEBUG:PIL.Image:Importing CurImagePlugin
+DEBUG:PIL.Image:Importing DcxImagePlugin
+DEBUG:PIL.Image:Importing DdsImagePlugin
+DEBUG:PIL.Image:Importing EpsImagePlugin
+DEBUG:PIL.Image:Importing FitsImagePlugin
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:PIL.Image:Importing FliImagePlugin
+DEBUG:PIL.Image:Importing FpxImagePlugin
+DEBUG:PIL.Image:Image: failed to import FpxImagePlugin: No module named 'olefile'
+DEBUG:PIL.Image:Importing FtexImagePlugin
+DEBUG:PIL.Image:Importing GbrImagePlugin
+DEBUG:PIL.Image:Importing GifImagePlugin
+DEBUG:PIL.Image:Importing GribStubImagePlugin
+DEBUG:PIL.Image:Importing Hdf5StubImagePlugin
+DEBUG:PIL.Image:Importing IcnsImagePlugin
+DEBUG:PIL.Image:Importing IcoImagePlugin
+DEBUG:PIL.Image:Importing ImImagePlugin
+DEBUG:PIL.Image:Importing ImtImagePlugin
+DEBUG:PIL.Image:Importing IptcImagePlugin
+DEBUG:PIL.Image:Importing JpegImagePlugin
+DEBUG:PIL.Image:Importing Jpeg2KImagePlugin
+DEBUG:PIL.Image:Importing McIdasImagePlugin
+DEBUG:PIL.Image:Importing MicImagePlugin
+DEBUG:PIL.Image:Image: failed to import MicImagePlugin: No module named 'olefile'
+DEBUG:PIL.Image:Importing MpegImagePlugin
+DEBUG:PIL.Image:Importing MpoImagePlugin
+DEBUG:PIL.Image:Importing MspImagePlugin
+DEBUG:PIL.Image:Importing PalmImagePlugin
+DEBUG:PIL.Image:Importing PcdImagePlugin
+DEBUG:PIL.Image:Importing PcxImagePlugin
+DEBUG:PIL.Image:Importing PdfImagePlugin
+DEBUG:PIL.Image:Importing PixarImagePlugin
+DEBUG:PIL.Image:Importing PngImagePlugin
+DEBUG:PIL.Image:Importing PpmImagePlugin
+DEBUG:PIL.Image:Importing PsdImagePlugin
+DEBUG:PIL.Image:Importing QoiImagePlugin
+DEBUG:PIL.Image:Importing SgiImagePlugin
+DEBUG:PIL.Image:Importing SpiderImagePlugin
+DEBUG:PIL.Image:Importing SunImagePlugin
+DEBUG:PIL.Image:Importing TgaImagePlugin
+DEBUG:PIL.Image:Importing TiffImagePlugin
+DEBUG:PIL.Image:Importing WebPImagePlugin
+DEBUG:PIL.Image:Importing WmfImagePlugin
+DEBUG:PIL.Image:Importing XbmImagePlugin
+DEBUG:PIL.Image:Importing XpmImagePlugin
+DEBUG:PIL.Image:Importing XVThumbImagePlugin
+DEBUG:root:force_cleanup called with signum=2
+DEBUG:PIL.Image:Importing AvifImagePlugin
+DEBUG:PIL.Image:Importing BlpImagePlugin
+DEBUG:PIL.Image:Importing BmpImagePlugin
+DEBUG:PIL.Image:Importing BufrStubImagePlugin
+DEBUG:PIL.Image:Importing CurImagePlugin
+DEBUG:PIL.Image:Importing DcxImagePlugin
+DEBUG:PIL.Image:Importing DdsImagePlugin
+DEBUG:PIL.Image:Importing EpsImagePlugin
+DEBUG:PIL.Image:Importing FitsImagePlugin
+DEBUG:PIL.Image:Importing FliImagePlugin
+DEBUG:PIL.Image:Importing FpxImagePlugin
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:PIL.Image:Image: failed to import FpxImagePlugin: No module named 'olefile'
+DEBUG:PIL.Image:Importing FtexImagePlugin
+DEBUG:PIL.Image:Importing GbrImagePlugin
+DEBUG:PIL.Image:Importing GifImagePlugin
+DEBUG:PIL.Image:Importing GribStubImagePlugin
+DEBUG:PIL.Image:Importing Hdf5StubImagePlugin
+DEBUG:PIL.Image:Importing IcnsImagePlugin
+DEBUG:PIL.Image:Importing IcoImagePlugin
+DEBUG:PIL.Image:Importing ImImagePlugin
+DEBUG:PIL.Image:Importing ImtImagePlugin
+DEBUG:PIL.Image:Importing IptcImagePlugin
+DEBUG:PIL.Image:Importing JpegImagePlugin
+DEBUG:PIL.Image:Importing Jpeg2KImagePlugin
+DEBUG:PIL.Image:Importing McIdasImagePlugin
+DEBUG:PIL.Image:Importing MicImagePlugin
+DEBUG:PIL.Image:Image: failed to import MicImagePlugin: No module named 'olefile'
+DEBUG:PIL.Image:Importing MpegImagePlugin
+DEBUG:PIL.Image:Importing MpoImagePlugin
+DEBUG:PIL.Image:Importing MspImagePlugin
+DEBUG:PIL.Image:Importing PalmImagePlugin
+DEBUG:PIL.Image:Importing PcdImagePlugin
+DEBUG:PIL.Image:Importing PcxImagePlugin
+DEBUG:PIL.Image:Importing PdfImagePlugin
+DEBUG:PIL.Image:Importing PixarImagePlugin
+DEBUG:PIL.Image:Importing PngImagePlugin
+DEBUG:PIL.Image:Importing PpmImagePlugin
+DEBUG:PIL.Image:Importing PsdImagePlugin
+DEBUG:PIL.Image:Importing QoiImagePlugin
+DEBUG:PIL.Image:Importing SgiImagePlugin
+DEBUG:PIL.Image:Importing SpiderImagePlugin
+DEBUG:PIL.Image:Importing SunImagePlugin
+DEBUG:PIL.Image:Importing TgaImagePlugin
+DEBUG:PIL.Image:Importing TiffImagePlugin
+DEBUG:PIL.Image:Importing WebPImagePlugin
+DEBUG:PIL.Image:Importing WmfImagePlugin
+DEBUG:PIL.Image:Importing XbmImagePlugin
+DEBUG:PIL.Image:Importing XpmImagePlugin
+DEBUG:PIL.Image:Importing XVThumbImagePlugin
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+INFO:root:Requesting prompt expansion from Llama...
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:8080
+DEBUG:urllib3.connectionpool:http://127.0.0.1:8080 "POST /v1/chat/completions HTTP/1.1" 200 1496
+INFO:root:Expanded Prompt: 
+INFO:root:Stopping Llama-server to free VRAM...
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+INFO:root:Sending prompt to SwarmUI: http://127.0.0.1:7801/API/GenerateText2Image
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+ERROR:root:SwarmUI Generation failed: HTTPConnectionPool(host='127.0.0.1', port=7801): Max retries exceeded with url: /API/GenerateText2Image (Caused by NewConnectionError("HTTPConnection(host='127.0.0.1', port=7801): Failed to establish a new connection: [WinError 10061] No connection could be made because the target machine actively refused it"))
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:http://127.0.0.1:7801 "POST /API/GetCurrentStatus HTTP/1.1" 400 None
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:http://127.0.0.1:7801 "POST /API/GetCurrentStatus HTTP/1.1" 400 None
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:http://127.0.0.1:7801 "POST /API/GetCurrentStatus HTTP/1.1" 400 None
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:http://127.0.0.1:7801 "POST /API/GetCurrentStatus HTTP/1.1" 400 None
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:http://127.0.0.1:7801 "POST /API/GetCurrentStatus HTTP/1.1" 400 None
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:http://127.0.0.1:7801 "POST /API/GetCurrentStatus HTTP/1.1" 400 None
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:http://127.0.0.1:7801 "POST /API/GetCurrentStatus HTTP/1.1" 400 None
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:http://127.0.0.1:7801 "POST /API/GetCurrentStatus HTTP/1.1" 400 None
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:http://127.0.0.1:7801 "POST /API/GetCurrentStatus HTTP/1.1" 400 None
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:http://127.0.0.1:7801 "POST /API/GetCurrentStatus HTTP/1.1" 400 None
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:http://127.0.0.1:7801 "POST /API/GetCurrentStatus HTTP/1.1" 400 None
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:http://127.0.0.1:7801 "POST /API/GetCurrentStatus HTTP/1.1" 400 None
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:http://127.0.0.1:7801 "POST /API/GetCurrentStatus HTTP/1.1" 400 None
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:http://127.0.0.1:7801 "POST /API/GetCurrentStatus HTTP/1.1" 400 None
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:http://127.0.0.1:7801 "POST /API/GetCurrentStatus HTTP/1.1" 400 None
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:http://127.0.0.1:7801 "POST /API/GetCurrentStatus HTTP/1.1" 400 None
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:http://127.0.0.1:7801 "POST /API/GetCurrentStatus HTTP/1.1" 400 None
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:http://127.0.0.1:7801 "POST /API/GetCurrentStatus HTTP/1.1" 400 None
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:http://127.0.0.1:7801 "POST /API/GetCurrentStatus HTTP/1.1" 400 None
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:http://127.0.0.1:7801 "POST /API/GetCurrentStatus HTTP/1.1" 400 None
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:http://127.0.0.1:7801 "POST /API/GetCurrentStatus HTTP/1.1" 400 None
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:http://127.0.0.1:7801 "POST /API/GetCurrentStatus HTTP/1.1" 400 None
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:http://127.0.0.1:7801 "POST /API/GetCurrentStatus HTTP/1.1" 400 None
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:http://127.0.0.1:7801 "POST /API/GetCurrentStatus HTTP/1.1" 400 None
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:http://127.0.0.1:7801 "POST /API/GetCurrentStatus HTTP/1.1" 400 None
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:http://127.0.0.1:7801 "POST /API/GetCurrentStatus HTTP/1.1" 400 None
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:http://127.0.0.1:7801 "POST /API/GetCurrentStatus HTTP/1.1" 400 None
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:http://127.0.0.1:7801 "POST /API/GetCurrentStatus HTTP/1.1" 400 None
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:http://127.0.0.1:7801 "POST /API/GetCurrentStatus HTTP/1.1" 400 None
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:http://127.0.0.1:7801 "POST /API/GetCurrentStatus HTTP/1.1" 400 None
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:http://127.0.0.1:7801 "POST /API/GetCurrentStatus HTTP/1.1" 400 None
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:http://127.0.0.1:7801 "POST /API/GetCurrentStatus HTTP/1.1" 400 None
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:http://127.0.0.1:7801 "POST /API/GetCurrentStatus HTTP/1.1" 400 None
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:http://127.0.0.1:7801 "POST /API/GetCurrentStatus HTTP/1.1" 400 None
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:http://127.0.0.1:7801 "POST /API/GetCurrentStatus HTTP/1.1" 400 None
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:http://127.0.0.1:7801 "POST /API/GetCurrentStatus HTTP/1.1" 400 None
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:http://127.0.0.1:7801 "POST /API/GetCurrentStatus HTTP/1.1" 400 None
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:http://127.0.0.1:7801 "POST /API/GetCurrentStatus HTTP/1.1" 400 None
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:http://127.0.0.1:7801 "POST /API/GetCurrentStatus HTTP/1.1" 400 None
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:http://127.0.0.1:7801 "POST /API/GetCurrentStatus HTTP/1.1" 400 None
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:http://127.0.0.1:7801 "POST /API/GetCurrentStatus HTTP/1.1" 400 None
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:http://127.0.0.1:7801 "POST /API/GetCurrentStatus HTTP/1.1" 400 None
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:http://127.0.0.1:7801 "POST /API/GetCurrentStatus HTTP/1.1" 400 None
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:http://127.0.0.1:7801 "POST /API/GetCurrentStatus HTTP/1.1" 400 None
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:http://127.0.0.1:7801 "POST /API/GetCurrentStatus HTTP/1.1" 400 None
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:http://127.0.0.1:7801 "POST /API/GetCurrentStatus HTTP/1.1" 400 None
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:http://127.0.0.1:7801 "POST /API/GetCurrentStatus HTTP/1.1" 400 None
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:http://127.0.0.1:7801 "POST /API/GetCurrentStatus HTTP/1.1" 400 None
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:http://127.0.0.1:7801 "POST /API/GetCurrentStatus HTTP/1.1" 400 None
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:http://127.0.0.1:7801 "POST /API/GetCurrentStatus HTTP/1.1" 400 None
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:http://127.0.0.1:7801 "POST /API/GetCurrentStatus HTTP/1.1" 400 None
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:http://127.0.0.1:7801 "POST /API/GetCurrentStatus HTTP/1.1" 400 None
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:http://127.0.0.1:7801 "POST /API/GetCurrentStatus HTTP/1.1" 400 None
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:http://127.0.0.1:7801 "POST /API/GetCurrentStatus HTTP/1.1" 400 None
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:http://127.0.0.1:7801 "POST /API/GetCurrentStatus HTTP/1.1" 400 None
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:http://127.0.0.1:7801 "POST /API/GetCurrentStatus HTTP/1.1" 400 None
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:http://127.0.0.1:7801 "POST /API/GetCurrentStatus HTTP/1.1" 400 None
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:http://127.0.0.1:7801 "POST /API/GetCurrentStatus HTTP/1.1" 400 None
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:http://127.0.0.1:7801 "POST /API/GetCurrentStatus HTTP/1.1" 400 None
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:http://127.0.0.1:7801 "POST /API/GetCurrentStatus HTTP/1.1" 400 None
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:http://127.0.0.1:7801 "POST /API/GetCurrentStatus HTTP/1.1" 400 None
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:http://127.0.0.1:7801 "POST /API/GetCurrentStatus HTTP/1.1" 400 None
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:http://127.0.0.1:7801 "POST /API/GetCurrentStatus HTTP/1.1" 400 None
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:http://127.0.0.1:7801 "POST /API/GetCurrentStatus HTTP/1.1" 400 None
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:http://127.0.0.1:7801 "POST /API/GetCurrentStatus HTTP/1.1" 400 None
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:http://127.0.0.1:7801 "POST /API/GetCurrentStatus HTTP/1.1" 400 None
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:http://127.0.0.1:7801 "POST /API/GetCurrentStatus HTTP/1.1" 400 None
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:http://127.0.0.1:7801 "POST /API/GetCurrentStatus HTTP/1.1" 400 None
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:http://127.0.0.1:7801 "POST /API/GetCurrentStatus HTTP/1.1" 400 None
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:http://127.0.0.1:7801 "POST /API/GetCurrentStatus HTTP/1.1" 400 None
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:http://127.0.0.1:7801 "POST /API/GetCurrentStatus HTTP/1.1" 400 None
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:http://127.0.0.1:7801 "POST /API/GetCurrentStatus HTTP/1.1" 400 None
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:http://127.0.0.1:7801 "POST /API/GetCurrentStatus HTTP/1.1" 400 None
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:http://127.0.0.1:7801 "POST /API/GetCurrentStatus HTTP/1.1" 400 None
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:http://127.0.0.1:7801 "POST /API/GetCurrentStatus HTTP/1.1" 400 None
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:http://127.0.0.1:7801 "POST /API/GetCurrentStatus HTTP/1.1" 400 None
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:http://127.0.0.1:7801 "POST /API/GetCurrentStatus HTTP/1.1" 400 None
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:http://127.0.0.1:7801 "POST /API/GetCurrentStatus HTTP/1.1" 400 None
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:http://127.0.0.1:7801 "POST /API/GetCurrentStatus HTTP/1.1" 400 None
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:http://127.0.0.1:7801 "POST /API/GetCurrentStatus HTTP/1.1" 400 None
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:http://127.0.0.1:7801 "POST /API/GetCurrentStatus HTTP/1.1" 400 None
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:http://127.0.0.1:7801 "POST /API/GetCurrentStatus HTTP/1.1" 400 None
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:http://127.0.0.1:7801 "POST /API/GetCurrentStatus HTTP/1.1" 400 None
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:http://127.0.0.1:7801 "POST /API/GetCurrentStatus HTTP/1.1" 400 None
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:http://127.0.0.1:7801 "POST /API/GetCurrentStatus HTTP/1.1" 400 None
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:http://127.0.0.1:7801 "POST /API/GetCurrentStatus HTTP/1.1" 400 None
+DEBUG:root:on_closing called
+DEBUG:root:stopping server and returning True
+DEBUG:root:on_closed called
+ERROR:pywebview:Error occurred in script
+Traceback (most recent call last):
+  File "C:\Users\Gaming\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\webview\platforms\edgechromium.py", line 152, in evaluate_js
+    self.webview.Invoke(
+    ~~~~~~~~~~~~~~~~~~~^
+        Func[Object](
+        ^^^^^^^^^^^^^
+    ...<4 lines>...
+        )
+        ^
+    )
+    ^
+System.ObjectDisposedException: Cannot access a disposed object.
+Object name: 'WebView2'.
+   at System.Windows.Forms.Control.MarshaledInvoke(Control caller, Delegate method, Object[] args, Boolean synchronous)
+   at System.Windows.Forms.Control.Invoke(Delegate method, Object[] args)
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:PIL.Image:Importing AvifImagePlugin
+DEBUG:PIL.Image:Importing BlpImagePlugin
+DEBUG:PIL.Image:Importing BmpImagePlugin
+DEBUG:PIL.Image:Importing BufrStubImagePlugin
+DEBUG:PIL.Image:Importing CurImagePlugin
+DEBUG:PIL.Image:Importing DcxImagePlugin
+DEBUG:PIL.Image:Importing DdsImagePlugin
+DEBUG:PIL.Image:Importing EpsImagePlugin
+DEBUG:PIL.Image:Importing FitsImagePlugin
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:PIL.Image:Importing FliImagePlugin
+DEBUG:PIL.Image:Importing FpxImagePlugin
+DEBUG:PIL.Image:Image: failed to import FpxImagePlugin: No module named 'olefile'
+DEBUG:PIL.Image:Importing FtexImagePlugin
+DEBUG:PIL.Image:Importing GbrImagePlugin
+DEBUG:PIL.Image:Importing GifImagePlugin
+DEBUG:PIL.Image:Importing GribStubImagePlugin
+DEBUG:PIL.Image:Importing Hdf5StubImagePlugin
+DEBUG:PIL.Image:Importing IcnsImagePlugin
+DEBUG:PIL.Image:Importing IcoImagePlugin
+DEBUG:PIL.Image:Importing ImImagePlugin
+DEBUG:PIL.Image:Importing ImtImagePlugin
+DEBUG:PIL.Image:Importing IptcImagePlugin
+DEBUG:PIL.Image:Importing JpegImagePlugin
+DEBUG:PIL.Image:Importing Jpeg2KImagePlugin
+DEBUG:PIL.Image:Importing McIdasImagePlugin
+DEBUG:PIL.Image:Importing MicImagePlugin
+DEBUG:PIL.Image:Image: failed to import MicImagePlugin: No module named 'olefile'
+DEBUG:PIL.Image:Importing MpegImagePlugin
+DEBUG:PIL.Image:Importing MpoImagePlugin
+DEBUG:PIL.Image:Importing MspImagePlugin
+DEBUG:PIL.Image:Importing PalmImagePlugin
+DEBUG:PIL.Image:Importing PcdImagePlugin
+DEBUG:PIL.Image:Importing PcxImagePlugin
+DEBUG:PIL.Image:Importing PdfImagePlugin
+DEBUG:PIL.Image:Importing PixarImagePlugin
+DEBUG:PIL.Image:Importing PngImagePlugin
+DEBUG:PIL.Image:Importing PpmImagePlugin
+DEBUG:PIL.Image:Importing PsdImagePlugin
+DEBUG:PIL.Image:Importing QoiImagePlugin
+DEBUG:PIL.Image:Importing SgiImagePlugin
+DEBUG:PIL.Image:Importing SpiderImagePlugin
+DEBUG:PIL.Image:Importing SunImagePlugin
+DEBUG:PIL.Image:Importing TgaImagePlugin
+DEBUG:PIL.Image:Importing TiffImagePlugin
+DEBUG:PIL.Image:Importing WebPImagePlugin
+DEBUG:PIL.Image:Importing WmfImagePlugin
+DEBUG:PIL.Image:Importing XbmImagePlugin
+DEBUG:PIL.Image:Importing XpmImagePlugin
+DEBUG:PIL.Image:Importing XVThumbImagePlugin
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+INFO:root:Requesting prompt expansion from Llama...
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:8080
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:http://127.0.0.1:8080 "POST /v1/chat/completions HTTP/1.1" 200 1511
+INFO:root:Expanded Prompt: 
+INFO:root:Stopping Llama-server to free VRAM...
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+INFO:root:SwarmUI is not running. Auto-starting it now...
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+INFO:root:Waiting for SwarmUI API to come online (may take a minute)...
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:http://127.0.0.1:7801 "POST /API/GetCurrentStatus HTTP/1.1" 400 None
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:http://127.0.0.1:7801 "GET / HTTP/1.1" 302 0
+DEBUG:urllib3.connectionpool:http://127.0.0.1:7801 "GET /Text2Image HTTP/1.1" 200 None
+INFO:root:Sending prompt to SwarmUI: http://127.0.0.1:7801/API/GenerateText2Image
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:http://127.0.0.1:7801 "POST /API/GenerateText2Image HTTP/1.1" 400 None
+INFO:root:Image generated successfully.
+INFO:root:Restarting Llama-server...
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:http://127.0.0.1:7801 "POST /API/GetCurrentStatus HTTP/1.1" 400 None
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:8080
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:http://127.0.0.1:7801 "POST /API/GetCurrentStatus HTTP/1.1" 400 None
+DEBUG:urllib3.connectionpool:http://127.0.0.1:8080 "GET /health HTTP/1.1" 503 75
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:8080
+DEBUG:urllib3.connectionpool:http://127.0.0.1:8080 "GET /health HTTP/1.1" 503 75
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:http://127.0.0.1:7801 "POST /API/GetCurrentStatus HTTP/1.1" 400 None
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:8080
+DEBUG:urllib3.connectionpool:http://127.0.0.1:8080 "GET /health HTTP/1.1" 503 75
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:8080
+DEBUG:urllib3.connectionpool:http://127.0.0.1:8080 "GET /health HTTP/1.1" 503 75
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:http://127.0.0.1:7801 "POST /API/GetCurrentStatus HTTP/1.1" 400 None
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:8080
+DEBUG:urllib3.connectionpool:http://127.0.0.1:8080 "GET /health HTTP/1.1" 200 15
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:http://127.0.0.1:7801 "POST /API/GetCurrentStatus HTTP/1.1" 400 None
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:http://127.0.0.1:7801 "POST /API/GetCurrentStatus HTTP/1.1" 400 None
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:http://127.0.0.1:7801 "POST /API/GetCurrentStatus HTTP/1.1" 400 None
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:http://127.0.0.1:7801 "POST /API/GetCurrentStatus HTTP/1.1" 400 None
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:http://127.0.0.1:7801 "POST /API/GetCurrentStatus HTTP/1.1" 400 None
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:http://127.0.0.1:7801 "POST /API/GetCurrentStatus HTTP/1.1" 400 None
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:http://127.0.0.1:7801 "POST /API/GetCurrentStatus HTTP/1.1" 400 None
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:http://127.0.0.1:7801 "POST /API/GetCurrentStatus HTTP/1.1" 400 None
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:http://127.0.0.1:7801 "POST /API/GetCurrentStatus HTTP/1.1" 400 None
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:http://127.0.0.1:7801 "POST /API/GetCurrentStatus HTTP/1.1" 400 None
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:http://127.0.0.1:7801 "POST /API/GetCurrentStatus HTTP/1.1" 400 None
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:http://127.0.0.1:7801 "POST /API/GetCurrentStatus HTTP/1.1" 400 None
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:http://127.0.0.1:7801 "POST /API/GetCurrentStatus HTTP/1.1" 400 None
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:http://127.0.0.1:7801 "POST /API/GetCurrentStatus HTTP/1.1" 400 None
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:http://127.0.0.1:7801 "POST /API/GetCurrentStatus HTTP/1.1" 400 None
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:http://127.0.0.1:7801 "POST /API/GetCurrentStatus HTTP/1.1" 400 None
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:http://127.0.0.1:7801 "POST /API/GetCurrentStatus HTTP/1.1" 400 None
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:http://127.0.0.1:7801 "POST /API/GetCurrentStatus HTTP/1.1" 400 None
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:http://127.0.0.1:7801 "POST /API/GetCurrentStatus HTTP/1.1" 400 None
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:http://127.0.0.1:7801 "POST /API/GetCurrentStatus HTTP/1.1" 400 None
+DEBUG:root:on_closing called
+DEBUG:root:stopping server and returning True
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:http://127.0.0.1:7801 "POST /API/GetCurrentStatus HTTP/1.1" 400 None
+DEBUG:root:on_closed called
+ERROR:pywebview:Error occurred in script
+Traceback (most recent call last):
+  File "C:\Users\Gaming\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\webview\platforms\edgechromium.py", line 152, in evaluate_js
+    self.webview.Invoke(
+    ~~~~~~~~~~~~~~~~~~~^
+        Func[Object](
+        ^^^^^^^^^^^^^
+    ...<4 lines>...
+        )
+        ^
+    )
+    ^
+System.ObjectDisposedException: Cannot access a disposed object.
+Object name: 'WebView2'.
+   at System.Windows.Forms.Control.MarshaledInvoke(Control caller, Delegate method, Object[] args, Boolean synchronous)
+   at System.Windows.Forms.Control.Invoke(Delegate method, Object[] args)
+DEBUG:PIL.Image:Importing AvifImagePlugin
+DEBUG:PIL.Image:Importing BlpImagePlugin
+DEBUG:PIL.Image:Importing BmpImagePlugin
+DEBUG:PIL.Image:Importing BufrStubImagePlugin
+DEBUG:PIL.Image:Importing CurImagePlugin
+DEBUG:PIL.Image:Importing DcxImagePlugin
+DEBUG:PIL.Image:Importing DdsImagePlugin
+DEBUG:PIL.Image:Importing EpsImagePlugin
+DEBUG:PIL.Image:Importing FitsImagePlugin
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:PIL.Image:Importing FliImagePlugin
+DEBUG:PIL.Image:Importing FpxImagePlugin
+DEBUG:PIL.Image:Image: failed to import FpxImagePlugin: No module named 'olefile'
+DEBUG:PIL.Image:Importing FtexImagePlugin
+DEBUG:PIL.Image:Importing GbrImagePlugin
+DEBUG:PIL.Image:Importing GifImagePlugin
+DEBUG:PIL.Image:Importing GribStubImagePlugin
+DEBUG:PIL.Image:Importing Hdf5StubImagePlugin
+DEBUG:PIL.Image:Importing IcnsImagePlugin
+DEBUG:PIL.Image:Importing IcoImagePlugin
+DEBUG:PIL.Image:Importing ImImagePlugin
+DEBUG:PIL.Image:Importing ImtImagePlugin
+DEBUG:PIL.Image:Importing IptcImagePlugin
+DEBUG:PIL.Image:Importing JpegImagePlugin
+DEBUG:PIL.Image:Importing Jpeg2KImagePlugin
+DEBUG:PIL.Image:Importing McIdasImagePlugin
+DEBUG:PIL.Image:Importing MicImagePlugin
+DEBUG:PIL.Image:Image: failed to import MicImagePlugin: No module named 'olefile'
+DEBUG:PIL.Image:Importing MpegImagePlugin
+DEBUG:PIL.Image:Importing MpoImagePlugin
+DEBUG:PIL.Image:Importing MspImagePlugin
+DEBUG:PIL.Image:Importing PalmImagePlugin
+DEBUG:PIL.Image:Importing PcdImagePlugin
+DEBUG:PIL.Image:Importing PcxImagePlugin
+DEBUG:PIL.Image:Importing PdfImagePlugin
+DEBUG:PIL.Image:Importing PixarImagePlugin
+DEBUG:PIL.Image:Importing PngImagePlugin
+DEBUG:PIL.Image:Importing PpmImagePlugin
+DEBUG:PIL.Image:Importing PsdImagePlugin
+DEBUG:PIL.Image:Importing QoiImagePlugin
+DEBUG:PIL.Image:Importing SgiImagePlugin
+DEBUG:PIL.Image:Importing SpiderImagePlugin
+DEBUG:PIL.Image:Importing SunImagePlugin
+DEBUG:PIL.Image:Importing TgaImagePlugin
+DEBUG:PIL.Image:Importing TiffImagePlugin
+DEBUG:PIL.Image:Importing WebPImagePlugin
+DEBUG:PIL.Image:Importing WmfImagePlugin
+DEBUG:PIL.Image:Importing XbmImagePlugin
+DEBUG:PIL.Image:Importing XpmImagePlugin
+DEBUG:PIL.Image:Importing XVThumbImagePlugin
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:http://127.0.0.1:7801 "POST /API/GetCurrentStatus HTTP/1.1" 400 None
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:http://127.0.0.1:7801 "POST /API/GetCurrentStatus HTTP/1.1" 400 None
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:http://127.0.0.1:7801 "POST /API/GetCurrentStatus HTTP/1.1" 400 None
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:http://127.0.0.1:7801 "POST /API/GetCurrentStatus HTTP/1.1" 400 None
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:http://127.0.0.1:7801 "POST /API/GetCurrentStatus HTTP/1.1" 400 None
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:http://127.0.0.1:7801 "POST /API/GetCurrentStatus HTTP/1.1" 400 None
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:http://127.0.0.1:7801 "POST /API/GetCurrentStatus HTTP/1.1" 400 None
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:http://127.0.0.1:7801 "POST /API/GetCurrentStatus HTTP/1.1" 400 None
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:http://127.0.0.1:7801 "POST /API/GetCurrentStatus HTTP/1.1" 400 None
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:http://127.0.0.1:7801 "POST /API/GetCurrentStatus HTTP/1.1" 400 None
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:http://127.0.0.1:7801 "POST /API/GetCurrentStatus HTTP/1.1" 400 None
+INFO:root:Requesting prompt expansion from Llama...
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:8080
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:http://127.0.0.1:7801 "POST /API/GetCurrentStatus HTTP/1.1" 400 None
+DEBUG:urllib3.connectionpool:http://127.0.0.1:8080 "POST /v1/chat/completions HTTP/1.1" 200 1511
+INFO:root:Expanded Prompt: fluffy cat, ginger tabby cat, orange tabby cat, big fluffy tail, soft fur, big green eyes, curious expression, sitting on windowsill, golden hour sunlight, warm sunlight streaming through window, dust motes dancing in light, cozy indoor setting, Persian rug, wooden floor, detailed fur texture, realistic fur strands, cinematic lighting, soft shadows, depth of field, bokeh background, 85mm lens, f/1.8 aperture,
+INFO:root:Stopping Llama-server to free VRAM...
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:http://127.0.0.1:7801 "POST /API/GetCurrentStatus HTTP/1.1" 400 None
+INFO:root:Waiting for SwarmUI API to be fully online...
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:http://127.0.0.1:7801 "POST /API/GetCurrentStatus HTTP/1.1" 400 None
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:http://127.0.0.1:7801 "POST /API/GetCurrentStatus HTTP/1.1" 400 None
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:http://127.0.0.1:7801 "POST /API/GetCurrentStatus HTTP/1.1" 400 None
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:http://127.0.0.1:7801 "POST /API/GetCurrentStatus HTTP/1.1" 400 None
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:http://127.0.0.1:7801 "POST /API/GetCurrentStatus HTTP/1.1" 400 None
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:http://127.0.0.1:7801 "POST /API/GetCurrentStatus HTTP/1.1" 400 None
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:http://127.0.0.1:7801 "POST /API/GetCurrentStatus HTTP/1.1" 400 None
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:http://127.0.0.1:7801 "POST /API/GetCurrentStatus HTTP/1.1" 400 None
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:http://127.0.0.1:7801 "POST /API/GetCurrentStatus HTTP/1.1" 400 None
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:http://127.0.0.1:7801 "POST /API/GetCurrentStatus HTTP/1.1" 400 None
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:http://127.0.0.1:7801 "POST /API/GetCurrentStatus HTTP/1.1" 400 None
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:http://127.0.0.1:7801 "POST /API/GetCurrentStatus HTTP/1.1" 400 None
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:http://127.0.0.1:7801 "POST /API/GetCurrentStatus HTTP/1.1" 400 None
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:http://127.0.0.1:7801 "POST /API/GetCurrentStatus HTTP/1.1" 400 None
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:http://127.0.0.1:7801 "POST /API/GetCurrentStatus HTTP/1.1" 400 None
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:http://127.0.0.1:7801 "POST /API/GetCurrentStatus HTTP/1.1" 400 None
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:http://127.0.0.1:7801 "POST /API/GetCurrentStatus HTTP/1.1" 400 None
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:http://127.0.0.1:7801 "POST /API/GetCurrentStatus HTTP/1.1" 400 None
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:http://127.0.0.1:7801 "POST /API/GetCurrentStatus HTTP/1.1" 400 None
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:http://127.0.0.1:7801 "POST /API/GetCurrentStatus HTTP/1.1" 400 None
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:http://127.0.0.1:7801 "POST /API/GetCurrentStatus HTTP/1.1" 400 None
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:http://127.0.0.1:7801 "POST /API/GetCurrentStatus HTTP/1.1" 400 None
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:http://127.0.0.1:7801 "POST /API/GetCurrentStatus HTTP/1.1" 400 None
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:http://127.0.0.1:7801 "POST /API/GetCurrentStatus HTTP/1.1" 400 None
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:http://127.0.0.1:7801 "POST /API/GetCurrentStatus HTTP/1.1" 400 None
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:http://127.0.0.1:7801 "POST /API/GetCurrentStatus HTTP/1.1" 400 None
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:root:on_closing called
+DEBUG:root:stopping server and returning True
+DEBUG:root:on_closed called
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:PIL.Image:Importing AvifImagePlugin
+DEBUG:PIL.Image:Importing BlpImagePlugin
+DEBUG:PIL.Image:Importing BmpImagePlugin
+DEBUG:PIL.Image:Importing BufrStubImagePlugin
+DEBUG:PIL.Image:Importing CurImagePlugin
+DEBUG:PIL.Image:Importing DcxImagePlugin
+DEBUG:PIL.Image:Importing DdsImagePlugin
+DEBUG:PIL.Image:Importing EpsImagePlugin
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:PIL.Image:Importing FitsImagePlugin
+DEBUG:PIL.Image:Importing FliImagePlugin
+DEBUG:PIL.Image:Importing FpxImagePlugin
+DEBUG:PIL.Image:Image: failed to import FpxImagePlugin: No module named 'olefile'
+DEBUG:PIL.Image:Importing FtexImagePlugin
+DEBUG:PIL.Image:Importing GbrImagePlugin
+DEBUG:PIL.Image:Importing GifImagePlugin
+DEBUG:PIL.Image:Importing GribStubImagePlugin
+DEBUG:PIL.Image:Importing Hdf5StubImagePlugin
+DEBUG:PIL.Image:Importing IcnsImagePlugin
+DEBUG:PIL.Image:Importing IcoImagePlugin
+DEBUG:PIL.Image:Importing ImImagePlugin
+DEBUG:PIL.Image:Importing ImtImagePlugin
+DEBUG:PIL.Image:Importing IptcImagePlugin
+DEBUG:PIL.Image:Importing JpegImagePlugin
+DEBUG:PIL.Image:Importing Jpeg2KImagePlugin
+DEBUG:PIL.Image:Importing McIdasImagePlugin
+DEBUG:PIL.Image:Importing MicImagePlugin
+DEBUG:PIL.Image:Image: failed to import MicImagePlugin: No module named 'olefile'
+DEBUG:PIL.Image:Importing MpegImagePlugin
+DEBUG:PIL.Image:Importing MpoImagePlugin
+DEBUG:PIL.Image:Importing MspImagePlugin
+DEBUG:PIL.Image:Importing PalmImagePlugin
+DEBUG:PIL.Image:Importing PcdImagePlugin
+DEBUG:PIL.Image:Importing PcxImagePlugin
+DEBUG:PIL.Image:Importing PdfImagePlugin
+DEBUG:PIL.Image:Importing PixarImagePlugin
+DEBUG:PIL.Image:Importing PngImagePlugin
+DEBUG:PIL.Image:Importing PpmImagePlugin
+DEBUG:PIL.Image:Importing PsdImagePlugin
+DEBUG:PIL.Image:Importing QoiImagePlugin
+DEBUG:PIL.Image:Importing SgiImagePlugin
+DEBUG:PIL.Image:Importing SpiderImagePlugin
+DEBUG:PIL.Image:Importing SunImagePlugin
+DEBUG:PIL.Image:Importing TgaImagePlugin
+DEBUG:PIL.Image:Importing TiffImagePlugin
+DEBUG:PIL.Image:Importing WebPImagePlugin
+DEBUG:PIL.Image:Importing WmfImagePlugin
+DEBUG:PIL.Image:Importing XbmImagePlugin
+DEBUG:PIL.Image:Importing XpmImagePlugin
+DEBUG:PIL.Image:Importing XVThumbImagePlugin
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:http://127.0.0.1:7801 "POST /API/GetCurrentStatus HTTP/1.1" 401 None
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:http://127.0.0.1:7801 "POST /API/GetCurrentStatus HTTP/1.1" 401 None
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:http://127.0.0.1:7801 "POST /API/GetCurrentStatus HTTP/1.1" 401 None
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:http://127.0.0.1:7801 "POST /API/GetCurrentStatus HTTP/1.1" 401 None
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:http://127.0.0.1:7801 "POST /API/GetCurrentStatus HTTP/1.1" 401 None
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:http://127.0.0.1:7801 "POST /API/GetCurrentStatus HTTP/1.1" 401 None
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:http://127.0.0.1:7801 "POST /API/GetCurrentStatus HTTP/1.1" 401 None
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:http://127.0.0.1:7801 "POST /API/GetCurrentStatus HTTP/1.1" 401 None
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:http://127.0.0.1:7801 "POST /API/GetCurrentStatus HTTP/1.1" 401 None
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:http://127.0.0.1:7801 "POST /API/GetCurrentStatus HTTP/1.1" 401 None
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:http://127.0.0.1:7801 "POST /API/GetCurrentStatus HTTP/1.1" 401 None
+INFO:root:Requesting prompt expansion from Llama...
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:8080
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:http://127.0.0.1:7801 "POST /API/GetCurrentStatus HTTP/1.1" 401 None
+DEBUG:urllib3.connectionpool:http://127.0.0.1:8080 "POST /v1/chat/completions HTTP/1.1" 200 1469
+INFO:root:Expanded Prompt: 
+INFO:root:Stopping Llama-server to free VRAM...
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:http://127.0.0.1:7801 "POST /API/GetCurrentStatus HTTP/1.1" 401 None
+INFO:root:Waiting for SwarmUI API to be fully online...
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:http://127.0.0.1:7801 "POST /API/GetCurrentStatus HTTP/1.1" 401 None
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:http://127.0.0.1:7801 "POST /API/GetCurrentStatus HTTP/1.1" 401 None
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:http://127.0.0.1:7801 "POST /API/GetCurrentStatus HTTP/1.1" 401 None
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:http://127.0.0.1:7801 "POST /API/GetCurrentStatus HTTP/1.1" 401 None
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:http://127.0.0.1:7801 "POST /API/GetCurrentStatus HTTP/1.1" 401 None
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:http://127.0.0.1:7801 "POST /API/GetCurrentStatus HTTP/1.1" 401 None
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:http://127.0.0.1:7801 "POST /API/GetCurrentStatus HTTP/1.1" 401 None
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:http://127.0.0.1:7801 "POST /API/GetCurrentStatus HTTP/1.1" 401 None
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:http://127.0.0.1:7801 "POST /API/GetCurrentStatus HTTP/1.1" 401 None
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:http://127.0.0.1:7801 "POST /API/GetCurrentStatus HTTP/1.1" 401 None
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:http://127.0.0.1:7801 "POST /API/GetCurrentStatus HTTP/1.1" 401 None
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:http://127.0.0.1:7801 "POST /API/GetCurrentStatus HTTP/1.1" 401 None
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:http://127.0.0.1:7801 "POST /API/GetCurrentStatus HTTP/1.1" 401 None
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:http://127.0.0.1:7801 "POST /API/GetCurrentStatus HTTP/1.1" 401 None
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:http://127.0.0.1:7801 "POST /API/GetCurrentStatus HTTP/1.1" 401 None
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:http://127.0.0.1:7801 "POST /API/GetCurrentStatus HTTP/1.1" 401 None
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:http://127.0.0.1:7801 "POST /API/GetCurrentStatus HTTP/1.1" 401 None
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:http://127.0.0.1:7801 "POST /API/GetCurrentStatus HTTP/1.1" 401 None
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:http://127.0.0.1:7801 "POST /API/GetCurrentStatus HTTP/1.1" 401 None
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:http://127.0.0.1:7801 "POST /API/GetCurrentStatus HTTP/1.1" 401 None
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:http://127.0.0.1:7801 "POST /API/GetCurrentStatus HTTP/1.1" 401 None
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:http://127.0.0.1:7801 "POST /API/GetCurrentStatus HTTP/1.1" 401 None
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:http://127.0.0.1:7801 "POST /API/GetCurrentStatus HTTP/1.1" 401 None
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:http://127.0.0.1:7801 "POST /API/GetCurrentStatus HTTP/1.1" 401 None
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:http://127.0.0.1:7801 "POST /API/GetCurrentStatus HTTP/1.1" 401 None
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:http://127.0.0.1:7801 "POST /API/GetCurrentStatus HTTP/1.1" 401 None
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:http://127.0.0.1:7801 "POST /API/GetCurrentStatus HTTP/1.1" 401 None
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:http://127.0.0.1:7801 "POST /API/GetCurrentStatus HTTP/1.1" 401 None
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:http://127.0.0.1:7801 "POST /API/GetCurrentStatus HTTP/1.1" 401 None
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:root:on_closing called
+DEBUG:root:stopping server and returning True
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:root:on_closed called
+DEBUG:PIL.Image:Importing AvifImagePlugin
+DEBUG:PIL.Image:Importing BlpImagePlugin
+DEBUG:PIL.Image:Importing BmpImagePlugin
+DEBUG:PIL.Image:Importing BufrStubImagePlugin
+DEBUG:PIL.Image:Importing CurImagePlugin
+DEBUG:PIL.Image:Importing DcxImagePlugin
+DEBUG:PIL.Image:Importing DdsImagePlugin
+DEBUG:PIL.Image:Importing EpsImagePlugin
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:PIL.Image:Importing FitsImagePlugin
+DEBUG:PIL.Image:Importing FliImagePlugin
+DEBUG:PIL.Image:Importing FpxImagePlugin
+DEBUG:PIL.Image:Image: failed to import FpxImagePlugin: No module named 'olefile'
+DEBUG:PIL.Image:Importing FtexImagePlugin
+DEBUG:PIL.Image:Importing GbrImagePlugin
+DEBUG:PIL.Image:Importing GifImagePlugin
+DEBUG:PIL.Image:Importing GribStubImagePlugin
+DEBUG:PIL.Image:Importing Hdf5StubImagePlugin
+DEBUG:PIL.Image:Importing IcnsImagePlugin
+DEBUG:PIL.Image:Importing IcoImagePlugin
+DEBUG:PIL.Image:Importing ImImagePlugin
+DEBUG:PIL.Image:Importing ImtImagePlugin
+DEBUG:PIL.Image:Importing IptcImagePlugin
+DEBUG:PIL.Image:Importing JpegImagePlugin
+DEBUG:PIL.Image:Importing Jpeg2KImagePlugin
+DEBUG:PIL.Image:Importing McIdasImagePlugin
+DEBUG:PIL.Image:Importing MicImagePlugin
+DEBUG:PIL.Image:Image: failed to import MicImagePlugin: No module named 'olefile'
+DEBUG:PIL.Image:Importing MpegImagePlugin
+DEBUG:PIL.Image:Importing MpoImagePlugin
+DEBUG:PIL.Image:Importing MspImagePlugin
+DEBUG:PIL.Image:Importing PalmImagePlugin
+DEBUG:PIL.Image:Importing PcdImagePlugin
+DEBUG:PIL.Image:Importing PcxImagePlugin
+DEBUG:PIL.Image:Importing PdfImagePlugin
+DEBUG:PIL.Image:Importing PixarImagePlugin
+DEBUG:PIL.Image:Importing PngImagePlugin
+DEBUG:PIL.Image:Importing PpmImagePlugin
+DEBUG:PIL.Image:Importing PsdImagePlugin
+DEBUG:PIL.Image:Importing QoiImagePlugin
+DEBUG:PIL.Image:Importing SgiImagePlugin
+DEBUG:PIL.Image:Importing SpiderImagePlugin
+DEBUG:PIL.Image:Importing SunImagePlugin
+DEBUG:PIL.Image:Importing TgaImagePlugin
+DEBUG:PIL.Image:Importing TiffImagePlugin
+DEBUG:PIL.Image:Importing WebPImagePlugin
+DEBUG:PIL.Image:Importing WmfImagePlugin
+DEBUG:PIL.Image:Importing XbmImagePlugin
+DEBUG:PIL.Image:Importing XpmImagePlugin
+DEBUG:PIL.Image:Importing XVThumbImagePlugin
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:http://127.0.0.1:7801 "POST /API/GetNewSession HTTP/1.1" 400 None
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:http://127.0.0.1:7801 "POST /API/GetNewSession HTTP/1.1" 400 None
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:http://127.0.0.1:7801 "POST /API/GetNewSession HTTP/1.1" 400 None
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:http://127.0.0.1:7801 "POST /API/GetNewSession HTTP/1.1" 400 None
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:http://127.0.0.1:7801 "POST /API/GetNewSession HTTP/1.1" 400 None
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:http://127.0.0.1:7801 "POST /API/GetNewSession HTTP/1.1" 400 None
+INFO:root:Requesting prompt expansion from Llama...
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:8080
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:http://127.0.0.1:7801 "POST /API/GetNewSession HTTP/1.1" 400 None
+DEBUG:urllib3.connectionpool:http://127.0.0.1:8080 "POST /v1/chat/completions HTTP/1.1" 200 1567
+INFO:root:Expanded Prompt: fluffy tabby cat, orange and white fur, sitting on a sunlit windowsill, golden hour lighting, soft natural light streaming through window, detailed fur texture, fluffy tail, curious expression, looking at camera, bokeh background, shallow depth of field, warm tones, cozy atmosphere, phot
+INFO:root:Stopping Llama-server to free VRAM...
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:http://127.0.0.1:7801 "POST /API/GetNewSession HTTP/1.1" 400 None
+INFO:root:Waiting for SwarmUI API to be fully online...
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:http://127.0.0.1:7801 "POST /API/GetNewSession HTTP/1.1" 400 None
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:http://127.0.0.1:7801 "POST /API/GetNewSession HTTP/1.1" 400 None
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:http://127.0.0.1:7801 "POST /API/GetNewSession HTTP/1.1" 400 None
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:http://127.0.0.1:7801 "POST /API/GetNewSession HTTP/1.1" 400 None
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:http://127.0.0.1:7801 "POST /API/GetNewSession HTTP/1.1" 400 None
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:http://127.0.0.1:7801 "POST /API/GetNewSession HTTP/1.1" 400 None
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:http://127.0.0.1:7801 "POST /API/GetNewSession HTTP/1.1" 400 None
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:http://127.0.0.1:7801 "POST /API/GetNewSession HTTP/1.1" 400 None
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:http://127.0.0.1:7801 "POST /API/GetNewSession HTTP/1.1" 400 None
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:http://127.0.0.1:7801 "POST /API/GetNewSession HTTP/1.1" 400 None
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:http://127.0.0.1:7801 "POST /API/GetNewSession HTTP/1.1" 400 None
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:http://127.0.0.1:7801 "POST /API/GetNewSession HTTP/1.1" 400 None
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:http://127.0.0.1:7801 "POST /API/GetNewSession HTTP/1.1" 400 None
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:http://127.0.0.1:7801 "POST /API/GetNewSession HTTP/1.1" 400 None
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:http://127.0.0.1:7801 "POST /API/GetNewSession HTTP/1.1" 400 None
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:http://127.0.0.1:7801 "POST /API/GetNewSession HTTP/1.1" 400 None
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:http://127.0.0.1:7801 "POST /API/GetNewSession HTTP/1.1" 400 None
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:http://127.0.0.1:7801 "POST /API/GetNewSession HTTP/1.1" 400 None
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:http://127.0.0.1:7801 "POST /API/GetNewSession HTTP/1.1" 400 None
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:http://127.0.0.1:7801 "POST /API/GetNewSession HTTP/1.1" 400 None
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:http://127.0.0.1:7801 "POST /API/GetNewSession HTTP/1.1" 400 None
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:http://127.0.0.1:7801 "POST /API/GetNewSession HTTP/1.1" 400 None
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:http://127.0.0.1:7801 "POST /API/GetNewSession HTTP/1.1" 400 None
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:http://127.0.0.1:7801 "POST /API/GetNewSession HTTP/1.1" 400 None
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:http://127.0.0.1:7801 "POST /API/GetNewSession HTTP/1.1" 400 None
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:http://127.0.0.1:7801 "POST /API/GetNewSession HTTP/1.1" 400 None
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:http://127.0.0.1:7801 "POST /API/GetNewSession HTTP/1.1" 400 None
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:http://127.0.0.1:7801 "POST /API/GetNewSession HTTP/1.1" 400 None
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:http://127.0.0.1:7801 "POST /API/GetNewSession HTTP/1.1" 400 None
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:http://127.0.0.1:7801 "POST /API/GetNewSession HTTP/1.1" 400 None
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:http://127.0.0.1:7801 "POST /API/GetNewSession HTTP/1.1" 400 None
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:http://127.0.0.1:7801 "POST /API/GetNewSession HTTP/1.1" 400 None
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:http://127.0.0.1:7801 "POST /API/GetNewSession HTTP/1.1" 400 None
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:http://127.0.0.1:7801 "POST /API/GetNewSession HTTP/1.1" 400 None
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:http://127.0.0.1:7801 "POST /API/GetNewSession HTTP/1.1" 400 None
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:http://127.0.0.1:7801 "POST /API/GetNewSession HTTP/1.1" 400 None
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:http://127.0.0.1:7801 "POST /API/GetNewSession HTTP/1.1" 400 None
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:http://127.0.0.1:7801 "POST /API/GetNewSession HTTP/1.1" 400 None
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:http://127.0.0.1:7801 "POST /API/GetNewSession HTTP/1.1" 400 None
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:http://127.0.0.1:7801 "POST /API/GetNewSession HTTP/1.1" 400 None
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:http://127.0.0.1:7801 "POST /API/GetNewSession HTTP/1.1" 400 None
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:http://127.0.0.1:7801 "POST /API/GetNewSession HTTP/1.1" 400 None
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:http://127.0.0.1:7801 "POST /API/GetNewSession HTTP/1.1" 400 None
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:http://127.0.0.1:7801 "POST /API/GetNewSession HTTP/1.1" 400 None
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:http://127.0.0.1:7801 "POST /API/GetNewSession HTTP/1.1" 400 None
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:http://127.0.0.1:7801 "POST /API/GetNewSession HTTP/1.1" 400 None
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:http://127.0.0.1:7801 "POST /API/GetNewSession HTTP/1.1" 400 None
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:http://127.0.0.1:7801 "POST /API/GetNewSession HTTP/1.1" 400 None
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:http://127.0.0.1:7801 "POST /API/GetNewSession HTTP/1.1" 400 None
+DEBUG:root:on_closing called
+DEBUG:root:stopping server and returning True
+DEBUG:root:on_closed called
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:urllib3.connectionpool:Starting new HTTP connection (1): 127.0.0.1:7801
+DEBUG:PIL.Image:Importing AvifImagePlugin
+DEBUG:PIL.Image:Importing BlpImagePlugin
+DEBUG:PIL.Image:Importing BmpImagePlugin
+DEBUG:PIL.Image:Importing BufrStubImagePlugin
+DEBUG:PIL.Image:Importing CurImagePlugin
+DEBUG:PIL.Image:Importing DcxImagePlugin
+DEBUG:PIL.Image:Importing DdsImagePlugin
+DEBUG:PIL.Image:Importing EpsImagePlugin
+DEBUG:PIL.Image:Importing FitsImagePlugin
+DEBUG:PIL.Image:Importing FliImagePlugin
+DEBUG:PIL.Image:Importing FpxImagePlugin
+DEBUG:PIL.Image:Image: failed to import FpxImagePlugin: No module named 'olefile'
+DEBUG:PIL.Image:Importing FtexImagePlugin
+DEBUG:PIL.Image:Importing GbrImagePlugin
+DEBUG:PIL.Image:Importing GifImagePlugin
+DEBUG:PIL.Image:Importing GribStubImagePlugin
+DEBUG:PIL.Image:Importing Hdf5StubImagePlugin
+DEBUG:PIL.Image:Importing IcnsImagePlugin
+DEBUG:PIL.Image:Importing IcoImagePlugin
+DEBUG:PIL.Image:Importing ImImagePlugin
+DEBUG:PIL.Image:Importing ImtImagePlugin
+DEBUG:PIL.Image:Importing IptcImagePlugin
+DEBUG:PIL.Image:Importing JpegImagePlugin
+DEBUG:PIL.Image:Importing Jpeg2KImagePlugin
+DEBUG:PIL.Image:Importing McIdasImagePlugin
+DEBUG:PIL.Image:Importing MicImagePlugin
+DEBUG:PIL.Image:Image: failed to import MicImagePlugin: No module named 'olefile'
+DEBUG:PIL.Image:Importing MpegImagePlugin
+DEBUG:PIL.Image:Importing MpoImagePlugin
+DEBUG:PIL.Image:Importing MspImagePlugin
+DEBUG:PIL.Image:Importing PalmImagePlugin
+DEBUG:PIL.Image:Importing PcdImagePlugin
+DEBUG:PIL.Image:Importing PcxImagePlugin
+DEBUG:PIL.Image:Importing PdfImagePlugin
+DEBUG:PIL.Image:Importing PixarImagePlugin
+DEBUG:PIL.Image:Importing PngImagePlugin
+DEBUG:PIL.Image:Importing PpmImagePlugin
+DEBUG:PIL.Image:Importing PsdImagePlugin
+DEBUG:PIL.Image:Importing QoiImagePlugin
+DEBUG:PIL.Image:Importing SgiImagePlugin
+DEBUG:PIL.Image:Importing SpiderImagePlugin
+DEBUG:PIL.Image:Importing SunImagePlugin
+DEBUG:PIL.Image:Importing TgaImagePlugin
+DEBUG:PIL.Image:Importing TiffImagePlugin
+DEBUG:PIL.Image:Importing WebPImagePlugin
+DEBUG:PIL.Image:Importing WmfImagePlugin
+DEBUG:PIL.Image:Importing XbmImagePlugin
+DEBUG:PIL.Image:Importing XpmImagePlugin
+DEBUG:PIL.Image:Importing XVThumbImagePlugin
+DEBUG:root:on_closing called
+DEBUG:root:stopping server and returning True
+DEBUG:root:on_closed called
+DEBUG:PIL.Image:Importing AvifImagePlugin
+DEBUG:PIL.Image:Importing BlpImagePlugin
+DEBUG:PIL.Image:Importing BmpImagePlugin
+DEBUG:PIL.Image:Importing BufrStubImagePlugin
+DEBUG:PIL.Image:Importing CurImagePlugin
+DEBUG:PIL.Image:Importing DcxImagePlugin
+DEBUG:PIL.Image:Importing DdsImagePlugin
+DEBUG:PIL.Image:Importing EpsImagePlugin
+DEBUG:PIL.Image:Importing FitsImagePlugin
+DEBUG:PIL.Image:Importing FliImagePlugin
+DEBUG:PIL.Image:Importing FpxImagePlugin
+DEBUG:PIL.Image:Image: failed to import FpxImagePlugin: No module named 'olefile'
+DEBUG:PIL.Image:Importing FtexImagePlugin
+DEBUG:PIL.Image:Importing GbrImagePlugin
+DEBUG:PIL.Image:Importing GifImagePlugin
+DEBUG:PIL.Image:Importing GribStubImagePlugin
+DEBUG:PIL.Image:Importing Hdf5StubImagePlugin
+DEBUG:PIL.Image:Importing IcnsImagePlugin
+DEBUG:PIL.Image:Importing IcoImagePlugin
+DEBUG:PIL.Image:Importing ImImagePlugin
+DEBUG:PIL.Image:Importing ImtImagePlugin
+DEBUG:PIL.Image:Importing IptcImagePlugin
+DEBUG:PIL.Image:Importing JpegImagePlugin
+DEBUG:PIL.Image:Importing Jpeg2KImagePlugin
+DEBUG:PIL.Image:Importing McIdasImagePlugin
+DEBUG:PIL.Image:Importing MicImagePlugin
+DEBUG:PIL.Image:Image: failed to import MicImagePlugin: No module named 'olefile'
+DEBUG:PIL.Image:Importing MpegImagePlugin
+DEBUG:PIL.Image:Importing MpoImagePlugin
+DEBUG:PIL.Image:Importing MspImagePlugin
+DEBUG:PIL.Image:Importing PalmImagePlugin
+DEBUG:PIL.Image:Importing PcdImagePlugin
+DEBUG:PIL.Image:Importing PcxImagePlugin
+DEBUG:PIL.Image:Importing PdfImagePlugin
+DEBUG:PIL.Image:Importing PixarImagePlugin
+DEBUG:PIL.Image:Importing PngImagePlugin
+DEBUG:PIL.Image:Importing PpmImagePlugin
+DEBUG:PIL.Image:Importing PsdImagePlugin
+DEBUG:PIL.Image:Importing QoiImagePlugin
+DEBUG:PIL.Image:Importing SgiImagePlugin
+DEBUG:PIL.Image:Importing SpiderImagePlugin
+DEBUG:PIL.Image:Importing SunImagePlugin
+DEBUG:PIL.Image:Importing TgaImagePlugin
+DEBUG:PIL.Image:Importing TiffImagePlugin
+DEBUG:PIL.Image:Importing WebPImagePlugin
+DEBUG:PIL.Image:Importing WmfImagePlugin
+DEBUG:PIL.Image:Importing XbmImagePlugin
+DEBUG:PIL.Image:Importing XpmImagePlugin
+DEBUG:PIL.Image:Importing XVThumbImagePlugin
+DEBUG:httpcore2.connection:connect_tcp.started host='huggingface.co' port=443 local_address=None timeout=3 socket_options=None
+DEBUG:httpcore2.connection:connect_tcp.complete return_value=<httpcore2._backends.sync.SyncStream object at 0x000001DDAAE497F0>
+DEBUG:httpcore2.connection:start_tls.started ssl_context=<truststore._api.SSLContext object at 0x000001DDAAE0B4D0> server_hostname='huggingface.co' timeout=3
+DEBUG:httpcore2.connection:start_tls.complete return_value=<httpcore2._backends.sync.SyncStream object at 0x000001DD92301450>
+DEBUG:httpcore2.http11:send_request_headers.started request=<Request [b'GET']>
+DEBUG:httpcore2.http11:send_request_headers.complete
+DEBUG:httpcore2.http11:send_request_body.started request=<Request [b'GET']>
+DEBUG:httpcore2.http11:send_request_body.complete
+DEBUG:httpcore2.http11:receive_response_headers.started request=<Request [b'GET']>
+DEBUG:httpcore2.http11:receive_response_headers.complete return_value=(b'HTTP/1.1', 200, b'OK', [(b'Content-Type', b'application/json; charset=utf-8'), (b'Transfer-Encoding', b'chunked'), (b'Connection', b'keep-alive'), (b'Date', b'Sun, 04 Oct 2026 13:43:20 GMT'), (b'content-encoding', b'gzip'), (b'ETag', b'W/"1576-P6io7QC3jFOB3QM4BbGHzDy+4To"'), (b'X-Powered-By', b'huggingface-moon'), (b'X-Request-Id', b'Root=1-6ac257f8-6959aa191221d89f1d178417;0caeab97-308a-4169-96ae-1eb8300b10ff'), (b'RateLimit', b'"api";r=499;t=247'), (b'RateLimit-Policy', b'"fixed window";"api";q=500;w=300'), (b'cross-origin-opener-policy', b'same-origin'), (b'Referrer-Policy', b'strict-origin-when-cross-origin'), (b'Access-Control-Max-Age', b'86400'), (b'Access-Control-Allow-Origin', b'https://huggingface.co'), (b'Vary', b'Origin'), (b'vary', b'Accept-Encoding'), (b'Access-Control-Expose-Headers', b'X-Repo-Commit,X-Request-Id,X-Error-Code,X-Error-Message,X-Total-Count,ETag,Link,Accept-Ranges,Content-Range,X-Linked-Size,X-Linked-ETag,X-Xet-Hash'), (b'X-Cache', b'Miss from cloudfront'), (b'Via', b'1.1 6bbb2da0f4f203dadcd8f0ae1073d674.cloudfront.net (CloudFront)'), (b'X-Amz-Cf-Pop', b'CDG52-P4'), (b'Alt-Svc', b'h3=":443"; ma=86400'), (b'X-Amz-Cf-Id', b'L3g4-iL9H40d9FSq0TpvF8zj4dZILVHX8K-KF2tqlIsb_4crEyjI7w=='), (b'Strict-Transport-Security', b'max-age=31536000')])
+INFO:httpx2:HTTP Request: GET https://huggingface.co/api/agent-harnesses "HTTP/1.1 200 OK"
+DEBUG:httpcore2.http11:receive_response_body.started request=<Request [b'GET']>
+DEBUG:httpcore2.http11:receive_response_body.complete
+DEBUG:httpcore2.http11:response_closed.started
+DEBUG:httpcore2.http11:response_closed.complete
+DEBUG:httpcore2.http11:send_request_headers.started request=<Request [b'GET']>
+DEBUG:httpcore2.http11:send_request_headers.complete
+DEBUG:httpcore2.http11:send_request_body.started request=<Request [b'GET']>
+DEBUG:httpcore2.http11:send_request_body.complete
+DEBUG:httpcore2.http11:receive_response_headers.started request=<Request [b'GET']>
+DEBUG:httpcore2.http11:receive_response_headers.complete return_value=(b'HTTP/1.1', 200, b'OK', [(b'Content-Type', b'application/json; charset=utf-8'), (b'Transfer-Encoding', b'chunked'), (b'Connection', b'keep-alive'), (b'Date', b'Sun, 04 Oct 2026 13:43:20 GMT'), (b'content-encoding', b'gzip'), (b'ETag', b'W/"18f5-1D5J8udLG925pM9H1hyVwlzI+KY"'), (b'X-Powered-By', b'huggingface-moon'), (b'X-Request-Id', b'Root=1-6ac257f8-34bb25ea5beb8a2a57205ddd;ca448c45-3887-427b-a34e-c783dd19e085'), (b'RateLimit', b'"api";r=498;t=247'), (b'RateLimit-Policy', b'"fixed window";"api";q=500;w=300'), (b'cross-origin-opener-policy', b'same-origin'), (b'Referrer-Policy', b'strict-origin-when-cross-origin'), (b'Access-Control-Max-Age', b'86400'), (b'Access-Control-Allow-Origin', b'https://huggingface.co'), (b'Vary', b'Origin'), (b'vary', b'Accept-Encoding'), (b'Access-Control-Expose-Headers', b'X-Repo-Commit,X-Request-Id,X-Error-Code,X-Error-Message,X-Total-Count,ETag,Link,Accept-Ranges,Content-Range,X-Linked-Size,X-Linked-ETag,X-Xet-Hash'), (b'Server-Timing', b'atlas1-0;dur=17.374962985515594'), (b'Link', b'<https://huggingface.co/api/models?filter=gguf&sort=downloads&limit=12&cursor=eyIkb3IiOlt7ImRvd25sb2FkcyI6MjE2NDE0MywiX2lkIjp7IiRndCI6IjZhOTY3ODM1NGUyNTQxYjgyOGI0YTQwZSJ9fSx7ImRvd25sb2FkcyI6eyIkbHQiOjIxNjQxNDN9fSx7ImRvd25sb2FkcyI6bnVsbH1dLCJzZWFyY2hTZXF1ZW5jZVRva2VuIjoiQ0thS2tBSWFDU0VBQUFDQTE0SkFRUm9PV2d4cWxuZzFUaVZCdUNpMHBBNGlEbG9NYXBaNE5VNGxRYmdvdEtRTyJ9>; rel="next"'), (b'X-Cache', b'Miss from cloudfront'), (b'Via', b'1.1 6bbb2da0f4f203dadcd8f0ae1073d674.cloudfront.net (CloudFront)'), (b'X-Amz-Cf-Pop', b'CDG52-P4'), (b'Alt-Svc', b'h3=":443"; ma=86400'), (b'X-Amz-Cf-Id', b'MhYFix7Y3J7QHLwqCjGJOa-bWqpoTu38IIVbA4RWAq_2rHll8EaH1g=='), (b'Strict-Transport-Security', b'max-age=31536000')])
+INFO:httpx2:HTTP Request: GET https://huggingface.co/api/models?filter=gguf&sort=downloads&limit=12 "HTTP/1.1 200 OK"
+DEBUG:httpcore2.http11:receive_response_body.started request=<Request [b'GET']>
+DEBUG:httpcore2.http11:receive_response_body.complete
+DEBUG:httpcore2.http11:response_closed.started
+DEBUG:httpcore2.http11:response_closed.complete
+DEBUG:httpcore2.http11:send_request_headers.started request=<Request [b'GET']>
+DEBUG:httpcore2.connection:connect_tcp.started host='huggingface.co' port=443 local_address=None timeout=None socket_options=None
+DEBUG:httpcore2.connection:connect_tcp.started host='huggingface.co' port=443 local_address=None timeout=None socket_options=None
+DEBUG:httpcore2.http11:send_request_headers.complete
+DEBUG:httpcore2.connection:connect_tcp.started host='huggingface.co' port=443 local_address=None timeout=None socket_options=None
+DEBUG:httpcore2.http11:send_request_body.started request=<Request [b'GET']>
+DEBUG:httpcore2.connection:connect_tcp.started host='huggingface.co' port=443 local_address=None timeout=None socket_options=None
+DEBUG:httpcore2.http11:send_request_body.complete
+DEBUG:httpcore2.connection:connect_tcp.started host='huggingface.co' port=443 local_address=None timeout=None socket_options=None
+DEBUG:httpcore2.http11:receive_response_headers.started request=<Request [b'GET']>
+DEBUG:httpcore2.connection:connect_tcp.started host='huggingface.co' port=443 local_address=None timeout=None socket_options=None
+DEBUG:httpcore2.connection:connect_tcp.started host='huggingface.co' port=443 local_address=None timeout=None socket_options=None
+DEBUG:httpcore2.connection:connect_tcp.started host='huggingface.co' port=443 local_address=None timeout=None socket_options=None
+DEBUG:httpcore2.connection:connect_tcp.started host='huggingface.co' port=443 local_address=None timeout=None socket_options=None
+DEBUG:httpcore2.connection:connect_tcp.started host='huggingface.co' port=443 local_address=None timeout=None socket_options=None
+DEBUG:httpcore2.connection:connect_tcp.started host='huggingface.co' port=443 local_address=None timeout=None socket_options=None
+DEBUG:httpcore2.connection:connect_tcp.complete return_value=<httpcore2._backends.sync.SyncStream object at 0x000001DD92303B10>
+DEBUG:httpcore2.connection:connect_tcp.complete return_value=<httpcore2._backends.sync.SyncStream object at 0x000001DD922E69E0>
+DEBUG:httpcore2.connection:start_tls.started ssl_context=<truststore._api.SSLContext object at 0x000001DDAAE0B4D0> server_hostname='huggingface.co' timeout=None
+DEBUG:httpcore2.connection:start_tls.started ssl_context=<truststore._api.SSLContext object at 0x000001DDAAE0B4D0> server_hostname='huggingface.co' timeout=None
+DEBUG:httpcore2.connection:connect_tcp.complete return_value=<httpcore2._backends.sync.SyncStream object at 0x000001DD922E6FD0>
+DEBUG:httpcore2.connection:connect_tcp.complete return_value=<httpcore2._backends.sync.SyncStream object at 0x000001DDAADB68D0>
+DEBUG:httpcore2.connection:connect_tcp.complete return_value=<httpcore2._backends.sync.SyncStream object at 0x000001DDAADD1F20>
+DEBUG:httpcore2.connection:start_tls.started ssl_context=<truststore._api.SSLContext object at 0x000001DDAAE0B4D0> server_hostname='huggingface.co' timeout=None
+DEBUG:httpcore2.connection:start_tls.started ssl_context=<truststore._api.SSLContext object at 0x000001DDAAE0B4D0> server_hostname='huggingface.co' timeout=None
+DEBUG:httpcore2.connection:start_tls.started ssl_context=<truststore._api.SSLContext object at 0x000001DDAAE0B4D0> server_hostname='huggingface.co' timeout=None
+DEBUG:httpcore2.connection:connect_tcp.complete return_value=<httpcore2._backends.sync.SyncStream object at 0x000001DDAADD2030>
+DEBUG:httpcore2.connection:start_tls.started ssl_context=<truststore._api.SSLContext object at 0x000001DDAAE0B4D0> server_hostname='huggingface.co' timeout=None
+DEBUG:httpcore2.connection:connect_tcp.complete return_value=<httpcore2._backends.sync.SyncStream object at 0x000001DDAAD5FB50>
+DEBUG:httpcore2.connection:start_tls.started ssl_context=<truststore._api.SSLContext object at 0x000001DDAAE0B4D0> server_hostname='huggingface.co' timeout=None
+DEBUG:httpcore2.connection:connect_tcp.complete return_value=<httpcore2._backends.sync.SyncStream object at 0x000001DDAAD5FC50>
+DEBUG:httpcore2.connection:connect_tcp.complete return_value=<httpcore2._backends.sync.SyncStream object at 0x000001DDAAE43C50>
+DEBUG:httpcore2.connection:start_tls.started ssl_context=<truststore._api.SSLContext object at 0x000001DDAAE0B4D0> server_hostname='huggingface.co' timeout=None
+DEBUG:httpcore2.connection:start_tls.started ssl_context=<truststore._api.SSLContext object at 0x000001DDAAE0B4D0> server_hostname='huggingface.co' timeout=None
+DEBUG:httpcore2.connection:connect_tcp.complete return_value=<httpcore2._backends.sync.SyncStream object at 0x000001DDAE1C4410>
+DEBUG:httpcore2.connection:connect_tcp.complete return_value=<httpcore2._backends.sync.SyncStream object at 0x000001DDAAD83BD0>
+DEBUG:httpcore2.connection:start_tls.started ssl_context=<truststore._api.SSLContext object at 0x000001DDAAE0B4D0> server_hostname='huggingface.co' timeout=None
+DEBUG:httpcore2.connection:start_tls.started ssl_context=<truststore._api.SSLContext object at 0x000001DDAAE0B4D0> server_hostname='huggingface.co' timeout=None
+DEBUG:httpcore2.connection:start_tls.complete return_value=<httpcore2._backends.sync.SyncStream object at 0x000001DDAAD83CB0>
+DEBUG:httpcore2.http11:send_request_headers.started request=<Request [b'GET']>
+DEBUG:httpcore2.http11:send_request_headers.complete
+DEBUG:httpcore2.http11:send_request_body.started request=<Request [b'GET']>
+DEBUG:httpcore2.http11:send_request_body.complete
+DEBUG:httpcore2.http11:receive_response_headers.started request=<Request [b'GET']>
+DEBUG:httpcore2.connection:start_tls.complete return_value=<httpcore2._backends.sync.SyncStream object at 0x000001DDAAE4CE20>
+DEBUG:httpcore2.http11:send_request_headers.started request=<Request [b'GET']>
+DEBUG:httpcore2.http11:send_request_headers.complete
+DEBUG:httpcore2.http11:send_request_body.started request=<Request [b'GET']>
+DEBUG:httpcore2.http11:send_request_body.complete
+DEBUG:httpcore2.http11:receive_response_headers.started request=<Request [b'GET']>
+DEBUG:httpcore2.connection:start_tls.complete return_value=<httpcore2._backends.sync.SyncStream object at 0x000001DDAAE3A690>
+DEBUG:httpcore2.http11:send_request_headers.started request=<Request [b'GET']>
+DEBUG:httpcore2.http11:send_request_headers.complete
+DEBUG:httpcore2.http11:send_request_body.started request=<Request [b'GET']>
+DEBUG:httpcore2.http11:send_request_body.complete
+DEBUG:httpcore2.http11:receive_response_headers.started request=<Request [b'GET']>
+DEBUG:httpcore2.connection:start_tls.complete return_value=<httpcore2._backends.sync.SyncStream object at 0x000001DDAAE3A5D0>
+DEBUG:httpcore2.connection:start_tls.complete return_value=<httpcore2._backends.sync.SyncStream object at 0x000001DDAAD57960>
+DEBUG:httpcore2.http11:send_request_headers.started request=<Request [b'GET']>
+DEBUG:httpcore2.http11:send_request_headers.started request=<Request [b'GET']>
+DEBUG:httpcore2.http11:send_request_headers.complete
+DEBUG:httpcore2.http11:send_request_headers.complete
+DEBUG:httpcore2.http11:send_request_body.started request=<Request [b'GET']>
+DEBUG:httpcore2.http11:send_request_body.started request=<Request [b'GET']>
+DEBUG:httpcore2.connection:start_tls.complete return_value=<httpcore2._backends.sync.SyncStream object at 0x000001DDAAD56FC0>
+DEBUG:httpcore2.http11:send_request_body.complete
+DEBUG:httpcore2.connection:start_tls.complete return_value=<httpcore2._backends.sync.SyncStream object at 0x000001DDAE19B2F0>
+DEBUG:httpcore2.http11:send_request_body.complete
+DEBUG:httpcore2.http11:send_request_headers.started request=<Request [b'GET']>
+DEBUG:httpcore2.http11:receive_response_headers.started request=<Request [b'GET']>
+DEBUG:httpcore2.http11:send_request_headers.started request=<Request [b'GET']>
+DEBUG:httpcore2.http11:receive_response_headers.started request=<Request [b'GET']>
+DEBUG:httpcore2.http11:send_request_headers.complete
+DEBUG:httpcore2.http11:send_request_headers.complete
+DEBUG:httpcore2.http11:send_request_body.started request=<Request [b'GET']>
+DEBUG:httpcore2.http11:send_request_body.started request=<Request [b'GET']>
+DEBUG:httpcore2.http11:send_request_body.complete
+DEBUG:httpcore2.http11:send_request_body.complete
+DEBUG:httpcore2.http11:receive_response_headers.started request=<Request [b'GET']>
+DEBUG:httpcore2.http11:receive_response_headers.started request=<Request [b'GET']>
+DEBUG:httpcore2.connection:start_tls.complete return_value=<httpcore2._backends.sync.SyncStream object at 0x000001DDAE19BED0>
+DEBUG:httpcore2.http11:send_request_headers.started request=<Request [b'GET']>
+DEBUG:httpcore2.connection:start_tls.complete return_value=<httpcore2._backends.sync.SyncStream object at 0x000001DDAE1A05F0>
+DEBUG:httpcore2.http11:send_request_headers.complete
+DEBUG:httpcore2.http11:send_request_headers.started request=<Request [b'GET']>
+DEBUG:httpcore2.http11:send_request_body.started request=<Request [b'GET']>
+DEBUG:httpcore2.http11:send_request_body.complete
+DEBUG:httpcore2.http11:send_request_headers.complete
+DEBUG:httpcore2.http11:receive_response_headers.started request=<Request [b'GET']>
+DEBUG:httpcore2.http11:send_request_body.started request=<Request [b'GET']>
+DEBUG:httpcore2.http11:send_request_body.complete
+DEBUG:httpcore2.http11:receive_response_headers.started request=<Request [b'GET']>
+DEBUG:httpcore2.connection:start_tls.complete return_value=<httpcore2._backends.sync.SyncStream object at 0x000001DDAE1B4050>
+DEBUG:httpcore2.http11:send_request_headers.started request=<Request [b'GET']>
+DEBUG:httpcore2.connection:start_tls.complete return_value=<httpcore2._backends.sync.SyncStream object at 0x000001DDAE1B7C50>
+DEBUG:httpcore2.http11:send_request_headers.complete
+DEBUG:httpcore2.http11:send_request_headers.started request=<Request [b'GET']>
+DEBUG:httpcore2.http11:send_request_body.started request=<Request [b'GET']>
+DEBUG:httpcore2.http11:send_request_body.complete
+DEBUG:httpcore2.http11:send_request_headers.complete
+DEBUG:httpcore2.http11:receive_response_headers.started request=<Request [b'GET']>
+DEBUG:httpcore2.http11:send_request_body.started request=<Request [b'GET']>
+DEBUG:httpcore2.http11:send_request_body.complete
+DEBUG:httpcore2.http11:receive_response_headers.started request=<Request [b'GET']>
+DEBUG:httpcore2.http11:receive_response_headers.complete return_value=(b'HTTP/1.1', 200, b'OK', [(b'Content-Type', b'application/json; charset=utf-8'), (b'Transfer-Encoding', b'chunked'), (b'Connection', b'keep-alive'), (b'Date', b'Sun, 04 Oct 2026 13:43:20 GMT'), (b'content-encoding', b'gzip'), (b'ETag', b'W/"ab1-x4p5GnmVJayasdIbjG3JAURHv7s"'), (b'X-Powered-By', b'huggingface-moon'), (b'X-Request-Id', b'Root=1-6ac257f8-12cd059a1416f7992af508a1;7f221103-af7f-4eb9-a124-ebd7b296b057'), (b'RateLimit', b'"api";r=497;t=247'), (b'RateLimit-Policy', b'"fixed window";"api";q=500;w=300'), (b'cross-origin-opener-policy', b'same-origin'), (b'Referrer-Policy', b'strict-origin-when-cross-origin'), (b'Access-Control-Max-Age', b'86400'), (b'Access-Control-Allow-Origin', b'https://huggingface.co'), (b'Vary', b'Origin'), (b'vary', b'Accept-Encoding'), (b'Access-Control-Expose-Headers', b'X-Repo-Commit,X-Request-Id,X-Error-Code,X-Error-Message,X-Total-Count,ETag,Link,Accept-Ranges,Content-Range,X-Linked-Size,X-Linked-ETag,X-Xet-Hash'), (b'X-Cache', b'Miss from cloudfront'), (b'Via', b'1.1 6bbb2da0f4f203dadcd8f0ae1073d674.cloudfront.net (CloudFront)'), (b'X-Amz-Cf-Pop', b'CDG52-P4'), (b'Alt-Svc', b'h3=":443"; ma=86400'), (b'X-Amz-Cf-Id', b'40JlgGsGVraWPQp-u4gaxEIoyKbp73foTkO4g5soUU_H1yRIEuDP8g=='), (b'Strict-Transport-Security', b'max-age=31536000')])
+INFO:httpx2:HTTP Request: GET https://huggingface.co/api/models/mudler/locate-anything.cpp-gguf?blobs=true "HTTP/1.1 200 OK"
+DEBUG:httpcore2.http11:receive_response_body.started request=<Request [b'GET']>
+DEBUG:httpcore2.http11:receive_response_body.complete
+DEBUG:httpcore2.http11:response_closed.started
+DEBUG:httpcore2.http11:response_closed.complete
+DEBUG:httpcore2.http11:receive_response_headers.complete return_value=(b'HTTP/1.1', 200, b'OK', [(b'Content-Type', b'application/json; charset=utf-8'), (b'Transfer-Encoding', b'chunked'), (b'Connection', b'keep-alive'), (b'Date', b'Sun, 04 Oct 2026 13:43:21 GMT'), (b'content-encoding', b'gzip'), (b'ETag', b'W/"2c9c-WQ+TXoRq4MMiziAulXpV0BAvyUg"'), (b'X-Powered-By', b'huggingface-moon'), (b'X-Request-Id', b'Root=1-6ac257f9-05bf082243ef00e247f13b17;b2531d23-db7c-4bea-b9f9-c7e373d92ad4'), (b'RateLimit', b'"api";r=491;t=246'), (b'RateLimit-Policy', b'"fixed window";"api";q=500;w=300'), (b'cross-origin-opener-policy', b'same-origin'), (b'Referrer-Policy', b'strict-origin-when-cross-origin'), (b'Access-Control-Max-Age', b'86400'), (b'Access-Control-Allow-Origin', b'https://huggingface.co'), (b'Vary', b'Origin'), (b'vary', b'Accept-Encoding'), (b'Access-Control-Expose-Headers', b'X-Repo-Commit,X-Request-Id,X-Error-Code,X-Error-Message,X-Total-Count,ETag,Link,Accept-Ranges,Content-Range,X-Linked-Size,X-Linked-ETag,X-Xet-Hash'), (b'X-Cache', b'Miss from cloudfront'), (b'Via', b'1.1 4a09ca83280b6b5f15a5c3da38e16cc4.cloudfront.net (CloudFront)'), (b'X-Amz-Cf-Pop', b'CDG52-P4'), (b'Alt-Svc', b'h3=":443"; ma=86400'), (b'X-Amz-Cf-Id', b'_ZmjoQCImTKmbvYxu_HXp3XIY5dfGcM3azxe7edLVedgkbfe_rnr7g=='), (b'Strict-Transport-Security', b'max-age=31536000')])
+INFO:httpx2:HTTP Request: GET https://huggingface.co/api/models/ornith-ai/Ornith-1.5-9B-GGUF?blobs=true "HTTP/1.1 200 OK"
+DEBUG:httpcore2.http11:receive_response_body.started request=<Request [b'GET']>
+DEBUG:httpcore2.http11:receive_response_headers.complete return_value=(b'HTTP/1.1', 200, b'OK', [(b'Content-Type', b'application/json; charset=utf-8'), (b'Transfer-Encoding', b'chunked'), (b'Connection', b'keep-alive'), (b'Date', b'Sun, 04 Oct 2026 13:43:21 GMT'), (b'content-encoding', b'gzip'), (b'ETag', b'W/"4094-2ZEBYQ14JyLb99iA9IoFz7/p7yo"'), (b'X-Powered-By', b'huggingface-moon'), (b'X-Request-Id', b'Root=1-6ac257f9-1987f5251ad151277cd18e1f;a3baf5f3-1138-46d9-8fc6-7a097bfe2e7c'), (b'RateLimit', b'"api";r=496;t=246'), (b'RateLimit-Policy', b'"fixed window";"api";q=500;w=300'), (b'cross-origin-opener-policy', b'same-origin'), (b'Referrer-Policy', b'strict-origin-when-cross-origin'), (b'Access-Control-Max-Age', b'86400'), (b'Access-Control-Allow-Origin', b'https://huggingface.co'), (b'Vary', b'Origin'), (b'vary', b'Accept-Encoding'), (b'Access-Control-Expose-Headers', b'X-Repo-Commit,X-Request-Id,X-Error-Code,X-Error-Message,X-Total-Count,ETag,Link,Accept-Ranges,Content-Range,X-Linked-Size,X-Linked-ETag,X-Xet-Hash'), (b'X-Cache', b'Miss from cloudfront'), (b'Via', b'1.1 d7473af2384857db4a300adf87749d2a.cloudfront.net (CloudFront)'), (b'X-Amz-Cf-Pop', b'CDG52-P4'), (b'Alt-Svc', b'h3=":443"; ma=86400'), (b'X-Amz-Cf-Id', b'TpFXMDY3Johz95Q_ef7V4TZlG252WVyoyVA9BR7WwRQD-jj-56x5nA=='), (b'Strict-Transport-Security', b'max-age=31536000')])
+INFO:httpx2:HTTP Request: GET https://huggingface.co/api/models/unsloth/Qwen3-Coder-30B-A3B-Instruct-GGUF?blobs=true "HTTP/1.1 200 OK"
+DEBUG:httpcore2.http11:receive_response_body.started request=<Request [b'GET']>
+DEBUG:httpcore2.http11:receive_response_body.complete
+DEBUG:httpcore2.http11:response_closed.started
+DEBUG:httpcore2.http11:receive_response_headers.complete return_value=(b'HTTP/1.1', 200, b'OK', [(b'Content-Type', b'application/json; charset=utf-8'), (b'Transfer-Encoding', b'chunked'), (b'Connection', b'keep-alive'), (b'Date', b'Sun, 04 Oct 2026 13:43:21 GMT'), (b'content-encoding', b'gzip'), (b'ETag', b'W/"9a8-dg7OCS612jiyjQ6MMp9UNXb2DOY"'), (b'X-Powered-By', b'huggingface-moon'), (b'X-Request-Id', b'Root=1-6ac257f9-62c1e8bc2e22e8c25f50523d;d27df64b-880a-4aad-9d1f-68a17ed28cd9'), (b'RateLimit', b'"api";r=493;t=246'), (b'RateLimit-Policy', b'"fixed window";"api";q=500;w=300'), (b'cross-origin-opener-policy', b'same-origin'), (b'Referrer-Policy', b'strict-origin-when-cross-origin'), (b'Access-Control-Max-Age', b'86400'), (b'Access-Control-Allow-Origin', b'https://huggingface.co'), (b'Vary', b'Origin'), (b'vary', b'Accept-Encoding'), (b'Access-Control-Expose-Headers', b'X-Repo-Commit,X-Request-Id,X-Error-Code,X-Error-Message,X-Total-Count,ETag,Link,Accept-Ranges,Content-Range,X-Linked-Size,X-Linked-ETag,X-Xet-Hash'), (b'X-Cache', b'Miss from cloudfront'), (b'Via', b'1.1 659f7e30714eec8c6be60dc1c3cca158.cloudfront.net (CloudFront)'), (b'X-Amz-Cf-Pop', b'CDG52-P4'), (b'Alt-Svc', b'h3=":443"; ma=86400'), (b'X-Amz-Cf-Id', b'o3TZ7H0BBqbxio7nKekkmxiPWFGkbQYWvsPwTaGvMP9zvJDE-U-x_w=='), (b'Strict-Transport-Security', b'max-age=31536000')])
+DEBUG:httpcore2.http11:receive_response_headers.complete return_value=(b'HTTP/1.1', 200, b'OK', [(b'Content-Type', b'application/json; charset=utf-8'), (b'Transfer-Encoding', b'chunked'), (b'Connection', b'keep-alive'), (b'Date', b'Sun, 04 Oct 2026 13:43:21 GMT'), (b'content-encoding', b'gzip'), (b'ETag', b'W/"4af0-OauFizWqnZY2R4VEadt575dI+mM"'), (b'X-Powered-By', b'huggingface-moon'), (b'X-Request-Id', b'Root=1-6ac257f9-23b38bb90d243fd43683c36f;adde193f-d3f5-415a-bcd0-ef9593f925a6'), (b'RateLimit', b'"api";r=492;t=246'), (b'RateLimit-Policy', b'"fixed window";"api";q=500;w=300'), (b'cross-origin-opener-policy', b'same-origin'), (b'Referrer-Policy', b'strict-origin-when-cross-origin'), (b'Access-Control-Max-Age', b'86400'), (b'Access-Control-Allow-Origin', b'https://huggingface.co'), (b'Vary', b'Origin'), (b'vary', b'Accept-Encoding'), (b'Access-Control-Expose-Headers', b'X-Repo-Commit,X-Request-Id,X-Error-Code,X-Error-Message,X-Total-Count,ETag,Link,Accept-Ranges,Content-Range,X-Linked-Size,X-Linked-ETag,X-Xet-Hash'), (b'X-Cache', b'Miss from cloudfront'), (b'Via', b'1.1 56455cfd91a1942216b3c22ed923150c.cloudfront.net (CloudFront)'), (b'X-Amz-Cf-Pop', b'CDG52-P4'), (b'Alt-Svc', b'h3=":443"; ma=86400'), (b'X-Amz-Cf-Id', b'KmReTsQ9moQ5cVHH1uEOdddFd6Pv5g4PYicNputZa5xgbN8Hl86U5g=='), (b'Strict-Transport-Security', b'max-age=31536000')])
+DEBUG:httpcore2.http11:response_closed.complete
+INFO:httpx2:HTTP Request: GET https://huggingface.co/api/models/cdiamond/Qwen3.8-27B-iMatrix-NVFP4-MTP-GGUF?blobs=true "HTTP/1.1 200 OK"
+DEBUG:httpcore2.http11:receive_response_body.complete
+INFO:httpx2:HTTP Request: GET https://huggingface.co/api/models/unsloth/Qwen3.8-27B-GGUF?blobs=true "HTTP/1.1 200 OK"
+DEBUG:httpcore2.http11:receive_response_body.started request=<Request [b'GET']>
+DEBUG:httpcore2.http11:response_closed.started
+DEBUG:httpcore2.http11:receive_response_body.started request=<Request [b'GET']>
+DEBUG:httpcore2.http11:response_closed.complete
+DEBUG:httpcore2.http11:receive_response_body.complete
+DEBUG:httpcore2.http11:response_closed.started
+DEBUG:httpcore2.http11:response_closed.complete
+DEBUG:httpcore2.http11:receive_response_body.complete
+DEBUG:httpcore2.http11:response_closed.started
+DEBUG:httpcore2.http11:response_closed.complete
+DEBUG:httpcore2.http11:receive_response_headers.complete return_value=(b'HTTP/1.1', 200, b'OK', [(b'Content-Type', b'application/json; charset=utf-8'), (b'Transfer-Encoding', b'chunked'), (b'Connection', b'keep-alive'), (b'Date', b'Sun, 04 Oct 2026 13:43:21 GMT'), (b'content-encoding', b'gzip'), (b'ETag', b'W/"481f-IM8nggVAJ7jqY19Alh19lQ55ydY"'), (b'X-Powered-By', b'huggingface-moon'), (b'X-Request-Id', b'Root=1-6ac257f9-4f9fb4cf189e4a22334a9558;c559c238-115b-44f8-b968-c97f49dcec16'), (b'RateLimit', b'"api";r=494;t=246'), (b'RateLimit-Policy', b'"fixed window";"api";q=500;w=300'), (b'cross-origin-opener-policy', b'same-origin'), (b'Referrer-Policy', b'strict-origin-when-cross-origin'), (b'Access-Control-Max-Age', b'86400'), (b'Access-Control-Allow-Origin', b'https://huggingface.co'), (b'Vary', b'Origin'), (b'vary', b'Accept-Encoding'), (b'Access-Control-Expose-Headers', b'X-Repo-Commit,X-Request-Id,X-Error-Code,X-Error-Message,X-Total-Count,ETag,Link,Accept-Ranges,Content-Range,X-Linked-Size,X-Linked-ETag,X-Xet-Hash'), (b'X-Cache', b'Miss from cloudfront'), (b'Via', b'1.1 7942de46d7f690659dee238fe5cd2d32.cloudfront.net (CloudFront)'), (b'X-Amz-Cf-Pop', b'CDG52-P4'), (b'Alt-Svc', b'h3=":443"; ma=86400'), (b'X-Amz-Cf-Id', b'qN5Rd9dcxBcs0wi8B7t8jwVBFH6AtOcngV6uLZeTIeUBlawW1pOXyg=='), (b'Strict-Transport-Security', b'max-age=31536000')])
+INFO:httpx2:HTTP Request: GET https://huggingface.co/api/models/DavidAU/Qwen3.8-27B-TURBO-Fable-Cold-Fusion-735-882-Heretic-Uncensored-NEO-CODER-MAX-MTP-GGUF?blobs=true "HTTP/1.1 200 OK"
+DEBUG:httpcore2.http11:receive_response_body.started request=<Request [b'GET']>
+DEBUG:httpcore2.http11:receive_response_headers.complete return_value=(b'HTTP/1.1', 200, b'OK', [(b'Content-Type', b'application/json; charset=utf-8'), (b'Transfer-Encoding', b'chunked'), (b'Connection', b'keep-alive'), (b'Date', b'Sun, 04 Oct 2026 13:43:21 GMT'), (b'content-encoding', b'gzip'), (b'ETag', b'W/"2cba-SIPlEb8IW0cQ3oht37ThRS7hZjk"'), (b'X-Powered-By', b'huggingface-moon'), (b'X-Request-Id', b'Root=1-6ac257f9-079ba542637a8caf3c1d450a;5352585f-4e54-405f-a997-5057a3a7ac95'), (b'RateLimit', b'"api";r=495;t=246'), (b'RateLimit-Policy', b'"fixed window";"api";q=500;w=300'), (b'cross-origin-opener-policy', b'same-origin'), (b'Referrer-Policy', b'strict-origin-when-cross-origin'), (b'Access-Control-Max-Age', b'86400'), (b'Access-Control-Allow-Origin', b'https://huggingface.co'), (b'Vary', b'Origin'), (b'vary', b'Accept-Encoding'), (b'Access-Control-Expose-Headers', b'X-Repo-Commit,X-Request-Id,X-Error-Code,X-Error-Message,X-Total-Count,ETag,Link,Accept-Ranges,Content-Range,X-Linked-Size,X-Linked-ETag,X-Xet-Hash'), (b'X-Cache', b'Miss from cloudfront'), (b'Via', b'1.1 4756b7e0ebcafb62886b18ec3b8cea7c.cloudfront.net (CloudFront)'), (b'X-Amz-Cf-Pop', b'CDG52-P4'), (b'Alt-Svc', b'h3=":443"; ma=86400'), (b'X-Amz-Cf-Id', b'PhIfDJZsRb30GANqzbTVc_Xw63lTccRdwEgXXpMo2IldO60Gv6SiTg=='), (b'Strict-Transport-Security', b'max-age=31536000')])
+INFO:httpx2:HTTP Request: GET https://huggingface.co/api/models/ornith-ai/Ornith-1.5-35B-A3B-GGUF?blobs=true "HTTP/1.1 200 OK"
+DEBUG:httpcore2.http11:receive_response_body.started request=<Request [b'GET']>
+DEBUG:httpcore2.http11:receive_response_body.complete
+DEBUG:httpcore2.http11:response_closed.started
+DEBUG:httpcore2.http11:response_closed.complete
+DEBUG:httpcore2.http11:receive_response_headers.complete return_value=(b'HTTP/1.1', 200, b'OK', [(b'Content-Type', b'application/json; charset=utf-8'), (b'Transfer-Encoding', b'chunked'), (b'Connection', b'keep-alive'), (b'Date', b'Sun, 04 Oct 2026 13:43:21 GMT'), (b'content-encoding', b'gzip'), (b'ETag', b'W/"2aca-aSlnp6ElXz/0heJwQ4Gdokv0/AE"'), (b'X-Powered-By', b'huggingface-moon'), (b'X-Request-Id', b'Root=1-6ac257f9-13b78e9b11c64e91063351c1;017ed7cb-237a-42a0-b9af-983e6c5d1c5f'), (b'RateLimit', b'"api";r=489;t=246'), (b'RateLimit-Policy', b'"fixed window";"api";q=500;w=300'), (b'cross-origin-opener-policy', b'same-origin'), (b'Referrer-Policy', b'strict-origin-when-cross-origin'), (b'Access-Control-Max-Age', b'86400'), (b'Access-Control-Allow-Origin', b'https://huggingface.co'), (b'Vary', b'Origin'), (b'vary', b'Accept-Encoding'), (b'Access-Control-Expose-Headers', b'X-Repo-Commit,X-Request-Id,X-Error-Code,X-Error-Message,X-Total-Count,ETag,Link,Accept-Ranges,Content-Range,X-Linked-Size,X-Linked-ETag,X-Xet-Hash'), (b'X-Cache', b'Miss from cloudfront'), (b'Via', b'1.1 aeaf6805e1f7af40289dbac799f9b670.cloudfront.net (CloudFront)'), (b'X-Amz-Cf-Pop', b'CDG52-P4'), (b'Alt-Svc', b'h3=":443"; ma=86400'), (b'X-Amz-Cf-Id', b'cYfY7SZmzfMQy9c4QmdNTh9KXnyMRd8QDeZNYu7TULboaFujFYGINw=='), (b'Strict-Transport-Security', b'max-age=31536000')])
+DEBUG:httpcore2.http11:receive_response_body.complete
+INFO:httpx2:HTTP Request: GET https://huggingface.co/api/models/ornith-ai/Ornith-1.0-9B-GGUF?blobs=true "HTTP/1.1 200 OK"
+DEBUG:httpcore2.http11:response_closed.started
+DEBUG:httpcore2.http11:receive_response_headers.complete return_value=(b'HTTP/1.1', 200, b'OK', [(b'Content-Type', b'application/json; charset=utf-8'), (b'Transfer-Encoding', b'chunked'), (b'Connection', b'keep-alive'), (b'Date', b'Sun, 04 Oct 2026 13:43:21 GMT'), (b'content-encoding', b'gzip'), (b'ETag', b'W/"3f7f-P1JiiBlu/KaXDOjdFzu6uaADI9s"'), (b'X-Powered-By', b'huggingface-moon'), (b'X-Request-Id', b'Root=1-6ac257f9-480db6460876d1e735524b6f;2d027f57-133d-4ce7-851f-664a2f6a4424'), (b'RateLimit', b'"api";r=490;t=246'), (b'RateLimit-Policy', b'"fixed window";"api";q=500;w=300'), (b'cross-origin-opener-policy', b'same-origin'), (b'Referrer-Policy', b'strict-origin-when-cross-origin'), (b'Access-Control-Max-Age', b'86400'), (b'Access-Control-Allow-Origin', b'https://huggingface.co'), (b'Vary', b'Origin'), (b'vary', b'Accept-Encoding'), (b'Access-Control-Expose-Headers', b'X-Repo-Commit,X-Request-Id,X-Error-Code,X-Error-Message,X-Total-Count,ETag,Link,Accept-Ranges,Content-Range,X-Linked-Size,X-Linked-ETag,X-Xet-Hash'), (b'X-Cache', b'Miss from cloudfront'), (b'Via', b'1.1 4a09ca83280b6b5f15a5c3da38e16cc4.cloudfront.net (CloudFront)'), (b'X-Amz-Cf-Pop', b'CDG52-P4'), (b'Alt-Svc', b'h3=":443"; ma=86400'), (b'X-Amz-Cf-Id', b'Cv2iLnIqUIRQzLeAzXDFj3Xv9OtTOtIbv4xFzNui8gq229Afpodu8w=='), (b'Strict-Transport-Security', b'max-age=31536000')])
+DEBUG:httpcore2.http11:receive_response_body.started request=<Request [b'GET']>
+DEBUG:httpcore2.http11:response_closed.complete
+INFO:httpx2:HTTP Request: GET https://huggingface.co/api/models/JonathanColetti/Qwen3.8-27B-Uncensored-GGUF?blobs=true "HTTP/1.1 200 OK"
+DEBUG:httpcore2.http11:receive_response_body.started request=<Request [b'GET']>
+DEBUG:httpcore2.http11:receive_response_body.complete
+DEBUG:httpcore2.http11:response_closed.started
+DEBUG:httpcore2.http11:response_closed.complete
+DEBUG:httpcore2.http11:receive_response_headers.complete return_value=(b'HTTP/1.1', 200, b'OK', [(b'Content-Type', b'application/json; charset=utf-8'), (b'Transfer-Encoding', b'chunked'), (b'Connection', b'keep-alive'), (b'Date', b'Sun, 04 Oct 2026 13:43:21 GMT'), (b'content-encoding', b'gzip'), (b'ETag', b'W/"298e-32puS1XPPy5jRLvz9GPRbKql+Uo"'), (b'X-Powered-By', b'huggingface-moon'), (b'X-Request-Id', b'Root=1-6ac257f9-53af8267719d11a322a3e450;d28031b7-25ff-4d8f-a300-493615ddbadb'), (b'RateLimit', b'"api";r=488;t=246'), (b'RateLimit-Policy', b'"fixed window";"api";q=500;w=300'), (b'cross-origin-opener-policy', b'same-origin'), (b'Referrer-Policy', b'strict-origin-when-cross-origin'), (b'Access-Control-Max-Age', b'86400'), (b'Access-Control-Allow-Origin', b'https://huggingface.co'), (b'Vary', b'Origin'), (b'vary', b'Accept-Encoding'), (b'Access-Control-Expose-Headers', b'X-Repo-Commit,X-Request-Id,X-Error-Code,X-Error-Message,X-Total-Count,ETag,Link,Accept-Ranges,Content-Range,X-Linked-Size,X-Linked-ETag,X-Xet-Hash'), (b'X-Cache', b'Miss from cloudfront'), (b'Via', b'1.1 a355d8f903a0cf5525893c863fcdf216.cloudfront.net (CloudFront)'), (b'X-Amz-Cf-Pop', b'CDG52-P4'), (b'Alt-Svc', b'h3=":443"; ma=86400'), (b'X-Amz-Cf-Id', b'BPJ5iwBdDObnaIaNALDz5J8nnIoOC61BtspVi0-MF7ZEtojTlr70vg=='), (b'Strict-Transport-Security', b'max-age=31536000')])
+INFO:httpx2:HTTP Request: GET https://huggingface.co/api/models/CMSManhattan/JiRackUltra_1b?blobs=true "HTTP/1.1 200 OK"
+DEBUG:httpcore2.http11:receive_response_body.started request=<Request [b'GET']>
+DEBUG:httpcore2.http11:receive_response_body.complete
+DEBUG:httpcore2.http11:response_closed.started
+DEBUG:httpcore2.http11:response_closed.complete
+DEBUG:httpcore2.http11:receive_response_body.complete
+DEBUG:httpcore2.http11:response_closed.started
+DEBUG:httpcore2.http11:response_closed.complete
+DEBUG:httpcore2.http11:receive_response_headers.complete return_value=(b'HTTP/1.1', 200, b'OK', [(b'Content-Type', b'application/json; charset=utf-8'), (b'Transfer-Encoding', b'chunked'), (b'Connection', b'keep-alive'), (b'Date', b'Sun, 04 Oct 2026 13:43:21 GMT'), (b'content-encoding', b'gzip'), (b'ETag', b'W/"16f88-+7tE44tqvRIX3GsYcBsFrEQEPJY"'), (b'X-Powered-By', b'huggingface-moon'), (b'X-Request-Id', b'Root=1-6ac257f9-5d09f0873a83c79311fd36f8;786b53bd-cd77-4456-8fd8-e3ec295eeb47'), (b'RateLimit', b'"api";r=487;t=246'), (b'RateLimit-Policy', b'"fixed window";"api";q=500;w=300'), (b'cross-origin-opener-policy', b'same-origin'), (b'Referrer-Policy', b'strict-origin-when-cross-origin'), (b'Access-Control-Max-Age', b'86400'), (b'Access-Control-Allow-Origin', b'https://huggingface.co'), (b'Vary', b'Origin'), (b'vary', b'Accept-Encoding'), (b'Access-Control-Expose-Headers', b'X-Repo-Commit,X-Request-Id,X-Error-Code,X-Error-Message,X-Total-Count,ETag,Link,Accept-Ranges,Content-Range,X-Linked-Size,X-Linked-ETag,X-Xet-Hash'), (b'X-Cache', b'Miss from cloudfront'), (b'Via', b'1.1 5cb605e8100138acccc04f094724133e.cloudfront.net (CloudFront)'), (b'X-Amz-Cf-Pop', b'CDG52-P4'), (b'Alt-Svc', b'h3=":443"; ma=86400'), (b'X-Amz-Cf-Id', b'OzlbPq2nfoUF6QYmnQGT353jZ28fHRO_9b65NQgrvrcEBnMxdSB_nA=='), (b'Strict-Transport-Security', b'max-age=31536000')])
+INFO:httpx2:HTTP Request: GET https://huggingface.co/api/models/audio-cpp/audio.cpp-gguf?blobs=true "HTTP/1.1 200 OK"
+DEBUG:httpcore2.http11:receive_response_body.started request=<Request [b'GET']>
+DEBUG:httpcore2.http11:receive_response_headers.complete return_value=(b'HTTP/1.1', 200, b'OK', [(b'Content-Type', b'application/json; charset=utf-8'), (b'Transfer-Encoding', b'chunked'), (b'Connection', b'keep-alive'), (b'Date', b'Sun, 04 Oct 2026 13:43:21 GMT'), (b'content-encoding', b'gzip'), (b'ETag', b'W/"3297-4oKjXnnDDSKWPDcZ9UP2bUz9mgY"'), (b'X-Powered-By', b'huggingface-moon'), (b'X-Request-Id', b'Root=1-6ac257f9-387074e67f19bdfa0d66e41a;11e9eec3-aea1-4a49-8b19-039286d14c01'), (b'RateLimit', b'"api";r=486;t=246'), (b'RateLimit-Policy', b'"fixed window";"api";q=500;w=300'), (b'cross-origin-opener-policy', b'same-origin'), (b'Referrer-Policy', b'strict-origin-when-cross-origin'), (b'Access-Control-Max-Age', b'86400'), (b'Access-Control-Allow-Origin', b'https://huggingface.co'), (b'Vary', b'Origin'), (b'vary', b'Accept-Encoding'), (b'Access-Control-Expose-Headers', b'X-Repo-Commit,X-Request-Id,X-Error-Code,X-Error-Message,X-Total-Count,ETag,Link,Accept-Ranges,Content-Range,X-Linked-Size,X-Linked-ETag,X-Xet-Hash'), (b'X-Cache', b'Miss from cloudfront'), (b'Via', b'1.1 c78f30ff7f6b22fd8ede54f77f4fe538.cloudfront.net (CloudFront)'), (b'X-Amz-Cf-Pop', b'CDG52-P4'), (b'Alt-Svc', b'h3=":443"; ma=86400'), (b'X-Amz-Cf-Id', b'iVbzIpnd8x7pwHJZFQVthccuXX-hBv-R88gLeBteHt1dnGUTUZ63VQ=='), (b'Strict-Transport-Security', b'max-age=31536000')])
+INFO:httpx2:HTTP Request: GET https://huggingface.co/api/models/prism-ml/Ternary-Bonsai-2-27B-gguf?blobs=true "HTTP/1.1 200 OK"
+DEBUG:httpcore2.http11:receive_response_body.started request=<Request [b'GET']>
+DEBUG:httpcore2.http11:receive_response_body.complete
+DEBUG:httpcore2.http11:response_closed.started
+DEBUG:httpcore2.http11:response_closed.complete
+DEBUG:httpcore2.http11:receive_response_body.complete
+DEBUG:httpcore2.http11:response_closed.started
+DEBUG:httpcore2.http11:response_closed.complete
+DEBUG:root:on_closing called
+DEBUG:root:stopping server and returning True
+DEBUG:root:on_closed called
+DEBUG:PIL.Image:Importing AvifImagePlugin
+DEBUG:PIL.Image:Importing BlpImagePlugin
+DEBUG:PIL.Image:Importing BmpImagePlugin
+DEBUG:PIL.Image:Importing BufrStubImagePlugin
+DEBUG:PIL.Image:Importing CurImagePlugin
+DEBUG:PIL.Image:Importing DcxImagePlugin
+DEBUG:PIL.Image:Importing DdsImagePlugin
+DEBUG:PIL.Image:Importing EpsImagePlugin
+DEBUG:PIL.Image:Importing FitsImagePlugin
+DEBUG:PIL.Image:Importing FliImagePlugin
+DEBUG:PIL.Image:Importing FpxImagePlugin
+DEBUG:PIL.Image:Image: failed to import FpxImagePlugin: No module named 'olefile'
+DEBUG:PIL.Image:Importing FtexImagePlugin
+DEBUG:PIL.Image:Importing GbrImagePlugin
+DEBUG:PIL.Image:Importing GifImagePlugin
+DEBUG:PIL.Image:Importing GribStubImagePlugin
+DEBUG:PIL.Image:Importing Hdf5StubImagePlugin
+DEBUG:PIL.Image:Importing IcnsImagePlugin
+DEBUG:PIL.Image:Importing IcoImagePlugin
+DEBUG:PIL.Image:Importing ImImagePlugin
+DEBUG:PIL.Image:Importing ImtImagePlugin
+DEBUG:PIL.Image:Importing IptcImagePlugin
+DEBUG:PIL.Image:Importing JpegImagePlugin
+DEBUG:PIL.Image:Importing Jpeg2KImagePlugin
+DEBUG:PIL.Image:Importing McIdasImagePlugin
+DEBUG:PIL.Image:Importing MicImagePlugin
+DEBUG:PIL.Image:Image: failed to import MicImagePlugin: No module named 'olefile'
+DEBUG:PIL.Image:Importing MpegImagePlugin
+DEBUG:PIL.Image:Importing MpoImagePlugin
+DEBUG:PIL.Image:Importing MspImagePlugin
+DEBUG:PIL.Image:Importing PalmImagePlugin
+DEBUG:PIL.Image:Importing PcdImagePlugin
+DEBUG:PIL.Image:Importing PcxImagePlugin
+DEBUG:PIL.Image:Importing PdfImagePlugin
+DEBUG:PIL.Image:Importing PixarImagePlugin
+DEBUG:PIL.Image:Importing PngImagePlugin
+DEBUG:PIL.Image:Importing PpmImagePlugin
+DEBUG:PIL.Image:Importing PsdImagePlugin
+DEBUG:PIL.Image:Importing QoiImagePlugin
+DEBUG:PIL.Image:Importing SgiImagePlugin
+DEBUG:PIL.Image:Importing SpiderImagePlugin
+DEBUG:PIL.Image:Importing SunImagePlugin
+DEBUG:PIL.Image:Importing TgaImagePlugin
+DEBUG:PIL.Image:Importing TiffImagePlugin
+DEBUG:PIL.Image:Importing WebPImagePlugin
+DEBUG:PIL.Image:Importing WmfImagePlugin
+DEBUG:PIL.Image:Importing XbmImagePlugin
+DEBUG:PIL.Image:Importing XpmImagePlugin
+DEBUG:PIL.Image:Importing XVThumbImagePlugin
+DEBUG:root:on_closing called
+DEBUG:root:stopping server and returning True
+DEBUG:root:on_closed called
+DEBUG:PIL.Image:Importing AvifImagePlugin
+DEBUG:PIL.Image:Importing BlpImagePlugin
+DEBUG:PIL.Image:Importing BmpImagePlugin
+DEBUG:PIL.Image:Importing BufrStubImagePlugin
+DEBUG:PIL.Image:Importing CurImagePlugin
+DEBUG:PIL.Image:Importing DcxImagePlugin
+DEBUG:PIL.Image:Importing DdsImagePlugin
+DEBUG:PIL.Image:Importing EpsImagePlugin
+DEBUG:PIL.Image:Importing FitsImagePlugin
+DEBUG:PIL.Image:Importing FliImagePlugin
+DEBUG:PIL.Image:Importing FpxImagePlugin
+DEBUG:PIL.Image:Image: failed to import FpxImagePlugin: No module named 'olefile'
+DEBUG:PIL.Image:Importing FtexImagePlugin
+DEBUG:PIL.Image:Importing GbrImagePlugin
+DEBUG:PIL.Image:Importing GifImagePlugin
+DEBUG:PIL.Image:Importing GribStubImagePlugin
+DEBUG:PIL.Image:Importing Hdf5StubImagePlugin
+DEBUG:PIL.Image:Importing IcnsImagePlugin
+DEBUG:PIL.Image:Importing IcoImagePlugin
+DEBUG:PIL.Image:Importing ImImagePlugin
+DEBUG:PIL.Image:Importing ImtImagePlugin
+DEBUG:PIL.Image:Importing IptcImagePlugin
+DEBUG:PIL.Image:Importing JpegImagePlugin
+DEBUG:PIL.Image:Importing Jpeg2KImagePlugin
+DEBUG:PIL.Image:Importing McIdasImagePlugin
+DEBUG:PIL.Image:Importing MicImagePlugin
+DEBUG:PIL.Image:Image: failed to import MicImagePlugin: No module named 'olefile'
+DEBUG:PIL.Image:Importing MpegImagePlugin
+DEBUG:PIL.Image:Importing MpoImagePlugin
+DEBUG:PIL.Image:Importing MspImagePlugin
+DEBUG:PIL.Image:Importing PalmImagePlugin
+DEBUG:PIL.Image:Importing PcdImagePlugin
+DEBUG:PIL.Image:Importing PcxImagePlugin
+DEBUG:PIL.Image:Importing PdfImagePlugin
+DEBUG:PIL.Image:Importing PixarImagePlugin
+DEBUG:PIL.Image:Importing PngImagePlugin
+DEBUG:PIL.Image:Importing PpmImagePlugin
+DEBUG:PIL.Image:Importing PsdImagePlugin
+DEBUG:PIL.Image:Importing QoiImagePlugin
+DEBUG:PIL.Image:Importing SgiImagePlugin
+DEBUG:PIL.Image:Importing SpiderImagePlugin
+DEBUG:PIL.Image:Importing SunImagePlugin
+DEBUG:PIL.Image:Importing TgaImagePlugin
+DEBUG:PIL.Image:Importing TiffImagePlugin
+DEBUG:PIL.Image:Importing WebPImagePlugin
+DEBUG:PIL.Image:Importing WmfImagePlugin
+DEBUG:PIL.Image:Importing XbmImagePlugin
+DEBUG:PIL.Image:Importing XpmImagePlugin
+DEBUG:PIL.Image:Importing XVThumbImagePlugin
+DEBUG:PIL.Image:Importing AvifImagePlugin
+DEBUG:PIL.Image:Importing BlpImagePlugin
+DEBUG:PIL.Image:Importing BmpImagePlugin
+DEBUG:PIL.Image:Importing BufrStubImagePlugin
+DEBUG:PIL.Image:Importing CurImagePlugin
+DEBUG:PIL.Image:Importing DcxImagePlugin
+DEBUG:PIL.Image:Importing DdsImagePlugin
+DEBUG:PIL.Image:Importing EpsImagePlugin
+DEBUG:PIL.Image:Importing FitsImagePlugin
+DEBUG:PIL.Image:Importing FliImagePlugin
+DEBUG:PIL.Image:Importing FpxImagePlugin
+DEBUG:PIL.Image:Image: failed to import FpxImagePlugin: No module named 'olefile'
+DEBUG:PIL.Image:Importing FtexImagePlugin
+DEBUG:PIL.Image:Importing GbrImagePlugin
+DEBUG:PIL.Image:Importing GifImagePlugin
+DEBUG:PIL.Image:Importing GribStubImagePlugin
+DEBUG:PIL.Image:Importing Hdf5StubImagePlugin
+DEBUG:PIL.Image:Importing IcnsImagePlugin
+DEBUG:PIL.Image:Importing IcoImagePlugin
+DEBUG:PIL.Image:Importing ImImagePlugin
+DEBUG:PIL.Image:Importing ImtImagePlugin
+DEBUG:PIL.Image:Importing IptcImagePlugin
+DEBUG:PIL.Image:Importing JpegImagePlugin
+DEBUG:PIL.Image:Importing Jpeg2KImagePlugin
+DEBUG:PIL.Image:Importing McIdasImagePlugin
+DEBUG:PIL.Image:Importing MicImagePlugin
+DEBUG:PIL.Image:Image: failed to import MicImagePlugin: No module named 'olefile'
+DEBUG:PIL.Image:Importing MpegImagePlugin
+DEBUG:PIL.Image:Importing MpoImagePlugin
+DEBUG:PIL.Image:Importing MspImagePlugin
+DEBUG:PIL.Image:Importing PalmImagePlugin
+DEBUG:PIL.Image:Importing PcdImagePlugin
+DEBUG:PIL.Image:Importing PcxImagePlugin
+DEBUG:PIL.Image:Importing PdfImagePlugin
+DEBUG:PIL.Image:Importing PixarImagePlugin
+DEBUG:PIL.Image:Importing PngImagePlugin
+DEBUG:PIL.Image:Importing PpmImagePlugin
+DEBUG:PIL.Image:Importing PsdImagePlugin
+DEBUG:PIL.Image:Importing QoiImagePlugin
+DEBUG:PIL.Image:Importing SgiImagePlugin
+DEBUG:PIL.Image:Importing SpiderImagePlugin
+DEBUG:PIL.Image:Importing SunImagePlugin
+DEBUG:PIL.Image:Importing TgaImagePlugin
+DEBUG:PIL.Image:Importing TiffImagePlugin
+DEBUG:PIL.Image:Importing WebPImagePlugin
+DEBUG:PIL.Image:Importing WmfImagePlugin
+DEBUG:PIL.Image:Importing XbmImagePlugin
+DEBUG:PIL.Image:Importing XpmImagePlugin
+DEBUG:PIL.Image:Importing XVThumbImagePlugin
+DEBUG:PIL.Image:Importing AvifImagePlugin
+DEBUG:PIL.Image:Importing BlpImagePlugin
+DEBUG:PIL.Image:Importing BmpImagePlugin
+DEBUG:PIL.Image:Importing BufrStubImagePlugin
+DEBUG:PIL.Image:Importing CurImagePlugin
+DEBUG:PIL.Image:Importing DcxImagePlugin
+DEBUG:PIL.Image:Importing DdsImagePlugin
+DEBUG:PIL.Image:Importing EpsImagePlugin
+DEBUG:PIL.Image:Importing FitsImagePlugin
+DEBUG:PIL.Image:Importing FliImagePlugin
+DEBUG:PIL.Image:Importing FpxImagePlugin
+DEBUG:PIL.Image:Image: failed to import FpxImagePlugin: No module named 'olefile'
+DEBUG:PIL.Image:Importing FtexImagePlugin
+DEBUG:PIL.Image:Importing GbrImagePlugin
+DEBUG:PIL.Image:Importing GifImagePlugin
+DEBUG:PIL.Image:Importing GribStubImagePlugin
+DEBUG:PIL.Image:Importing Hdf5StubImagePlugin
+DEBUG:PIL.Image:Importing IcnsImagePlugin
+DEBUG:PIL.Image:Importing IcoImagePlugin
+DEBUG:PIL.Image:Importing ImImagePlugin
+DEBUG:PIL.Image:Importing ImtImagePlugin
+DEBUG:PIL.Image:Importing IptcImagePlugin
+DEBUG:PIL.Image:Importing JpegImagePlugin
+DEBUG:PIL.Image:Importing Jpeg2KImagePlugin
+DEBUG:PIL.Image:Importing McIdasImagePlugin
+DEBUG:PIL.Image:Importing MicImagePlugin
+DEBUG:PIL.Image:Image: failed to import MicImagePlugin: No module named 'olefile'
+DEBUG:PIL.Image:Importing MpegImagePlugin
+DEBUG:PIL.Image:Importing MpoImagePlugin
+DEBUG:PIL.Image:Importing MspImagePlugin
+DEBUG:PIL.Image:Importing PalmImagePlugin
+DEBUG:PIL.Image:Importing PcdImagePlugin
+DEBUG:PIL.Image:Importing PcxImagePlugin
+DEBUG:PIL.Image:Importing PdfImagePlugin
+DEBUG:PIL.Image:Importing PixarImagePlugin
+DEBUG:PIL.Image:Importing PngImagePlugin
+DEBUG:PIL.Image:Importing PpmImagePlugin
+DEBUG:PIL.Image:Importing PsdImagePlugin
+DEBUG:PIL.Image:Importing QoiImagePlugin
+DEBUG:PIL.Image:Importing SgiImagePlugin
+DEBUG:PIL.Image:Importing SpiderImagePlugin
+DEBUG:PIL.Image:Importing SunImagePlugin
+DEBUG:PIL.Image:Importing TgaImagePlugin
+DEBUG:PIL.Image:Importing TiffImagePlugin
+DEBUG:PIL.Image:Importing WebPImagePlugin
+DEBUG:PIL.Image:Importing WmfImagePlugin
+DEBUG:PIL.Image:Importing XbmImagePlugin
+DEBUG:PIL.Image:Importing XpmImagePlugin
+DEBUG:PIL.Image:Importing XVThumbImagePlugin
+DEBUG:PIL.Image:Importing AvifImagePlugin
+DEBUG:PIL.Image:Importing BlpImagePlugin
+DEBUG:PIL.Image:Importing BmpImagePlugin
+DEBUG:PIL.Image:Importing BufrStubImagePlugin
+DEBUG:PIL.Image:Importing CurImagePlugin
+DEBUG:PIL.Image:Importing DcxImagePlugin
+DEBUG:PIL.Image:Importing DdsImagePlugin
+DEBUG:PIL.Image:Importing EpsImagePlugin
+DEBUG:PIL.Image:Importing FitsImagePlugin
+DEBUG:PIL.Image:Importing FliImagePlugin
+DEBUG:PIL.Image:Importing FpxImagePlugin
+DEBUG:PIL.Image:Image: failed to import FpxImagePlugin: No module named 'olefile'
+DEBUG:PIL.Image:Importing FtexImagePlugin
+DEBUG:PIL.Image:Importing GbrImagePlugin
+DEBUG:PIL.Image:Importing GifImagePlugin
+DEBUG:PIL.Image:Importing GribStubImagePlugin
+DEBUG:PIL.Image:Importing Hdf5StubImagePlugin
+DEBUG:PIL.Image:Importing IcnsImagePlugin
+DEBUG:PIL.Image:Importing IcoImagePlugin
+DEBUG:PIL.Image:Importing ImImagePlugin
+DEBUG:PIL.Image:Importing ImtImagePlugin
+DEBUG:PIL.Image:Importing IptcImagePlugin
+DEBUG:PIL.Image:Importing JpegImagePlugin
+DEBUG:PIL.Image:Importing Jpeg2KImagePlugin
+DEBUG:PIL.Image:Importing McIdasImagePlugin
+DEBUG:PIL.Image:Importing MicImagePlugin
+DEBUG:PIL.Image:Image: failed to import MicImagePlugin: No module named 'olefile'
+DEBUG:PIL.Image:Importing MpegImagePlugin
+DEBUG:PIL.Image:Importing MpoImagePlugin
+DEBUG:PIL.Image:Importing MspImagePlugin
+DEBUG:PIL.Image:Importing PalmImagePlugin
+DEBUG:PIL.Image:Importing PcdImagePlugin
+DEBUG:PIL.Image:Importing PcxImagePlugin
+DEBUG:PIL.Image:Importing PdfImagePlugin
+DEBUG:PIL.Image:Importing PixarImagePlugin
+DEBUG:PIL.Image:Importing PngImagePlugin
+DEBUG:PIL.Image:Importing PpmImagePlugin
+DEBUG:PIL.Image:Importing PsdImagePlugin
+DEBUG:PIL.Image:Importing QoiImagePlugin
+DEBUG:PIL.Image:Importing SgiImagePlugin
+DEBUG:PIL.Image:Importing SpiderImagePlugin
+DEBUG:PIL.Image:Importing SunImagePlugin
+DEBUG:PIL.Image:Importing TgaImagePlugin
+DEBUG:PIL.Image:Importing TiffImagePlugin
+DEBUG:PIL.Image:Importing WebPImagePlugin
+DEBUG:PIL.Image:Importing WmfImagePlugin
+DEBUG:PIL.Image:Importing XbmImagePlugin
+DEBUG:PIL.Image:Importing XpmImagePlugin
+DEBUG:PIL.Image:Importing XVThumbImagePlugin
+DEBUG:PIL.Image:Importing AvifImagePlugin
+DEBUG:PIL.Image:Importing BlpImagePlugin
+DEBUG:PIL.Image:Importing BmpImagePlugin
+DEBUG:PIL.Image:Importing BufrStubImagePlugin
+DEBUG:PIL.Image:Importing CurImagePlugin
+DEBUG:PIL.Image:Importing DcxImagePlugin
+DEBUG:PIL.Image:Importing DdsImagePlugin
+DEBUG:PIL.Image:Importing EpsImagePlugin
+DEBUG:PIL.Image:Importing FitsImagePlugin
+DEBUG:PIL.Image:Importing FliImagePlugin
+DEBUG:PIL.Image:Importing FpxImagePlugin
+DEBUG:PIL.Image:Image: failed to import FpxImagePlugin: No module named 'olefile'
+DEBUG:PIL.Image:Importing FtexImagePlugin
+DEBUG:PIL.Image:Importing GbrImagePlugin
+DEBUG:PIL.Image:Importing GifImagePlugin
+DEBUG:PIL.Image:Importing GribStubImagePlugin
+DEBUG:PIL.Image:Importing Hdf5StubImagePlugin
+DEBUG:PIL.Image:Importing IcnsImagePlugin
+DEBUG:PIL.Image:Importing IcoImagePlugin
+DEBUG:PIL.Image:Importing ImImagePlugin
+DEBUG:PIL.Image:Importing ImtImagePlugin
+DEBUG:PIL.Image:Importing IptcImagePlugin
+DEBUG:PIL.Image:Importing JpegImagePlugin
+DEBUG:PIL.Image:Importing Jpeg2KImagePlugin
+DEBUG:PIL.Image:Importing McIdasImagePlugin
+DEBUG:PIL.Image:Importing MicImagePlugin
+DEBUG:PIL.Image:Image: failed to import MicImagePlugin: No module named 'olefile'
+DEBUG:PIL.Image:Importing MpegImagePlugin
+DEBUG:PIL.Image:Importing MpoImagePlugin
+DEBUG:PIL.Image:Importing MspImagePlugin
+DEBUG:PIL.Image:Importing PalmImagePlugin
+DEBUG:PIL.Image:Importing PcdImagePlugin
+DEBUG:PIL.Image:Importing PcxImagePlugin
+DEBUG:PIL.Image:Importing PdfImagePlugin
+DEBUG:PIL.Image:Importing PixarImagePlugin
+DEBUG:PIL.Image:Importing PngImagePlugin
+DEBUG:PIL.Image:Importing PpmImagePlugin
+DEBUG:PIL.Image:Importing PsdImagePlugin
+DEBUG:PIL.Image:Importing QoiImagePlugin
+DEBUG:PIL.Image:Importing SgiImagePlugin
+DEBUG:PIL.Image:Importing SpiderImagePlugin
+DEBUG:PIL.Image:Importing SunImagePlugin
+DEBUG:PIL.Image:Importing TgaImagePlugin
+DEBUG:PIL.Image:Importing TiffImagePlugin
+DEBUG:PIL.Image:Importing WebPImagePlugin
+DEBUG:PIL.Image:Importing WmfImagePlugin
+DEBUG:PIL.Image:Importing XbmImagePlugin
+DEBUG:PIL.Image:Importing XpmImagePlugin
+DEBUG:PIL.Image:Importing XVThumbImagePlugin
+DEBUG:root:on_closing called
+DEBUG:root:stopping server and returning True
+DEBUG:root:on_closed called
+ERROR:pywebview:Error occurred in script
+Traceback (most recent call last):
+  File "C:\Users\Gaming\AppData\Local\Programs\Python\Python313\Lib\site-packages\webview\platforms\edgechromium.py", line 152, in evaluate_js
+    self.webview.Invoke(
+    ~~~~~~~~~~~~~~~~~~~^
+        Func[Object](
+        ^^^^^^^^^^^^^
+    ...<4 lines>...
+        )
+        ^
+    )
+    ^
+System.ObjectDisposedException: Cannot access a disposed object.
+Object name: 'WebView2'.
+   at System.Windows.Forms.Control.MarshaledInvoke(Control caller, Delegate method, Object[] args, Boolean synchronous)
+   at System.Windows.Forms.Control.Invoke(Delegate method, Object[] args)

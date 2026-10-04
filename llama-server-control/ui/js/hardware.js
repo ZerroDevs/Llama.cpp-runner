@@ -48,6 +48,15 @@ setInterval(async () => {
                     ctxWarning.classList.add('hidden');
                 }
             }
+            
+            // Swarm UI Speed update
+            const swarmSpeedEl = document.getElementById('swarm-gen-speed');
+            if (swarmSpeedEl) {
+                // If it's been a while since we updated currentSwarmIts, we might want to fade it to 0, 
+                // but for now just show what's there.
+                const speed = window.currentSwarmIts || 0;
+                swarmSpeedEl.innerHTML = `${speed.toFixed(2)} <span class="text-sm text-textMuted font-normal">it/s</span>`;
+            }
         }
     }
 }, 2000);
@@ -85,13 +94,23 @@ if (btnRunBenchmark) {
             data: {
                 labels: [],
                 datasets: [{
-                    label: 'Tokens / Second',
+                    label: 'Llama Tokens / Second',
                     data: [],
                     borderColor: '#10b981',
                     backgroundColor: 'rgba(16, 185, 129, 0.1)',
                     borderWidth: 2,
                     fill: true,
-                    tension: 0.3
+                    tension: 0.3,
+                    yAxisID: 'y'
+                }, {
+                    label: 'SwarmUI Speed (it/s)',
+                    data: [],
+                    borderColor: '#6366f1',
+                    backgroundColor: 'rgba(99, 102, 241, 0.1)',
+                    borderWidth: 2,
+                    fill: true,
+                    tension: 0.3,
+                    yAxisID: 'y1'
                 }]
             },
             options: {
@@ -99,9 +118,10 @@ if (btnRunBenchmark) {
                 maintainAspectRatio: false,
                 scales: {
                     x: { display: true, title: { display: true, text: 'Time (s)', color: '#9ca3af' }, ticks: { color: '#9ca3af' }, grid: { color: 'rgba(255,255,255,0.05)' } },
-                    y: { display: true, title: { display: true, text: 'T/s', color: '#9ca3af' }, ticks: { color: '#9ca3af' }, grid: { color: 'rgba(255,255,255,0.05)' }, beginAtZero: true }
+                    y: { type: 'linear', display: true, position: 'left', title: { display: true, text: 'T/s', color: '#9ca3af' }, ticks: { color: '#9ca3af' }, grid: { color: 'rgba(255,255,255,0.05)' }, beginAtZero: true },
+                    y1: { type: 'linear', display: true, position: 'right', title: { display: true, text: 'it/s', color: '#9ca3af' }, ticks: { color: '#9ca3af' }, grid: { drawOnChartArea: false }, beginAtZero: true }
                 },
-                plugins: { legend: { display: false } },
+                plugins: { legend: { display: true, labels: { color: '#9ca3af' } } },
                 animation: false
             }
         });
@@ -143,29 +163,37 @@ if (btnRunBenchmark) {
             let lastChartTime = performance.now();
             let tokensSinceLastChart = 0;
             
+            let buffer = '';
             while (!done) {
                 const { value, done: readerDone } = await reader.read();
                 done = readerDone;
                 if (value) {
-                    const chunk = decoder.decode(value, { stream: true });
-                    const lines = chunk.split('\n');
+                    buffer += decoder.decode(value, { stream: true });
+                    const lines = buffer.split('\n');
+                    buffer = lines.pop(); // keep partial line in buffer
                     for (const line of lines) {
                         if (line.startsWith('data: ') && line !== 'data: [DONE]') {
                             try {
                                 const data = JSON.parse(line.substring(6));
-                                if (data.choices[0].delta && data.choices[0].delta.content) {
+                                
+                                if (data.error) {
+                                    throw new Error(data.error.message || "Unknown stream error");
+                                }
+
+                                if (data.choices && data.choices.length > 0) {
                                     if (firstTokenTime === 0) {
                                         firstTokenTime = performance.now();
-                                        // Calc prompt eval speed
-                                        // We sent ~30 tokens. Let's get exact prompt tokens if returned, but usually streaming doesn't give usage until the end.
-                                        // We will just estimate: 30 tokens / time. Actually, if llama.cpp returns usage, we can update it later.
                                         const evalTimeMs = firstTokenTime - startReqTime;
                                         const estimatedPromptTokens = 30; // roughly
                                         const pSpeed = (estimatedPromptTokens / (evalTimeMs / 1000)).toFixed(1);
                                         promptSpeedEl.innerHTML = `${pSpeed} <span class="text-sm text-textMuted font-normal">T/s (est.)</span>`;
                                     }
-                                    tokensGenerated++;
-                                    tokensSinceLastChart++;
+                                    
+                                    // Even if content is empty string, count it as a token if it's a valid delta
+                                    if (data.choices[0].delta) {
+                                        tokensGenerated++;
+                                        tokensSinceLastChart++;
+                                    }
                                 }
                                 
                                 // Update chart every ~0.5s
@@ -177,6 +205,10 @@ if (btnRunBenchmark) {
                                     const totalTimeSec = (now - firstTokenTime) / 1000;
                                     benchChart.data.labels.push(totalTimeSec.toFixed(1));
                                     benchChart.data.datasets[0].data.push(currentSpeed);
+                                    
+                                    // Push SwarmUI current telemetry
+                                    benchChart.data.datasets[1].data.push(window.currentSwarmIts || 0);
+                                    
                                     benchChart.update();
                                     
                                     genSpeedEl.innerHTML = `${currentSpeed.toFixed(1)} <span class="text-sm text-textMuted font-normal">T/s</span>`;
@@ -187,12 +219,19 @@ if (btnRunBenchmark) {
                                 
                                 // End of stream usage
                                 if (data.usage) {
-                                    if (data.usage.prompt_tokens) {
+                                    if (data.usage.prompt_tokens && firstTokenTime > 0) {
                                         const pSpeed = (data.usage.prompt_tokens / ((firstTokenTime - startReqTime) / 1000)).toFixed(1);
                                         promptSpeedEl.innerHTML = `${pSpeed} <span class="text-sm text-textMuted font-normal">T/s</span>`;
                                     }
                                 }
-                            } catch (e) {}
+                            } catch (e) {
+                                if (e.message !== "Unexpected end of JSON input" && e.message !== "Unexpected token 'D', \"DONE]\" is not valid JSON") {
+                                    console.error("Stream parse error:", e, line);
+                                    if (e.message && e.message.includes("Unknown stream error")) {
+                                        throw e; // bubble up to outer catch
+                                    }
+                                }
+                            }
                         }
                     }
                 }

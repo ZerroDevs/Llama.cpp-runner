@@ -15,11 +15,47 @@ document.addEventListener('DOMContentLoaded', () => {
     
     // Markdown configuration
     if (window.marked && window.hljs) {
+        const renderer = new marked.Renderer();
+        renderer.code = function(arg1, arg2) {
+            let code = arg1;
+            let language = arg2;
+            // Handle Marked.js v13+ token object signature
+            if (typeof arg1 === 'object' && arg1 !== null) {
+                code = arg1.text || '';
+                language = arg1.lang || '';
+            }
+            
+            const validLanguage = (language && window.hljs.getLanguage(language)) ? language : 'plaintext';
+            let highlighted = code;
+            
+            try {
+                if (validLanguage !== 'plaintext') {
+                    highlighted = window.hljs.highlight(code, { language: validLanguage }).value;
+                } else {
+                    highlighted = code.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+                }
+            } catch (e) {
+                highlighted = code.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+            }
+            
+            const encoded = encodeURIComponent(code).replace(/'/g, "\\'");
+            
+            return `
+            <div class="my-4 rounded-md overflow-hidden bg-[#1e1e1e] border border-border/50 shadow-sm">
+                <div class="flex items-center justify-between px-4 py-2 bg-[#2d2d2d] text-xs text-textMuted select-none border-b border-border/30">
+                    <span class="font-mono uppercase tracking-wider">${validLanguage}</span>
+                    <button class="hover:text-white transition-colors flex items-center gap-1.5" onclick="navigator.clipboard.writeText(decodeURIComponent('${encoded}')); this.innerHTML='<i data-lucide=\\'check\\' class=\\'w-3 h-3\\'></i> Copied'; setTimeout(()=>this.innerHTML='<i data-lucide=\\'copy\\' class=\\'w-3 h-3\\'></i> Copy', 2000);">
+                        <i data-lucide="copy" class="w-3 h-3"></i> Copy
+                    </button>
+                </div>
+                <div class="p-4 overflow-x-auto text-sm">
+                    <pre><code class="hljs language-${validLanguage}">${highlighted}</code></pre>
+                </div>
+            </div>`;
+        };
+        
         marked.setOptions({
-            highlight: function(code, lang) {
-                const language = hljs.getLanguage(lang) ? lang : 'plaintext';
-                return hljs.highlight(code, { language }).value;
-            },
+            renderer: renderer,
             langPrefix: 'hljs language-'
         });
     }
@@ -41,14 +77,27 @@ document.addEventListener('DOMContentLoaded', () => {
         return `http://${host}:${appConfig.port}/v1`;
     }
     
+    function formatThinkTags(text) {
+        let formatted = text.replace(/<think>([\s\S]*?)<\/think>/gi, (match, p1) => {
+            return `<details class="mb-3 border border-border rounded-lg bg-base"><summary class="cursor-pointer text-xs font-semibold text-textMuted flex items-center gap-2 p-2 select-none hover:text-white transition-colors"><i data-lucide="brain" class="w-3 h-3"></i> Reasoning Process</summary><div class="text-xs text-textMuted p-2 pt-0 border-t border-border mt-1 whitespace-pre-wrap">${p1}</div></details>`;
+        });
+        formatted = formatted.replace(/<think>([\s\S]*)$/gi, (match, p1) => {
+            return `<details open class="mb-3 border border-border rounded-lg bg-base"><summary class="cursor-pointer text-xs font-semibold text-textMuted flex items-center gap-2 p-2 select-none"><i data-lucide="brain" class="w-3 h-3 animate-pulse text-brand"></i> Thinking...</summary><div class="text-xs text-textMuted p-2 pt-0 border-t border-border mt-1 whitespace-pre-wrap">${p1}</div></details>`;
+        });
+        return formatted;
+    }
+
     function addMessageToUI(role, content) {
         const wrap = document.createElement('div');
-        wrap.className = role === 'user' ? 'flex gap-3 max-w-[85%] ml-auto flex-row-reverse' : 'flex gap-3 max-w-[85%]';
+        wrap.className = role === 'user' ? 'flex gap-3 max-w-[85%] ml-auto flex-row-reverse group' : 'flex gap-3 max-w-[85%] group';
         
         const avatar = document.createElement('div');
         avatar.className = role === 'user' ? 'w-8 h-8 rounded-full bg-sec/20 flex items-center justify-center shrink-0 mt-1' : 'w-8 h-8 rounded-full bg-brand/20 flex items-center justify-center shrink-0 mt-1';
         avatar.innerHTML = role === 'user' ? '<i data-lucide="user" class="w-4 h-4 text-sec"></i>' : '<i data-lucide="bot" class="w-4 h-4 text-brand"></i>';
         
+        const contentCol = document.createElement('div');
+        contentCol.className = 'flex flex-col gap-1 min-w-0';
+
         const bubble = document.createElement('div');
         bubble.className = role === 'user' 
             ? 'bg-sec text-white border border-sec p-3 rounded-2xl rounded-tr-sm text-sm'
@@ -57,11 +106,72 @@ document.addEventListener('DOMContentLoaded', () => {
         if (role === 'user') {
             bubble.innerText = content;
         } else {
-            bubble.innerHTML = window.marked ? marked.parse(content) : content;
+            const formatted = formatThinkTags(content);
+            bubble.innerHTML = window.marked ? marked.parse(formatted) : formatted;
         }
         
+        const actionBar = document.createElement('div');
+        actionBar.className = `flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity ${role === 'user' ? 'justify-end' : 'justify-start'}`;
+        
+        const btnCopy = document.createElement('button');
+        btnCopy.className = 'text-textMuted hover:text-white transition-colors p-1 rounded hover:bg-base';
+        btnCopy.title = 'Copy Text';
+        btnCopy.innerHTML = '<i data-lucide="copy" class="w-3 h-3"></i>';
+        btnCopy.addEventListener('click', () => {
+            const rawContent = bubble.getAttribute('data-raw') !== null ? bubble.getAttribute('data-raw') : bubble.innerText;
+            navigator.clipboard.writeText(rawContent);
+            window.showToast("Copied to clipboard!");
+        });
+        
+        if (role === 'user') {
+            const btnEdit = document.createElement('button');
+            btnEdit.className = 'text-textMuted hover:text-white transition-colors p-1 rounded hover:bg-base';
+            btnEdit.title = 'Edit / Retry';
+            btnEdit.innerHTML = '<i data-lucide="edit-2" class="w-3 h-3"></i>';
+            btnEdit.addEventListener('click', () => {
+                // Find index of this message in DOM
+                const children = Array.from(chatMessages.children);
+                const indexInDom = children.indexOf(wrap);
+                if (indexInDom === -1) return;
+                
+                // Clear DOM from this message downwards
+                while (chatMessages.children.length > indexInDom) {
+                    chatMessages.removeChild(chatMessages.lastChild);
+                }
+                
+                // Truncate history (accounting for system prompt if any, but history only holds user/assistant)
+                // wait, the DOM index includes the intro message. Let's just recalculate messageHistory
+                // based on what's left in the DOM. 
+                // Actually, just popping messageHistory until we match is safer, but DOM is easier.
+                // We'll just reset messageHistory from remaining DOM elements.
+                messageHistory = [];
+                Array.from(chatMessages.children).forEach(child => {
+                    const b = child.querySelector('.bg-sec') || child.querySelector('.markdown-body');
+                    if (b) {
+                        const isUser = child.querySelector('.bg-sec') !== null;
+                        messageHistory.push({
+                            role: isUser ? 'user' : 'assistant',
+                            content: isUser ? b.innerText : b.getAttribute('data-raw')
+                        });
+                    }
+                });
+                
+                chatInput.value = content;
+                chatInput.focus();
+            });
+            actionBar.appendChild(btnEdit);
+        } else {
+            // Save raw content for editing history reconstruction
+            bubble.setAttribute('data-raw', content);
+        }
+        
+        actionBar.appendChild(btnCopy);
+
+        contentCol.appendChild(bubble);
+        contentCol.appendChild(actionBar);
+        
         wrap.appendChild(avatar);
-        wrap.appendChild(bubble);
+        wrap.appendChild(contentCol);
         chatMessages.appendChild(wrap);
         chatMessages.scrollTop = chatMessages.scrollHeight;
         
@@ -124,19 +234,24 @@ document.addEventListener('DOMContentLoaded', () => {
             const decoder = new TextDecoder('utf-8');
             let done = false;
             
+            let buffer = '';
             while (!done) {
                 const { value, done: readerDone } = await reader.read();
                 done = readerDone;
                 if (value) {
-                    const chunk = decoder.decode(value, { stream: true });
-                    const lines = chunk.split('\n');
+                    buffer += decoder.decode(value, { stream: true });
+                    const lines = buffer.split('\n');
+                    buffer = lines.pop();
                     for (const line of lines) {
                         if (line.startsWith('data: ') && line !== 'data: [DONE]') {
                             try {
                                 const data = JSON.parse(line.substring(6));
                                 if (data.choices[0].delta && data.choices[0].delta.content) {
                                     fullResponse += data.choices[0].delta.content;
-                                    assistantBubble.innerHTML = window.marked ? marked.parse(fullResponse) : fullResponse;
+                                    const formattedContent = formatThinkTags(fullResponse);
+                                    assistantBubble.innerHTML = window.marked ? marked.parse(formattedContent) : formattedContent;
+                                    assistantBubble.setAttribute('data-raw', fullResponse);
+                                    
                                     chatMessages.scrollTop = chatMessages.scrollHeight;
                                 }
                             } catch (e) {}
@@ -225,12 +340,14 @@ Write ONLY the exact text of the system prompt. Do not include any introductions
             let done = false;
             let firstChunk = true;
             
+            let buffer = '';
             while (!done) {
                 const { value, done: readerDone } = await reader.read();
                 done = readerDone;
                 if (value) {
-                    const chunk = decoder.decode(value, { stream: true });
-                    const lines = chunk.split('\n');
+                    buffer += decoder.decode(value, { stream: true });
+                    const lines = buffer.split('\n');
+                    buffer = lines.pop();
                     for (const line of lines) {
                         if (line.startsWith('data: ') && line !== 'data: [DONE]') {
                             try {

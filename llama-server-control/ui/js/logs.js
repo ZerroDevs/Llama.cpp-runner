@@ -1,6 +1,13 @@
 const logContainer = document.getElementById('log-container');
 const autoScrollCheckbox = document.getElementById('auto-scroll');
 
+function resetSwarmItsTimeout() {
+    clearTimeout(window.swarmItsTimeout);
+    window.swarmItsTimeout = setTimeout(() => {
+        window.currentSwarmIts = 0;
+    }, 2000);
+}
+
 window.receiveLog = function(logLine) {
     if (!logLine) return;
     
@@ -11,6 +18,22 @@ window.receiveLog = function(logLine) {
         div.dataset.source = 'swarm';
         logLine = logLine.substring(8);
         div.classList.add('text-indigo-400');
+        
+        // Parse it/s or s/it for telemetry
+        const itsMatch = logLine.match(/([\d.]+)\s*it\/s/i);
+        if (itsMatch) {
+            window.currentSwarmIts = parseFloat(itsMatch[1]);
+            resetSwarmItsTimeout();
+        } else {
+            const sitMatch = logLine.match(/([\d.]+)\s*s\/it/i);
+            if (sitMatch) {
+                const sIt = parseFloat(sitMatch[1]);
+                if (sIt > 0) {
+                    window.currentSwarmIts = (1 / sIt);
+                    resetSwarmItsTimeout();
+                }
+            }
+        }
     } else {
         div.dataset.source = 'llama';
         if (logLine.includes('WARN')) {
