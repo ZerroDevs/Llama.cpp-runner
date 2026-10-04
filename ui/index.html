@@ -849,6 +849,9 @@ print(res.choices[0].message.content)</pre>
                             <button id="btn-bulk-uncensor" class="p-1 text-textMuted hover:text-green-400 transition-colors" title="Unblur Selected">
                                 <i data-lucide="eye" class="w-4 h-4"></i>
                             </button>
+                            <button id="btn-bulk-webhook" class="p-1 text-textMuted hover:text-brand transition-colors" title="Send to Discord Webhook">
+                                <i data-lucide="send" class="w-4 h-4"></i>
+                            </button>
                             <button id="btn-bulk-delete" class="p-1 text-textMuted hover:text-red-500 transition-colors" title="Delete Selected">
                                 <i data-lucide="trash-2" class="w-4 h-4"></i>
                             </button>
@@ -891,6 +894,9 @@ print(res.choices[0].message.content)</pre>
                 </button>
                 <button id="modal-btn-copy" class="btn-secondary px-3 py-1.5 text-xs flex items-center gap-2 bg-white/10 hover:bg-white/20 border-0 text-white">
                     <i data-lucide="copy" class="w-3.5 h-3.5"></i> Copy Image
+                </button>
+                <button id="modal-btn-webhook" class="btn-secondary px-3 py-1.5 text-xs flex items-center gap-2 bg-brand/20 hover:bg-brand/40 border-0 text-brand font-medium">
+                    <i data-lucide="send" class="w-3.5 h-3.5"></i> Webhook
                 </button>
                 <button id="modal-btn-delete" class="px-3 py-1.5 text-xs flex items-center gap-2 bg-red-500/20 hover:bg-red-500/40 text-red-200 rounded-lg transition-colors">
                     <i data-lucide="trash-2" class="w-3.5 h-3.5"></i> Delete

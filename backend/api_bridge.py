@@ -223,6 +223,35 @@ class ApiBridge:
                 pass
         return {"status": "success", "deleted": deleted}
 
+    def send_to_webhook(self, paths):
+        webhook_url = self.get_config().get("discord_webhook", "")
+        if not webhook_url:
+            return {"status": "error", "message": "No Discord Webhook URL configured in settings."}
+            
+        import threading
+        def _dispatch_bulk():
+            import requests
+            for path in paths:
+                try:
+                    if os.path.exists(path):
+                        with open(path, 'rb') as f:
+                            files = {'file': (os.path.basename(path), f, 'image/jpeg' if path.lower().endswith('.jpg') else 'image/png')}
+                            payload = {
+                                "content": "**Gallery Export**",
+                                "embeds": [{
+                                    "title": "Image Metadata",
+                                    "color": 5814783,
+                                    "image": {"url": f"attachment://{os.path.basename(path)}"}
+                                }]
+                            }
+                            import json
+                            requests.post(webhook_url, data={'payload_json': json.dumps(payload)}, files=files, timeout=30)
+                except Exception as e:
+                    pass
+                    
+        threading.Thread(target=_dispatch_bulk, daemon=True).start()
+        return {"status": "success"}
+
     def _get_censored_list(self):
         censored_file = "censored.json"
         if os.path.exists(censored_file):

@@ -141,6 +141,7 @@ const btnToggleSelect = document.getElementById('btn-toggle-select');
 const btnBulkDelete = document.getElementById('btn-bulk-delete');
 const btnBulkCensor = document.getElementById('btn-bulk-censor');
 const btnBulkUncensor = document.getElementById('btn-bulk-uncensor');
+const btnBulkWebhook = document.getElementById('btn-bulk-webhook');
 const btnBulkCancel = document.getElementById('btn-bulk-cancel');
 const bulkActions = document.getElementById('bulk-actions');
 const bulkCount = document.getElementById('bulk-count');
@@ -232,6 +233,36 @@ if (btnBulkDelete) {
         } finally {
             btnBulkDelete.disabled = false;
             btnBulkDelete.innerHTML = '<i data-lucide="trash-2" class="w-4 h-4"></i>';
+            if (window.lucide) window.lucide.createIcons();
+        }
+    });
+}
+
+if (btnBulkWebhook) {
+    btnBulkWebhook.addEventListener('click', async () => {
+        if (selectedImages.size === 0) return;
+        
+        btnBulkWebhook.disabled = true;
+        btnBulkWebhook.innerHTML = '<i data-lucide="loader" class="animate-spin w-4 h-4 text-brand"></i>';
+        if (window.lucide) window.lucide.createIcons();
+        
+        try {
+            const paths = Array.from(selectedImages);
+            const res = await window.pywebview.api.send_to_webhook(paths);
+            if(res.status === 'success') {
+                if (window.showToast) window.showToast('Images sent to Discord webhook!');
+            } else {
+                if (window.showToast) window.showToast(res.message || 'Failed to send to webhook');
+            }
+            isSelectionMode = false;
+            selectedImages.clear();
+            updateBulkUI();
+            await loadSwarmGallery();
+        } catch (e) {
+            if (window.showToast) window.showToast('Failed to send images');
+        } finally {
+            btnBulkWebhook.disabled = false;
+            btnBulkWebhook.innerHTML = '<i data-lucide="send" class="w-4 h-4"></i>';
             if (window.lucide) window.lucide.createIcons();
         }
     });
@@ -582,6 +613,16 @@ document.getElementById('modal-btn-copy')?.addEventListener('click', async () =>
             window.showToast("Image copied to clipboard!");
         } catch(e) {
             window.showToast("Failed to copy image.");
+        }
+    }
+});
+document.getElementById('modal-btn-webhook')?.addEventListener('click', async () => {
+    if(currentModalImage) {
+        const res = await window.pywebview.api.send_to_webhook([currentModalImage.path]);
+        if(res.status === 'success') {
+            window.showToast("Image sent to Discord webhook!");
+        } else {
+            window.showToast(res.message || "Failed to send to webhook");
         }
     }
 });
