@@ -417,6 +417,20 @@ window.addEventListener('mouseup', () => {
 });
 
 function updateTransform() {
+    if (scale <= 1) {
+        panX = 0;
+        panY = 0;
+    } else {
+        const wrapper = modalImage.parentElement;
+        // Limit panning bounds so the image doesn't fly off screen
+        const limitX = Math.max(0, (wrapper.clientWidth * scale - wrapper.clientWidth) / 2);
+        const limitY = Math.max(0, (wrapper.clientHeight * scale - wrapper.clientHeight) / 2);
+        
+        // Add a small buffer (e.g., 50px) so they can reach the edges easily if aspect ratio is weird
+        panX = Math.min(Math.max(panX, -limitX - 50), limitX + 50);
+        panY = Math.min(Math.max(panY, -limitY - 50), limitY + 50);
+    }
+    
     modalImage.style.transform = `translate(${panX}px, ${panY}px) scale(${scale})`;
     modalImage.parentElement.style.cursor = scale > 1 ? (isDragging ? 'grabbing' : 'grab') : 'default';
 }
@@ -591,6 +605,9 @@ document.getElementById('modal-btn-fullscreen')?.addEventListener('click', () =>
 document.addEventListener('fullscreenchange', () => {
     const exitBtn = document.getElementById('btn-exit-fullscreen');
     if (!exitBtn) return;
+    
+    resetTransform(); // Reset pan/zoom when toggling fullscreen
+    
     if (document.fullscreenElement) {
         exitBtn.classList.remove('hidden');
     } else {
