@@ -382,6 +382,17 @@ This server flawlessly intercepts standard OpenAI API calls (`/v1/chat/completio
         webhook_url = self.server.config.get("discord_webhook", "")
         if not webhook_url: return
         
+        def log_ui(msg):
+            if hasattr(self.server, 'process_manager') and getattr(self.server.process_manager, 'window', None):
+                try:
+                    import json
+                    safe_msg = json.dumps(msg)
+                    self.server.process_manager.window.evaluate_js(f"window.receiveLog({safe_msg})")
+                except Exception:
+                    pass
+
+        log_ui("[INFO] Preparing to send image to Discord Webhook...")
+        
         import threading
         def _post():
             try:
@@ -390,27 +401,48 @@ This server flawlessly intercepts standard OpenAI API calls (`/v1/chat/completio
                     files = {'file': ('image.jpg', f, 'image/jpeg')}
                     pos = pos_prompt if pos_prompt else "N/A"
                     neg = neg_prompt if neg_prompt else "N/A"
+                    
+                    if len(pos) + len(neg) > 5000:
+                        pos = pos[:4000] + "..."
+                        neg = neg[:950] + "..."
+                        
+                    fields = []
+                    
+                    # Chunk Positive Prompt
+                    pos_chunks = [pos[i:i+1000] for i in range(0, len(pos), 1000)]
+                    for i, chunk in enumerate(pos_chunks):
+                        name = f"Positive Prompt ({i+1}/{len(pos_chunks)})" if len(pos_chunks) > 1 else "Positive Prompt"
+                        fields.append({"name": name, "value": chunk})
+                        
+                    # Chunk Negative Prompt
+                    neg_chunks = [neg[i:i+1000] for i in range(0, len(neg), 1000)]
+                    for i, chunk in enumerate(neg_chunks):
+                        name = f"Negative Prompt ({i+1}/{len(neg_chunks)})" if len(neg_chunks) > 1 else "Negative Prompt"
+                        fields.append({"name": name, "value": chunk})
+                        
+                    fields.extend([
+                        {"name": "Resolution", "value": f"{width}x{height}", "inline": True},
+                        {"name": "CFG Scale", "value": str(cfg), "inline": True},
+                        {"name": "Steps", "value": str(steps), "inline": True}
+                    ])
+                    
                     payload = {
                         "content": "**New Image Generated!**",
                         "embeds": [{
                             "title": "Image Metadata",
                             "color": 5814783,
                             "image": {"url": "attachment://image.jpg"},
-                            "fields": [
-                                {"name": "Positive Prompt", "value": (pos[:1020] + '...') if len(pos) > 1024 else pos},
-                                {"name": "Negative Prompt", "value": (neg[:1020] + '...') if len(neg) > 1024 else neg},
-                                {"name": "Resolution", "value": f"{width}x{height}", "inline": True},
-                                {"name": "CFG Scale", "value": str(cfg), "inline": True},
-                                {"name": "Steps", "value": str(steps), "inline": True}
-                            ]
+                            "fields": fields
                         }]
                     }
                     import json
                     resp = requests.post(webhook_url, data={'payload_json': json.dumps(payload)}, files=files, timeout=30)
                     if resp.status_code >= 400:
-                        print(f"Discord Webhook Error: {resp.status_code} - {resp.text}")
+                        log_ui(f"[ERR] Discord Webhook Error: {resp.status_code} - {resp.text}")
+                    else:
+                        log_ui("[INFO] Successfully sent generated image to Discord Webhook.")
             except Exception as e:
-                print(f"Discord Webhook Exception: {e}")
+                log_ui(f"[ERR] Discord Webhook Exception: {str(e)}")
                 
         threading.Thread(target=_post, daemon=True).start()
 
