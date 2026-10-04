@@ -134,7 +134,10 @@ class LlamaProxyHandler(BaseHTTPRequestHandler):
                             time.sleep(4)
                     
                     if "/draw " in prompt or prompt.startswith("/draw"):
-                        self.handle_draw_request(prompt.replace("/draw", "").strip(), payload)
+                        self.handle_draw_request(prompt.replace("/draw", "").strip(), payload, is_art=False)
+                        return
+                    if "/art " in prompt or prompt.startswith("/art"):
+                        self.handle_draw_request(prompt.replace("/art", "").strip(), payload, is_art=True)
                         return
                     if prompt.strip() == "/api":
                         self.handle_api_request(payload)
@@ -375,14 +378,14 @@ This server flawlessly intercepts standard OpenAI API calls (`/v1/chat/completio
             }
             self.wfile.write(json.dumps(resp).encode('utf-8'))
 
-    def handle_draw_request(self, original_prompt, payload):
+    def handle_draw_request(self, original_prompt, payload, is_art=False):
         self.server.is_generating_image = True
         try:
-            self._do_handle_draw_request(original_prompt, payload)
+            self._do_handle_draw_request(original_prompt, payload, is_art)
         finally:
             self.server.is_generating_image = False
             
-    def _do_handle_draw_request(self, original_prompt, payload):
+    def _do_handle_draw_request(self, original_prompt, payload, is_art):
         is_stream = payload.get('stream', False)
         
         # Manually extract user's negative prompt if provided via '|'
@@ -393,8 +396,13 @@ This server flawlessly intercepts standard OpenAI API calls (`/v1/chat/completio
             user_pos = parts[0].strip()
             user_neg = parts[1].strip()
 
-        # Modify payload to ask LLM for prompt safely without breaking chat templates
-        system_injection = f"\n\n(SYSTEM: You are a Stable Diffusion prompt engineer. Write a highly detailed, descriptive, comma-separated image generation positive prompt based on my request. Do not output anything else, no conversational filler.)\n\nRequest: {user_pos}"
+        if is_art:
+            if user_neg:
+                system_injection = f"\n\n(SYSTEM: You are a Stable Diffusion prompt engineer. Analyze my request. I have provided a positive and negative prompt. Enhance both to be highly detailed and descriptive. Output STRICTLY in this exact format:\nPOSITIVE: <detailed positive prompt, comma-separated>\nNEGATIVE: <robust negative prompt, comma-separated>\nDo not output anything else, no conversational filler, DO NOT REPEAT WORDS.)\n\nRequest Positive: {user_pos}\nRequest Negative: {user_neg}"
+            else:
+                system_injection = f"\n\n(SYSTEM: You are a Stable Diffusion prompt engineer. Analyze my request. I have provided a positive prompt. Enhance it to be highly detailed and descriptive. AND automatically generate a robust, highly detailed negative prompt based on the positive prompt. Output STRICTLY in this exact format:\nPOSITIVE: <detailed positive prompt, comma-separated>\nNEGATIVE: <robust negative prompt, comma-separated>\nDo not output anything else, no conversational filler, DO NOT REPEAT WORDS.)\n\nRequest Positive: {user_pos}"
+        else:
+            system_injection = f"\n\n(SYSTEM: You are a Stable Diffusion prompt engineer. Write a highly detailed, descriptive, comma-separated image generation positive prompt based on my request. Do not output anything else, no conversational filler.)\n\nRequest: {user_pos}"
         
         if 'messages' in payload and len(payload['messages']) > 0:
             payload['messages'][-1]['content'] = system_injection
@@ -476,14 +484,39 @@ This server flawlessly intercepts standard OpenAI API calls (`/v1/chat/completio
             width = int(fresh_cfg.get("swarm_width", 1024))
             height = int(fresh_cfg.get("swarm_height", 1024))
             
-            pos_prompt = generated_prompt.strip()
-            if "POSITIVE:" in pos_prompt:
-                pos_prompt = pos_prompt.split("POSITIVE:")[-1].strip()
-            if not pos_prompt:
-                pos_prompt = user_pos
-                
             default_neg = "ugly, blurry, low quality, deformed, mutated, bad anatomy, bad proportions, poorly drawn face, poorly drawn hands, extra limbs, cloned face, disfigured, gross proportions"
-            neg_prompt = user_neg if user_neg else default_neg
+            
+            if is_art:
+                pos_prompt = user_pos
+                neg_prompt = user_neg if user_neg else default_neg
+                gen_text = generated_prompt.strip()
+                if "POSITIVE:" in gen_text or "NEGATIVE:" in gen_text:
+                    lines = gen_text.split('\n')
+                    p_lines = []
+                    n_lines = []
+                    current = None
+                    for line in lines:
+                        if line.startswith("POSITIVE:"):
+                            current = 'P'
+                            p_lines.append(line.replace("POSITIVE:", "").strip())
+                        elif line.startswith("NEGATIVE:"):
+                            current = 'N'
+                            n_lines.append(line.replace("NEGATIVE:", "").strip())
+                        elif current == 'P':
+                            p_lines.append(line.strip())
+                        elif current == 'N':
+                            n_lines.append(line.strip())
+                            
+                    if p_lines: pos_prompt = " ".join(p_lines).strip()
+                    if n_lines: neg_prompt = " ".join(n_lines).strip()
+            else:
+                pos_prompt = generated_prompt.strip()
+                if "POSITIVE:" in pos_prompt:
+                    pos_prompt = pos_prompt.split("POSITIVE:")[-1].strip()
+                if not pos_prompt:
+                    pos_prompt = user_pos
+                    
+                neg_prompt = user_neg if user_neg else default_neg
                 
             swarm_url = f"{base_url}/API/GenerateText2Image"
             swarm_payload = {
