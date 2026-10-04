@@ -531,10 +531,14 @@ This server flawlessly intercepts standard OpenAI API calls (`/v1/chat/completio
             last_content = payload['messages'][-1]['content']
             if isinstance(last_content, list):
                 # Multimodal payload (image + text)
+                text_injected = False
                 for item in last_content:
                     if isinstance(item, dict) and item.get('type') == 'text':
                         item['text'] = system_injection
+                        text_injected = True
                         break
+                if not text_injected:
+                    last_content.append({"type": "text", "text": system_injection})
             else:
                 payload['messages'][-1]['content'] = system_injection
         elif 'prompt' in payload:
@@ -544,6 +548,15 @@ This server flawlessly intercepts standard OpenAI API calls (`/v1/chat/completio
         payload['max_tokens'] = 500
         payload['presence_penalty'] = 0.5
         
+        # Debug log to verify what is being sent to LLM
+        debug_msg = "Payload text injection missing!"
+        if 'messages' in payload and len(payload['messages']) > 0:
+            debug_msg = str(payload['messages'][-1].get('content', ''))
+        # Truncate base64 strings in debug log to avoid huge console spam
+        import re
+        debug_msg = re.sub(r'data:image/[^;]+;base64,[a-zA-Z0-9+/=]+', 'data:image/...;base64,<TRUNCATED>', debug_msg)
+        self.log_ui(f"[DEBUG] [LLM Payload] Last message content: {debug_msg[:500]}...")
+
         self.send_response(200)
         self.send_header('Content-Type', 'text/event-stream' if is_stream else 'application/json')
         self.send_header('Cache-Control', 'no-cache')
@@ -569,26 +582,41 @@ This server flawlessly intercepts standard OpenAI API calls (`/v1/chat/completio
                 self.log_ui(f"[ERR] [LLM] Request failed with HTTP {resp.status_code}: {err_text}")
                 send_chunk(f"\n*[Error from LLM: HTTP {resp.status_code}]*\n")
             else:
-                for line in resp.iter_lines():
-                    if line:
-                        decoded = line.decode('utf-8')
-                        if decoded.startswith('data: '):
-                            data_str = decoded[6:]
-                            if data_str == '[DONE]':
-                                break
-                        try:
-                            data = json.loads(data_str)
-                            if 'choices' in data and len(data['choices']) > 0:
-                                delta = data['choices'][0].get('delta', {})
-                                content = delta.get('content', '')
-                                if not content and 'text' in data['choices'][0]:
-                                    content = data['choices'][0]['text']
-                                if content:
-                                    safe_content = content.replace("```", "")
-                                    generated_prompt += content
-                                    send_chunk(safe_content)
-                        except:
-                            pass
+                content_type = resp.headers.get('Content-Type', '')
+                if 'application/json' in content_type:
+                    # Model returned a single JSON object instead of a stream
+                    data = resp.json()
+                    if 'choices' in data and len(data['choices']) > 0:
+                        msg = data['choices'][0].get('message', {})
+                        content = msg.get('content', '')
+                        if not content and 'text' in data['choices'][0]:
+                            content = data['choices'][0]['text']
+                        if content:
+                            safe_content = content.replace("```", "")
+                            generated_prompt += content
+                            send_chunk(safe_content)
+                else:
+                    # Stream parsing
+                    for line in resp.iter_lines():
+                        if line:
+                            decoded = line.decode('utf-8')
+                            if decoded.startswith('data: '):
+                                data_str = decoded[6:]
+                                if data_str == '[DONE]':
+                                    break
+                                try:
+                                    data = json.loads(data_str)
+                                    if 'choices' in data and len(data['choices']) > 0:
+                                        delta = data['choices'][0].get('delta', {})
+                                        content = delta.get('content', '')
+                                        if not content and 'text' in data['choices'][0]:
+                                            content = data['choices'][0]['text']
+                                        if content:
+                                            safe_content = content.replace("```", "")
+                                            generated_prompt += content
+                                            send_chunk(safe_content)
+                                except:
+                                    pass
         except Exception as e:
             send_chunk(f"\n*[Error generating prompt: {e}]*\n")
             generated_prompt = original_prompt # fallback
