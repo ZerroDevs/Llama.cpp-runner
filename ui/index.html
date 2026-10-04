@@ -651,6 +651,13 @@ print(res.choices[0].message.content)</pre>
                             </div>
                         </label>
                     </div>
+                    <div class="mt-4 pt-4 border-t border-border">
+                        <label class="block text-sm font-semibold mb-2 flex items-center gap-2">
+                            <i data-lucide="bell" class="w-4 h-4 text-brand"></i> Discord Webhook URL (Optional)
+                        </label>
+                        <p class="text-xs text-textMuted mb-2">If provided, every generated image and its metadata will be automatically sent to this Discord channel.</p>
+                        <input type="text" id="cfg-discord_webhook" class="w-full input-field font-mono text-sm" placeholder="https://discord.com/api/webhooks/...">
+                    </div>
                 </div>
 
                 <div class="card p-6 rounded-xl border border-border space-y-4 mt-6">

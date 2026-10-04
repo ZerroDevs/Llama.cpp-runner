@@ -41,7 +41,8 @@ const configMap = {
     'swarm_width': document.getElementById('cfg-swarm_width'),
     'swarm_height': document.getElementById('cfg-swarm_height'),
     'auto_sleep': document.getElementById('cfg-auto_sleep'),
-    'swarm_model': document.getElementById('cfg-swarm_model')
+    'swarm_model': document.getElementById('cfg-swarm_model'),
+    'discord_webhook': document.getElementById('cfg-discord_webhook')
 };
 
 const valSwarmSteps = document.getElementById('val-swarm_steps');

@@ -378,6 +378,37 @@ This server flawlessly intercepts standard OpenAI API calls (`/v1/chat/completio
             }
             self.wfile.write(json.dumps(resp).encode('utf-8'))
 
+    def _dispatch_discord_webhook(self, image_path, pos_prompt, neg_prompt, width, height, cfg, steps):
+        webhook_url = self.server.config.get("discord_webhook", "")
+        if not webhook_url: return
+        
+        import threading
+        def _post():
+            try:
+                import requests
+                with open(image_path, 'rb') as f:
+                    files = {'file': ('image.jpg', f, 'image/jpeg')}
+                    payload = {
+                        "content": "**New Image Generated!**",
+                        "embeds": [{
+                            "title": "Image Metadata",
+                            "color": 5814783,
+                            "fields": [
+                                {"name": "Positive Prompt", "value": (pos_prompt[:1020] + '...') if len(pos_prompt) > 1024 else pos_prompt},
+                                {"name": "Negative Prompt", "value": (neg_prompt[:1020] + '...') if len(neg_prompt) > 1024 else neg_prompt},
+                                {"name": "Resolution", "value": f"{width}x{height}", "inline": True},
+                                {"name": "CFG Scale", "value": str(cfg), "inline": True},
+                                {"name": "Steps", "value": str(steps), "inline": True}
+                            ]
+                        }]
+                    }
+                    import json
+                    requests.post(webhook_url, data={'payload_json': json.dumps(payload)}, files=files, timeout=30)
+            except Exception:
+                pass
+                
+        threading.Thread(target=_post, daemon=True).start()
+
     def handle_draw_request(self, original_prompt, payload, is_art=False):
         self.server.is_generating_image = True
         try:
@@ -590,6 +621,7 @@ This server flawlessly intercepts standard OpenAI API calls (`/v1/chat/completio
                             safe_path = urllib.parse.quote(full_path)
                             my_port = self.server.config.get("port", 8080) if hasattr(self.server, 'config') else 8080
                             send_chunk(f"\n\n![Generated Image](http://127.0.0.1:{my_port}/local_image?path={safe_path})\n\n")
+                            self._dispatch_discord_webhook(full_path, pos_prompt, neg_prompt, width, height, cfg_scale, steps)
                         except Exception:
                             # Fallback: SwarmUI likely returned a relative file path (like 'ViewImage?image=Output/xyz.png')
                             import urllib.parse
@@ -614,6 +646,7 @@ This server flawlessly intercepts standard OpenAI API calls (`/v1/chat/completio
                                     safe_path = urllib.parse.quote(full_path)
                                     my_port = self.server.config.get("port", 8080) if hasattr(self.server, 'config') else 8080
                                     send_chunk(f"\n\n![Generated Image](http://127.0.0.1:{my_port}/local_image?path={safe_path})\n\n")
+                                    self._dispatch_discord_webhook(full_path, pos_prompt, neg_prompt, width, height, cfg_scale, steps)
                                 else:
                                     send_chunk(f"\n*SwarmUI failed to generate a valid image. (The prompt might have triggered an internal error or (NSFW) filter).*\n")
                             except Exception:
