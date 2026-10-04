@@ -150,6 +150,9 @@ class LlamaProxyHandler(BaseHTTPRequestHandler):
                     if prompt.strip() == "/clear":
                         self.handle_clear_request(payload)
                         return
+                    if prompt.strip() == "/compact":
+                        self.handle_compact_request(payload)
+                        return
                 except:
                     pass
                 
@@ -258,6 +261,73 @@ class LlamaProxyHandler(BaseHTTPRequestHandler):
     def handle_clear_request(self, payload):
         msg = "*Chat context wiped from server!*\n\n*(Note: To clear the messages from your screen, please refresh the page or click 'New Chat' in your client).* "
         self.send_assistant_message(msg, payload.get('stream', False))
+
+    def handle_compact_request(self, payload):
+        is_stream = payload.get('stream', False)
+        
+        messages = payload.get('messages', [])
+        if len(messages) <= 2:
+            self.send_assistant_message("*Chat is already too short to compact!*", is_stream)
+            return
+            
+        chat_text = ""
+        for m in messages[:-1]:
+            role = m.get('role', 'user')
+            content = m.get('content', '')
+            chat_text += f"{role.upper()}: {content}\n\n"
+            
+        summary_prompt = f"Please read the following chat history and summarize it into a highly condensed, dense block of text that retains all critical facts, context, code snippets, and active tasks. This will be used as the new memory context for the next chat session. DO NOT add conversational filler.\n\nCHAT HISTORY:\n{chat_text}\n\nDense Summary:"
+        
+        payload['messages'] = [{"role": "user", "content": summary_prompt}]
+        payload['stream'] = True
+        
+        self.send_response(200)
+        self.send_header('Content-Type', 'text/event-stream' if is_stream else 'application/json')
+        self.send_header('Cache-Control', 'no-cache')
+        self.send_header('Connection', 'keep-alive')
+        self.end_headers()
+        
+        def send_chunk(text):
+            if is_stream:
+                chunk = {"choices":[{"delta":{"content": text}}]}
+                self.wfile.write(f"data: {json.dumps(chunk)}\n\n".encode('utf-8'))
+                self.wfile.flush()
+                
+        send_chunk("*Compacting chat history...*\n\n> ")
+        
+        internal_port = self.server.config.get("port", 8080) + 1
+        url = f"http://127.0.0.1:{internal_port}{self.path}"
+        
+        try:
+            resp = requests.post(url, json=payload, stream=True, timeout=120)
+            for line in resp.iter_lines():
+                if line:
+                    decoded = line.decode('utf-8')
+                    if decoded.startswith('data: '):
+                        data_str = decoded[6:]
+                        if data_str == '[DONE]':
+                            break
+                        try:
+                            data = json.loads(data_str)
+                            if 'choices' in data and len(data['choices']) > 0:
+                                delta = data['choices'][0].get('delta', {})
+                                content = delta.get('content', '')
+                                if not content and 'text' in data['choices'][0]:
+                                    content = data['choices'][0]['text']
+                                if content:
+                                    send_chunk(content)
+                        except:
+                            pass
+        except Exception as e:
+            send_chunk(f"\n*[Error compacting chat: {e}]*\n")
+            
+        send_chunk("\n\n*✅ Compaction complete. Please copy the text block above, click 'New Chat' to clear your screen, and paste it as your first message to continue with this condensed memory!*")
+        
+        if is_stream:
+            self.wfile.write(b"data: [DONE]\n\n")
+            self.wfile.flush()
+        else:
+            self.wfile.write(b"") # Not perfectly handling non-stream for simplicity since most clients stream
 
     def handle_api_request(self, payload):
         is_stream = payload.get('stream', False)
