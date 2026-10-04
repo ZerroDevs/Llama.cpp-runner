@@ -576,6 +576,9 @@ This server flawlessly intercepts standard OpenAI API calls (`/v1/chat/completio
                                 b64_val += "=" * (4 - pad)
                             img_data = base64.b64decode(b64_val)
                             
+                            if len(img_data) < 1000:
+                                raise ValueError("Decoded image is too small to be valid")
+                                
                             cache_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'ui', 'generated_cache')
                             os.makedirs(cache_dir, exist_ok=True)
                             img_name = f"swarm_{uuid.uuid4().hex[:8]}.jpg"
@@ -600,7 +603,7 @@ This server flawlessly intercepts standard OpenAI API calls (`/v1/chat/completio
                             
                             try:
                                 img_resp = requests.get(swarm_img_url, timeout=10)
-                                if img_resp.status_code == 200:
+                                if img_resp.status_code == 200 and len(img_resp.content) > 1000:
                                     cache_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'ui', 'generated_cache')
                                     os.makedirs(cache_dir, exist_ok=True)
                                     img_name = f"swarm_{uuid.uuid4().hex[:8]}.jpg"
@@ -612,9 +615,9 @@ This server flawlessly intercepts standard OpenAI API calls (`/v1/chat/completio
                                     my_port = self.server.config.get("port", 8080) if hasattr(self.server, 'config') else 8080
                                     send_chunk(f"\n\n![Generated Image](http://127.0.0.1:{my_port}/local_image?path={safe_path})\n\n")
                                 else:
-                                    send_chunk(f"\n\n![Generated Image]({swarm_img_url})\n\n")
+                                    send_chunk(f"\n*SwarmUI failed to generate a valid image. (The prompt might have triggered an internal error or NSFW filter).*\n")
                             except Exception:
-                                send_chunk(f"\n\n![Generated Image]({swarm_img_url})\n\n")
+                                send_chunk(f"\n*SwarmUI failed to generate a valid image.* \n")
                 else:
                     send_chunk(f"\n*SwarmUI returned: {s_resp.text}*")
             else:
