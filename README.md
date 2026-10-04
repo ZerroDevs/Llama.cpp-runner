@@ -42,6 +42,9 @@ Our vision is to build the absolute lightest, most performant, zero-waste local 
 - **Proxy Slash Commands:** The backend proxy features an internal interception engine that allows you to type slash commands directly into your chat window (or external clients like Cline/Hermes) for instant control:
   - `/draw <prompt> | <negative>`: Auto-ejects the LLM, fires up SwarmUI to generate an image natively on the GPU, pipes it back into the chat, and wakes the LLM. The LLM enhances your positive prompt but takes your negative prompt exactly as-is. (Auto-generates negative tags if omitted).
   - `/art <prompt> | <negative>`: Identical to `/draw`, but forces the LLM to creatively rewrite and enhance BOTH your positive and negative prompts.
+  - `/guess`: Attach an image alongside this command to let the Vision Model visually analyze it and generate a flawless Stable Diffusion positive and negative prompt directly in the chat.
+  - `/yes`: Type this after a `/guess` or `/art` command to instantly dispatch the exact prompt the LLM just engineered directly to SwarmUI for generation.
+  - `/hook`: Send the very last image generated in your current session directly to your configured Discord Webhook.
   - `/api`: Dynamically outputs a markdown guide with your precise Host, Port, and Model ID for connecting external agents.
   - `/eject` (or `/unload`): Instantly unloads the model to free 100% VRAM while keeping the API alive.
   - `/sys` (or `/hw`): Returns a live system hardware telemetry snapshot (VRAM, RAM, CPU).
