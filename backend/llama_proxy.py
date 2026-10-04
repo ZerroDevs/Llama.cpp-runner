@@ -139,6 +139,9 @@ class LlamaProxyHandler(BaseHTTPRequestHandler):
                     if "/art " in prompt or prompt.startswith("/art"):
                         self.handle_draw_request(prompt.replace("/art", "").strip(), payload, is_art=True)
                         return
+                    if prompt.strip() == "/hook":
+                        self.handle_hook_request(payload)
+                        return
                     if prompt.strip() == "/api":
                         self.handle_api_request(payload)
                         return
@@ -446,6 +449,39 @@ This server flawlessly intercepts standard OpenAI API calls (`/v1/chat/completio
                 
         threading.Thread(target=_post, daemon=True).start()
 
+    def handle_hook_request(self, payload):
+        is_stream = payload.get('stream', False)
+        if is_stream:
+            self.send_response(200)
+            self.send_header('Content-Type', 'text/event-stream')
+            self.send_header('Cache-Control', 'no-cache')
+            self.end_headers()
+            
+            def send_chunk(text):
+                chunk_data = json.dumps({"choices": [{"delta": {"content": text}}]})
+                self.wfile.write(f"data: {chunk_data}\n\n".encode('utf-8'))
+                self.wfile.flush()
+                
+            last_img = getattr(self.server, 'last_generated_image_data', None)
+            if not last_img:
+                send_chunk("*No image has been generated yet in this session to send to Discord!*")
+            else:
+                webhook_url = self.server.config.get("discord_webhook", "")
+                if not webhook_url:
+                    send_chunk("*No Discord Webhook URL is configured in settings!*")
+                else:
+                    send_chunk("*Forwarding the last generated image to Discord Webhook...*")
+                    # Unpack
+                    image_path, pos_prompt, neg_prompt, width, height, cfg, steps = last_img
+                    self._dispatch_discord_webhook(image_path, pos_prompt, neg_prompt, width, height, cfg, steps)
+            
+            self.wfile.write(b"data: [DONE]\n\n")
+        else:
+            self.send_response(200)
+            self.send_header('Content-Type', 'application/json')
+            self.end_headers()
+            self.wfile.write(b"{}")
+
     def handle_draw_request(self, original_prompt, payload, is_art=False):
         self.server.is_generating_image = True
         try:
@@ -658,6 +694,7 @@ This server flawlessly intercepts standard OpenAI API calls (`/v1/chat/completio
                             safe_path = urllib.parse.quote(full_path)
                             my_port = self.server.config.get("port", 8080) if hasattr(self.server, 'config') else 8080
                             send_chunk(f"\n\n![Generated Image](http://127.0.0.1:{my_port}/local_image?path={safe_path})\n\n")
+                            self.server.last_generated_image_data = (full_path, pos_prompt, neg_prompt, width, height, cfg_scale, steps)
                             self._dispatch_discord_webhook(full_path, pos_prompt, neg_prompt, width, height, cfg_scale, steps)
                         except Exception:
                             # Fallback: SwarmUI likely returned a relative file path (like 'ViewImage?image=Output/xyz.png')
@@ -683,6 +720,7 @@ This server flawlessly intercepts standard OpenAI API calls (`/v1/chat/completio
                                     safe_path = urllib.parse.quote(full_path)
                                     my_port = self.server.config.get("port", 8080) if hasattr(self.server, 'config') else 8080
                                     send_chunk(f"\n\n![Generated Image](http://127.0.0.1:{my_port}/local_image?path={safe_path})\n\n")
+                                    self.server.last_generated_image_data = (full_path, pos_prompt, neg_prompt, width, height, cfg_scale, steps)
                                     self._dispatch_discord_webhook(full_path, pos_prompt, neg_prompt, width, height, cfg_scale, steps)
                                 else:
                                     send_chunk(f"\n*SwarmUI failed to generate a valid image. (The prompt might have triggered an internal error or (NSFW) filter).*\n")
