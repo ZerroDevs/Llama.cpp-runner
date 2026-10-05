@@ -44,6 +44,10 @@ Our vision is to build the absolute lightest, most performant, zero-waste local 
   - `/art <prompt> | <negative>`: Identical to `/draw`, but forces the LLM to creatively rewrite and enhance BOTH your positive and negative prompts.
   - `/guess`: Attach an image alongside this command to let the Vision Model visually analyze it and generate a flawless Stable Diffusion positive and negative prompt directly in the chat.
   - `/yes`: Type this after a `/guess` or `/art` command to instantly dispatch the exact prompt the LLM just engineered directly to SwarmUI for generation.
+  - `/help`: Print a formatted list of all available commands directly in the chat.
+  - `/cfg <0-20>`: Set the CFG scale for image generation (e.g., `/cfg 7.5`).
+  - `/step <0-50>`: Set the number of steps for image generation (e.g., `/step 25`).
+  - `/res <WxH>`: Set the resolution for image generation (e.g., `/res 1024x1024`).
   - `/hook`: Send the very last image generated in your current session directly to your configured Discord Webhook.
   - `/api`: Dynamically outputs a markdown guide with your precise Host, Port, and Model ID for connecting external agents.
   - `/eject` (or `/unload`): Instantly unloads the model to free 100% VRAM while keeping the API alive.

@@ -774,9 +774,14 @@ print(res.choices[0].message.content)</pre>
                             </h2>
                             <p class="text-textMuted text-sm" data-i18n="swarm_desc">Run your local Stable Diffusion models alongside your LLM.</p>
                         </div>
-                        <div class="flex items-center gap-2 px-3 py-1 rounded-full bg-base border border-border text-sm font-medium shadow-inner">
-                            <div id="swarm-status-dot" class="w-2.5 h-2.5 rounded-full bg-red-500 transition-colors duration-300 shadow-sm"></div>
-                            <span id="swarm-status-text" data-i18n="status_stopped">Stopped</span>
+                        <div class="flex items-center gap-3">
+                            <button id="btn-refresh-swarm-config" class="btn-secondary px-3 py-1 text-xs flex items-center gap-1.5 rounded-full" title="Sync settings from chat commands">
+                                <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i> Sync
+                            </button>
+                            <div class="flex items-center gap-2 px-3 py-1 rounded-full bg-base border border-border text-sm font-medium shadow-inner">
+                                <div id="swarm-status-dot" class="w-2.5 h-2.5 rounded-full bg-red-500 transition-colors duration-300 shadow-sm"></div>
+                                <span id="swarm-status-text" data-i18n="status_stopped">Stopped</span>
+                            </div>
                         </div>
                     </div>
 

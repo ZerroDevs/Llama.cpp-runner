@@ -30,3 +30,7 @@ frontend/
 # OS generated files
 .DS_Store
 Thumbs.db
+
+# Skills 
+agents.md
+.agents/**

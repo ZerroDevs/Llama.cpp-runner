@@ -26,7 +26,10 @@ class LlamaProxyHandler(BaseHTTPRequestHandler):
         internal_port = self.server.config.get("port", 8080) + 1
         url = f"http://127.0.0.1:{internal_port}{self.path}"
         
-        headers = {k: v for k, v in self.headers.items() if k.lower() not in ('host', 'content-length')}
+        headers = {k: v for k, v in self.headers.items()
+                   if k.lower() not in ('host', 'accept-encoding')}
+        # Force gzip so requests auto-decompresses; we strip it before forwarding to client
+        headers['Accept-Encoding'] = 'gzip, deflate'
         body = None
         if 'Content-Length' in self.headers:
             body = self.rfile.read(int(self.headers['Content-Length']))
@@ -37,28 +40,45 @@ class LlamaProxyHandler(BaseHTTPRequestHandler):
                 url=url,
                 headers=headers,
                 data=body,
-                stream=True,
                 timeout=30
             )
             
-            self.send_response(resp.status_code)
-            for k, v in resp.headers.items():
-                if k.lower() not in ('transfer-encoding', 'content-encoding', 'connection'):
-                    self.send_header(k, v)
-            self.end_headers()
+            body_bytes = resp.content  # auto-decompresses gzip/deflate
             
-            for chunk in resp.iter_content(chunk_size=4096):
-                if chunk:
-                    self.wfile.write(chunk)
-                    self.wfile.flush()
+            self.send_response(resp.status_code)
+            skip_headers = (
+                'transfer-encoding', 'content-encoding', 'connection',
+                'content-length', 'cross-origin-embedder-policy',
+                'cross-origin-opener-policy', 'cross-origin-resource-policy'
+            )
+            for k, v in resp.headers.items():
+                if k.lower() not in skip_headers:
+                    self.send_header(k, v)
+            self.send_header('Content-Length', str(len(body_bytes)))
+            self.send_header('Connection', 'close')
+            self.send_header('Access-Control-Allow-Origin', '*')
+            self.end_headers()
+            self.wfile.write(body_bytes)
         except Exception as e:
+            err_str = str(e)
+            is_conn_refused = 'Connection refused' in err_str or '10061' in err_str or 'Max retries exceeded' in err_str
+            if not is_conn_refused:
+                self.log_ui(f"[ERR] [Proxy] forward_request failed for {self.path}: {e}")
             if getattr(self.server, 'is_generating_image', False):
                 self.send_response(200)
                 self.send_header('Content-Type', 'application/json')
                 self.end_headers()
                 self.wfile.write(b"{}")
                 return
-            self.send_error(502, f"Bad Gateway: {str(e)}")
+            try:
+                self.send_response(503)
+                self.send_header('Content-Type', 'application/json')
+                self.send_header('Access-Control-Allow-Origin', '*')
+                self.send_header('Connection', 'close')
+                self.end_headers()
+                self.wfile.write(b'{"error":{"message":"LLM server is offline. Start the model first.","code":503}}')
+            except Exception:
+                pass
 
     def do_GET(self):
         # Serve generated images locally so they don't depend on llama-server being up
@@ -185,6 +205,72 @@ class LlamaProxyHandler(BaseHTTPRequestHandler):
                         self.headers.replace_header('Content-Length', str(len(body_data)))
                         # Let it fall through to forward_request
 
+                    if text_prompt == "/help":
+                        help_msg = (
+                            "**Available Commands:**\n"
+                            "- `/draw <prompt>` : Generate an image\n"
+                            "- `/art <prompt>` : Auto-enhance prompt and generate image\n"
+                            "- `/guess` : AI visually analyzes last image and guesses a prompt\n"
+                            "- `/yes` : Confirm and generate the AI's guessed prompt\n"
+                            "- `/cfg <0-20>` : Set image generation CFG scale (e.g. `/cfg 7.5`)\n"
+                            "- `/step <0-50>` : Set image generation steps (e.g. `/step 20`)\n"
+                            "- `/res <WxH>` : Set image resolution (e.g. `/res 1024x1024`)\n"
+                            "- `/sys` or `/hw` : View system hardware stats\n"
+                            "- `/eject` or `/unload` : Unload current model from memory\n"
+                            "- `/models` : List available models\n"
+                            "- `/clear` : Clear context\n"
+                            "- `/compact` : Compact context\n"
+                            "- `/hook` : Test Discord webhook"
+                        )
+                        self.send_assistant_message(help_msg, payload.get('stream', False))
+                        return
+
+                    import re
+                    if "/cfg " in text_prompt or text_prompt.startswith("/cfg"):
+                        try:
+                            match = re.search(r'/cfg\s+([0-9.]+)', text_prompt)
+                            if match:
+                                val = float(match.group(1))
+                                if 0 <= val <= 20:
+                                    self.server.config_manager.save_config({"swarm_cfg": str(val)})
+                                    self.send_assistant_message(f"*CFG Scale updated to {val}*", payload.get('stream', False))
+                                else:
+                                    self.send_assistant_message("*CFG must be between 0 and 20.*", payload.get('stream', False))
+                            else:
+                                self.send_assistant_message("*Invalid format. Use: `/cfg 7.5`*", payload.get('stream', False))
+                        except ValueError:
+                            self.send_assistant_message("*Invalid format. Use: `/cfg 7.5`*", payload.get('stream', False))
+                        return
+
+                    if "/step " in text_prompt or text_prompt.startswith("/step"):
+                        try:
+                            match = re.search(r'/step\s+([0-9]+)', text_prompt)
+                            if match:
+                                val = int(match.group(1))
+                                if 0 <= val <= 50:
+                                    self.server.config_manager.save_config({"swarm_steps": str(val)})
+                                    self.send_assistant_message(f"*Steps updated to {val}*", payload.get('stream', False))
+                                else:
+                                    self.send_assistant_message("*Steps must be between 0 and 50.*", payload.get('stream', False))
+                            else:
+                                self.send_assistant_message("*Invalid format. Use: `/step 20`*", payload.get('stream', False))
+                        except ValueError:
+                            self.send_assistant_message("*Invalid format. Use: `/step 20`*", payload.get('stream', False))
+                        return
+
+                    if "/res " in text_prompt or text_prompt.startswith("/res"):
+                        try:
+                            match = re.search(r'/res\s+([0-9]+)[xX]([0-9]+)', text_prompt)
+                            if match:
+                                w, h = int(match.group(1)), int(match.group(2))
+                                self.server.config_manager.save_config({"swarm_width": str(w), "swarm_height": str(h)})
+                                self.send_assistant_message(f"*Resolution updated to {w}x{h}*", payload.get('stream', False))
+                            else:
+                                self.send_assistant_message("*Invalid format. Use: `/res 1024x1024`*", payload.get('stream', False))
+                        except Exception:
+                            self.send_assistant_message("*Invalid format. Use: `/res 1024x1024`*", payload.get('stream', False))
+                        return
+
                     if text_prompt == "/yes" or text_prompt.startswith("/yes "):
                         self.log_ui("[INFO] Intercepted /yes command. Scanning history for generated prompt...")
                         if 'messages' in payload:
@@ -224,19 +310,27 @@ class LlamaProxyHandler(BaseHTTPRequestHandler):
                 # So we manually proxy it using the read body.
                 internal_port = self.server.config.get("port", 8080) + 1
                 url = f"http://127.0.0.1:{internal_port}{self.path}"
-                headers = {k: v for k, v in self.headers.items() if k.lower() not in ('host', 'content-length')}
+                headers = {k: v for k, v in self.headers.items()
+                           if k.lower() not in ('host', 'accept-encoding')}
+                headers['Accept-Encoding'] = 'gzip, deflate'
                 
                 try:
-                    resp = requests.post(url, headers=headers, data=body_data, stream=True, timeout=30)
+                    resp = requests.post(url, headers=headers, data=body_data, timeout=30)
+                    body_bytes = resp.content  # auto-decompresses gzip/deflate
                     self.send_response(resp.status_code)
+                    skip_headers = (
+                        'transfer-encoding', 'content-encoding', 'connection',
+                        'content-length', 'cross-origin-embedder-policy',
+                        'cross-origin-opener-policy', 'cross-origin-resource-policy'
+                    )
                     for k, v in resp.headers.items():
-                        if k.lower() not in ('transfer-encoding', 'content-encoding', 'connection'):
+                        if k.lower() not in skip_headers:
                             self.send_header(k, v)
+                    self.send_header('Content-Length', str(len(body_bytes)))
+                    self.send_header('Connection', 'close')
+                    self.send_header('Access-Control-Allow-Origin', '*')
                     self.end_headers()
-                    for chunk in resp.iter_content(chunk_size=4096):
-                        if chunk:
-                            self.wfile.write(chunk)
-                            self.wfile.flush()
+                    self.wfile.write(body_bytes)
                 except Exception as e:
                     if getattr(self.server, 'is_generating_image', False):
                         self.send_response(200)
@@ -815,7 +909,8 @@ This server flawlessly intercepts standard OpenAI API calls (`/v1/chat/completio
                             import urllib.parse
                             safe_path = urllib.parse.quote(full_path)
                             my_port = self.server.config.get("port", 8080) if hasattr(self.server, 'config') else 8080
-                            send_chunk(f"\n\n![Generated Image](http://127.0.0.1:{my_port}/local_image?path={safe_path})\n\n")
+                            req_host = self.headers.get('Host', f"127.0.0.1:{my_port}")
+                            send_chunk(f"\n\n![Generated Image](http://{req_host}/local_image?path={safe_path})\n\n")
                             self.server.last_generated_image_data = (full_path, pos_prompt, neg_prompt, width, height, cfg_scale, steps)
                             self._dispatch_discord_webhook(full_path, pos_prompt, neg_prompt, width, height, cfg_scale, steps)
                         except Exception:
@@ -842,7 +937,8 @@ This server flawlessly intercepts standard OpenAI API calls (`/v1/chat/completio
                                     
                                     safe_path = urllib.parse.quote(full_path)
                                     my_port = self.server.config.get("port", 8080) if hasattr(self.server, 'config') else 8080
-                                    send_chunk(f"\n\n![Generated Image](http://127.0.0.1:{my_port}/local_image?path={safe_path})\n\n")
+                                    req_host = self.headers.get('Host', f"127.0.0.1:{my_port}")
+                                    send_chunk(f"\n\n![Generated Image](http://{req_host}/local_image?path={safe_path})\n\n")
                                     self.server.last_generated_image_data = (full_path, pos_prompt, neg_prompt, width, height, cfg_scale, steps)
                                     self._dispatch_discord_webhook(full_path, pos_prompt, neg_prompt, width, height, cfg_scale, steps)
                                 else:

@@ -1015,6 +1015,13 @@ document.querySelectorAll('.nav-btn').forEach(btn => {
             if (scanBtn) scanBtn.click();
         } else if (targetId === 'tab-swarm-lib') {
             loadSwarmGallery();
+        } else if (targetId === 'tab-swarm') {
+            if (window.pywebview && window.pywebview.api) {
+                window.pywebview.api.get_config().then((conf) => {
+                    appConfig = conf;
+                    populateConfigUI();
+                });
+            }
         }
         
         // AGGRESSIVE DOM UNLOADING: Free RAM when leaving heavy tabs
@@ -1032,6 +1039,25 @@ document.querySelectorAll('.nav-btn').forEach(btn => {
         }
     });
 });
+
+const btnRefreshSwarm = document.getElementById('btn-refresh-swarm-config');
+if (btnRefreshSwarm) {
+    btnRefreshSwarm.addEventListener('click', () => {
+        if (window.pywebview && window.pywebview.api) {
+            window.pywebview.api.get_config().then((conf) => {
+                appConfig = conf;
+                populateConfigUI();
+                
+                // Add a small rotation animation to the icon for feedback
+                const icon = btnRefreshSwarm.querySelector('i');
+                if (icon) {
+                    icon.classList.add('animate-spin');
+                    setTimeout(() => icon.classList.remove('animate-spin'), 500);
+                }
+            });
+        }
+    });
+}
 
 const btnStart = document.getElementById('btn-start');
 const btnStop = document.getElementById('btn-stop');
