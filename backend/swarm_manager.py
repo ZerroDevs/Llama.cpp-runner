@@ -97,27 +97,22 @@ class SwarmManager:
             pid = self.process.pid
             
             try:
-                import psutil
-                parent = psutil.Process(pid)
-                for child in parent.children(recursive=True):
-                    child.kill()
-                parent.kill()
+                subprocess.run(
+                    ["taskkill", "/F", "/T", "/PID", str(pid)],
+                    creationflags=subprocess.CREATE_NO_WINDOW,
+                    stdout=subprocess.DEVNULL,
+                    stderr=subprocess.DEVNULL
+                )
             except Exception:
                 try:
-                    subprocess.run(
-                        ["taskkill", "/F", "/T", "/PID", str(pid)],
-                        creationflags=subprocess.CREATE_NO_WINDOW,
-                        stdout=subprocess.DEVNULL,
-                        stderr=subprocess.DEVNULL
-                    )
+                    import psutil
+                    parent = psutil.Process(pid)
+                    for child in parent.children(recursive=True):
+                        child.kill()
+                    parent.kill()
                 except Exception:
                     pass
                     
-            try:
-                self.process.wait(timeout=2)
-            except Exception:
-                pass
-            
             if self.log_streamer:
                 self.log_streamer.stop()
                 

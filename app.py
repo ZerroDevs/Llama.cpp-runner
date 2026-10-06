@@ -164,41 +164,50 @@ def main():
             if config_manager.get_config().get("minimize_to_tray", False):
                 logging.debug("minimize_to_tray is True, hiding window")
                 try:
-                    threading.Timer(0.1, window.hide).start()
-                    logging.debug("window.hide() deferred via timer")
-                except Exception as e:
-                    logging.debug(f"window.hide() exception: {e}")
+                    window.hide()
+                except Exception:
+                    pass
                 try:
                     tray_icon.notify(
                         "App is still running in the background.",
                         title="Llama Server Control"
                     )
-                except Exception as e:
-                    logging.debug(f"tray_icon exception: {e}")
-                logging.debug("returning False from on_closing")
+                except Exception:
+                    pass
                 return False
-            logging.debug("stopping server and returning True")
-            process_manager.stop_server()
-            swarm_manager.stop_swarm()
-            proxy_server.stop()
+                
+            logging.debug("closing: hiding window immediately and stopping processes")
+            try:
+                window.hide()
+            except Exception:
+                pass
+            try:
+                process_manager.stop_server()
+                swarm_manager.stop_swarm()
+                proxy_server.stop()
+                tray_icon.stop()
+            except Exception:
+                pass
+            os._exit(0)
             return True
             
         def on_closed():
             logging.debug("on_closed called")
-            import gc
-            gc.collect()
-            process_manager.stop_server()
-            swarm_manager.stop_swarm()
-            proxy_server.stop()
-            if HAS_PYSTRAY:
-                tray_icon.stop()
+            try:
+                process_manager.stop_server()
+                swarm_manager.stop_swarm()
+                proxy_server.stop()
+                if HAS_PYSTRAY:
+                    tray_icon.stop()
+            except Exception:
+                pass
             os._exit(0)
             
         def on_minimized():
             logging.debug("on_minimized called")
             if config_manager.get_config().get("minimize_to_tray", False):
                 try:
-                    threading.Timer(0.1, window.hide).start()
+                    window.hide()
                 except Exception:
                     pass
                 try:
@@ -214,17 +223,26 @@ def main():
         window.events.minimized += on_minimized
     else:
         def on_closing():
-            process_manager.stop_server()
-            swarm_manager.stop_swarm()
-            proxy_server.stop()
+            try:
+                window.hide()
+            except Exception:
+                pass
+            try:
+                process_manager.stop_server()
+                swarm_manager.stop_swarm()
+                proxy_server.stop()
+            except Exception:
+                pass
+            os._exit(0)
             return True
             
         def on_closed():
-            import gc
-            gc.collect()
-            process_manager.stop_server()
-            swarm_manager.stop_swarm()
-            proxy_server.stop()
+            try:
+                process_manager.stop_server()
+                swarm_manager.stop_swarm()
+                proxy_server.stop()
+            except Exception:
+                pass
             os._exit(0)
             
         window.events.closing += on_closing

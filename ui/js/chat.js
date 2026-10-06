@@ -13,6 +13,10 @@ document.addEventListener('DOMContentLoaded', () => {
     const personaIdea = document.getElementById('persona-idea');
     const btnGeneratePersona = document.getElementById('btn-generate-persona');
     
+    const personaPresets = document.getElementById('persona-presets');
+    const btnSavePersona = document.getElementById('btn-save-persona');
+    const btnDeletePersona = document.getElementById('btn-delete-persona');
+    
     // Markdown configuration
     if (window.marked && window.hljs) {
         const renderer = new marked.Renderer();
@@ -62,6 +66,71 @@ document.addEventListener('DOMContentLoaded', () => {
 
     let messageHistory = [];
 
+    window.addEventListener('pywebviewready', () => {
+        loadPersonaPresets();
+    });
+
+    function loadPersonaPresets() {
+        if (!appConfig.persona_presets) {
+            appConfig.persona_presets = {
+                "Default Assistant": "You are a helpful AI assistant."
+            };
+        }
+        
+        personaPresets.innerHTML = '<option value="">-- Presets --</option>';
+        for (const [name, content] of Object.entries(appConfig.persona_presets)) {
+            const opt = document.createElement('option');
+            opt.value = name;
+            opt.textContent = name;
+            personaPresets.appendChild(opt);
+        }
+    }
+
+    personaPresets.addEventListener('change', () => {
+        const name = personaPresets.value;
+        if (name && appConfig.persona_presets && appConfig.persona_presets[name]) {
+            sysPromptInput.value = appConfig.persona_presets[name];
+        }
+    });
+
+    btnSavePersona.addEventListener('click', async () => {
+        const content = sysPromptInput.value.trim();
+        if (!content) return;
+        
+        let name = personaPresets.value;
+        if (!name) {
+            name = prompt("Enter a name for this persona preset:");
+            if (!name) return;
+        }
+        
+        if (!appConfig.persona_presets) appConfig.persona_presets = {};
+        appConfig.persona_presets[name] = content;
+        await window.pywebview.api.save_config(appConfig);
+        
+        loadPersonaPresets();
+        personaPresets.value = name;
+        
+        const oldIcon = btnSavePersona.innerHTML;
+        btnSavePersona.innerHTML = '<i data-lucide="check" class="w-3 h-3 text-green-400"></i>';
+        if (window.lucide) window.lucide.createIcons();
+        setTimeout(() => {
+            btnSavePersona.innerHTML = oldIcon;
+            if (window.lucide) window.lucide.createIcons();
+        }, 1500);
+    });
+
+    btnDeletePersona.addEventListener('click', async () => {
+        const name = personaPresets.value;
+        if (!name) return;
+        
+        if (confirm(`Are you sure you want to delete the persona preset "${name}"?`)) {
+            delete appConfig.persona_presets[name];
+            await window.pywebview.api.save_config(appConfig);
+            sysPromptInput.value = '';
+            loadPersonaPresets();
+        }
+    });
+
     // UI Updates for sliders
     tempInput.addEventListener('input', () => {
         tempLabel.innerText = tempInput.value;
@@ -77,14 +146,56 @@ document.addEventListener('DOMContentLoaded', () => {
         return `http://${host}:${appConfig.port}/v1`;
     }
     
+    function escapeHtml(unsafe) {
+        return (unsafe || "")
+            .replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;")
+            .replace(/"/g, "&quot;")
+            .replace(/'/g, "&#039;");
+    }
+
     function formatThinkTags(text) {
-        let formatted = text.replace(/<think>([\s\S]*?)<\/think>/gi, (match, p1) => {
-            return `<details class="mb-3 border border-border rounded-lg bg-base"><summary class="cursor-pointer text-xs font-semibold text-textMuted flex items-center gap-2 p-2 select-none hover:text-white transition-colors"><i data-lucide="brain" class="w-3 h-3"></i> Reasoning Process</summary><div class="text-xs text-textMuted p-2 pt-0 border-t border-border mt-1 whitespace-pre-wrap">${p1}</div></details>`;
-        });
-        formatted = formatted.replace(/<think>([\s\S]*)$/gi, (match, p1) => {
-            return `<details open class="mb-3 border border-border rounded-lg bg-base"><summary class="cursor-pointer text-xs font-semibold text-textMuted flex items-center gap-2 p-2 select-none"><i data-lucide="brain" class="w-3 h-3 animate-pulse text-brand"></i> Thinking...</summary><div class="text-xs text-textMuted p-2 pt-0 border-t border-border mt-1 whitespace-pre-wrap">${p1}</div></details>`;
-        });
-        return formatted;
+        if (!text) return '';
+        
+        let thinkContent = '';
+        let finalContent = text;
+        
+        // Match <think>...</think> (complete)
+        if (text.includes('<think>') && text.includes('</think>')) {
+            const match = text.match(/<think>([\s\S]*?)<\/think>/i);
+            if (match) {
+                thinkContent = match[1].trim();
+                finalContent = text.replace(/<think>[\s\S]*?<\/think>/i, '').trim();
+            }
+        } else if (text.startsWith('<think>')) {
+            // Streaming (unclosed)
+            thinkContent = text.substring(7).trim();
+            finalContent = '';
+        }
+        
+        let html = '';
+        if (thinkContent) {
+            const isStreaming = !finalContent;
+            html += `
+            <details ${isStreaming ? 'open' : ''} class="think-block mb-3 border border-border/80 rounded-xl bg-base/60 overflow-hidden group/think">
+                <summary class="cursor-pointer text-xs font-medium text-textMuted flex items-center justify-between p-2.5 select-none hover:text-white hover:bg-card/40 transition-all">
+                    <span class="flex items-center gap-2 font-mono">
+                        <i data-lucide="brain" class="w-3.5 h-3.5 ${isStreaming ? 'animate-pulse text-brand' : 'text-brand'}"></i>
+                        <span>${isStreaming ? 'Thinking...' : 'Reasoning Process'}</span>
+                    </span>
+                    <i data-lucide="chevron-down" class="w-3.5 h-3.5 text-textMuted group-open/think:rotate-180 transition-transform"></i>
+                </summary>
+                <div class="text-xs text-textMuted/90 px-3.5 py-3 border-t border-border/50 bg-base/30 whitespace-pre-wrap font-mono leading-relaxed">
+${escapeHtml(thinkContent)}
+                </div>
+            </details>`;
+        }
+        
+        if (finalContent) {
+            html += window.marked ? marked.parse(finalContent) : escapeHtml(finalContent);
+        }
+        return html;
     }
 
     function addMessageToUI(role, content) {
@@ -106,8 +217,9 @@ document.addEventListener('DOMContentLoaded', () => {
         if (role === 'user') {
             bubble.innerText = content;
         } else {
-            const formatted = formatThinkTags(content);
-            bubble.innerHTML = window.marked ? marked.parse(formatted) : formatted;
+            bubble.innerHTML = formatThinkTags(content);
+            bubble.setAttribute('data-raw', content);
+            if (window.lucide) lucide.createIcons({root: bubble});
         }
         
         const actionBar = document.createElement('div');
@@ -140,10 +252,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
                 
                 // Truncate history (accounting for system prompt if any, but history only holds user/assistant)
-                // wait, the DOM index includes the intro message. Let's just recalculate messageHistory
-                // based on what's left in the DOM. 
-                // Actually, just popping messageHistory until we match is safer, but DOM is easier.
-                // We'll just reset messageHistory from remaining DOM elements.
                 messageHistory = [];
                 Array.from(chatMessages.children).forEach(child => {
                     const b = child.querySelector('.bg-sec') || child.querySelector('.markdown-body');
@@ -151,7 +259,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         const isUser = child.querySelector('.bg-sec') !== null;
                         messageHistory.push({
                             role: isUser ? 'user' : 'assistant',
-                            content: isUser ? b.innerText : b.getAttribute('data-raw')
+                            content: isUser ? b.innerText : (b.getAttribute('data-raw') || b.innerText)
                         });
                     }
                 });
@@ -228,7 +336,9 @@ document.addEventListener('DOMContentLoaded', () => {
             }
             
             assistantBubble.innerHTML = '';
-            let fullResponse = '';
+            let thinkingText = '';
+            let responseText = '';
+            let inThinkingTag = false;
             
             const reader = response.body.getReader();
             const decoder = new TextDecoder('utf-8');
@@ -243,15 +353,51 @@ document.addEventListener('DOMContentLoaded', () => {
                     const lines = buffer.split('\n');
                     buffer = lines.pop();
                     for (const line of lines) {
-                        if (line.startsWith('data: ') && line !== 'data: [DONE]') {
+                        const trimmedLine = line.trim();
+                        if (trimmedLine.startsWith('data: ') && trimmedLine !== 'data: [DONE]') {
                             try {
-                                const data = JSON.parse(line.substring(6));
-                                if (data.choices[0].delta && data.choices[0].delta.content) {
-                                    fullResponse += data.choices[0].delta.content;
-                                    const formattedContent = formatThinkTags(fullResponse);
-                                    assistantBubble.innerHTML = window.marked ? marked.parse(formattedContent) : formattedContent;
-                                    assistantBubble.setAttribute('data-raw', fullResponse);
+                                const data = JSON.parse(trimmedLine.substring(6));
+                                if (data.choices && data.choices.length > 0 && data.choices[0].delta) {
+                                    const delta = data.choices[0].delta;
+                                    const reasoningChunk = delta.reasoning_content || delta.reasoning || '';
+                                    const contentChunk = delta.content || '';
                                     
+                                    if (reasoningChunk) {
+                                        thinkingText += reasoningChunk;
+                                    }
+                                    
+                                    if (contentChunk) {
+                                        if (contentChunk.includes('<think>')) {
+                                            inThinkingTag = true;
+                                            const parts = contentChunk.split('<think>');
+                                            responseText += parts[0];
+                                            thinkingText += parts.slice(1).join('<think>');
+                                        } else if (inThinkingTag) {
+                                            if (contentChunk.includes('</think>')) {
+                                                inThinkingTag = false;
+                                                const parts = contentChunk.split('</think>');
+                                                thinkingText += parts[0];
+                                                responseText += parts.slice(1).join('</think>');
+                                            } else {
+                                                thinkingText += contentChunk;
+                                            }
+                                        } else {
+                                            responseText += contentChunk;
+                                        }
+                                    }
+                                    
+                                    let combined = '';
+                                    if (thinkingText && !responseText) {
+                                        combined = `<think>${thinkingText}`;
+                                    } else if (thinkingText && responseText) {
+                                        combined = `<think>${thinkingText}</think>\n\n${responseText}`;
+                                    } else {
+                                        combined = responseText;
+                                    }
+                                    
+                                    assistantBubble.innerHTML = formatThinkTags(combined);
+                                    assistantBubble.setAttribute('data-raw', combined);
+                                    if (window.lucide) lucide.createIcons({root: assistantBubble});
                                     chatMessages.scrollTop = chatMessages.scrollHeight;
                                 }
                             } catch (e) {}
@@ -259,7 +405,17 @@ document.addEventListener('DOMContentLoaded', () => {
                     }
                 }
             }
-            messageHistory.push({ role: 'assistant', content: fullResponse });
+            
+            let finalCombined = '';
+            if (thinkingText) {
+                finalCombined = `<think>${thinkingText}</think>\n\n${responseText}`;
+            } else {
+                finalCombined = responseText;
+            }
+            assistantBubble.innerHTML = formatThinkTags(finalCombined);
+            assistantBubble.setAttribute('data-raw', finalCombined);
+            if (window.lucide) lucide.createIcons({root: assistantBubble});
+            messageHistory.push({ role: 'assistant', content: finalCombined });
             
         } catch (e) {
             assistantBubble.innerHTML = `<span class="text-red-500">Error: ${e.message}</span>`;
@@ -349,17 +505,20 @@ Write ONLY the exact text of the system prompt. Do not include any introductions
                     const lines = buffer.split('\n');
                     buffer = lines.pop();
                     for (const line of lines) {
-                        if (line.startsWith('data: ') && line !== 'data: [DONE]') {
+                        const trimmedLine = line.trim();
+                        if (trimmedLine.startsWith('data: ') && trimmedLine !== 'data: [DONE]') {
                             try {
-                                const data = JSON.parse(line.substring(6));
-                                if (data.choices[0].delta && data.choices[0].delta.content) {
-                                    let content = data.choices[0].delta.content;
-                                    // Remove leading quotes if they exist
-                                    if (firstChunk && content.startsWith('"')) {
-                                        content = content.substring(1);
+                                const data = JSON.parse(trimmedLine.substring(6));
+                                if (data.choices && data.choices.length > 0 && data.choices[0].delta) {
+                                    let content = data.choices[0].delta.content || '';
+                                    if (content) {
+                                        // Remove leading quotes if they exist
+                                        if (firstChunk && content.startsWith('"')) {
+                                            content = content.substring(1);
+                                        }
+                                        firstChunk = false;
+                                        sysPromptInput.value += content;
                                     }
-                                    firstChunk = false;
-                                    sysPromptInput.value += content;
                                 }
                             } catch (e) {}
                         }

@@ -17,6 +17,7 @@ Our vision is to build the absolute lightest, most performant, zero-waste local 
 - **Full Configuration Control:** Easily tune `llama-server` settings including Host, Port, Context Size, CPU Threads, GPU Layers, Batch Sizes, Flash Attention, and K/V Cache Types.
 - **Hardware Acceleration:** Native support for Vision Projectors, LoRA Adapters, and Draft Models for speculative decoding.
 - **1-Click Start/Stop:** Effortlessly boot up your local AI server and shut it down cleanly through the UI or the System Tray. UI buttons dynamically lock/grey-out based on live server state.
+- **Flush Context & KV Cache (No-Reload Reset):** Instantly erase active slots and flush the entire KV context memory to 0 tokens with a single click (or via `/clear`), freeing context space after heavy agent sessions (Cline/Cursor) without unloading or reloading model weights from disk.
 - **Auto-Sleep / VRAM Reclaimer:** Automatically unloads LLMs from VRAM after 10 minutes of inactivity to instantly return hardware resources back to the host system for gaming or heavy browsing. Seamlessly hot-loads the model back in the exact moment a new chat request is received.
 
 ### 🧠 Model Hub & Library
@@ -40,6 +41,7 @@ Our vision is to build the absolute lightest, most performant, zero-waste local 
 ### 💬 Chat Interface & Personas
 - **Local AI Chat:** Chat directly with your loaded models right in the app.
 - **Proxy Slash Commands:** The backend proxy features an internal interception engine that allows you to type slash commands directly into your chat window (or external clients like Cline/Hermes) for instant control:
+  - `/imagine <prompt> | <negative>`: Directly dispatches your exact positive and negative prompts to SwarmUI for GPU rendering without any LLM alteration. If negative is omitted, a robust default negative prompt is used.
   - `/draw <prompt> | <negative>`: Auto-ejects the LLM, fires up SwarmUI to generate an image natively on the GPU, pipes it back into the chat, and wakes the LLM. The LLM enhances your positive prompt but takes your negative prompt exactly as-is. (Auto-generates negative tags if omitted).
   - `/art <prompt> | <negative>`: Identical to `/draw`, but forces the LLM to creatively rewrite and enhance BOTH your positive and negative prompts.
   - `/guess`: Attach an image alongside this command to let the Vision Model visually analyze it and generate a flawless Stable Diffusion positive and negative prompt directly in the chat.
@@ -60,7 +62,9 @@ Our vision is to build the absolute lightest, most performant, zero-waste local 
   - `/guess`: Attach up to multiple reference images alongside this command. The vision model analyzes their aesthetic, composition, and style, then strictly outputs optimized `Positive Prompt:` and `Negative Prompt:` tags without triggering generation.
   - `/yes`: Confirms and executes. Instantly catches the engineered prompts from the preceding `/guess` or `/art` response, unloads the LLM to free 100% VRAM, and dispatches them directly to SwarmUI for rendering.
   --
-- **Persona Generator:** Inject custom system prompts to change AI behavior. Don't know what to write? Give the AI a tiny hint (e.g. "Grumpy Pirate") and the app will ask the loaded model to *generate its own rich system prompt* to adopt the persona!
+- **Persona Generator & Presets:** Inject custom system prompts to change AI behavior. Save your favorite personas as persistent presets, delete unused ones, or give the AI a tiny hint (e.g. "Grumpy Pirate") to have it *generate its own rich system prompt* to adopt the persona!
+- **Real-Time Thinking & Reasoning:** Native live streaming of model thinking/reasoning processes (for DeepSeek-R1, QwQ, Qwen-distill models) rendered inside expandable `<details>` blocks with live brain indicators.
+- **External Agent & IDE Compatibility:** Seamlessly connect Cline, Cursor, Open-WebUI, or Continue using standard OpenAI endpoints (`http://127.0.0.1:8080/v1`) with full Private Network Access (PNA) and CORS compliance.
 
 ### 📊 System Monitoring
 - **Hardware Monitor:** Watch real-time graphical usage metrics for CPU, System RAM, GPU Core Utilization, and Dedicated VRAM (powered by `psutil` and `pynvml`).
@@ -94,20 +98,53 @@ Our vision is to build the absolute lightest, most performant, zero-waste local 
 - `llama-server.exe` (Downloadable via the [Llama.cpp project](https://github.com/ggml-org/llama.cpp))
 - (Optional) [SwarmUI](https://github.com/mcmonkeyprojects/SwarmUI) installed locally for image generation features (SwarmUI is powered by [ComfyUI](https://github.com/Comfy-Org/ComfyUI) under the hood, which it downloads automatically during its own installation).
 
-## Setup Instructions
+## Studio V1 (Next-Generation Workspace)
+
+Located in `v1/`, the **Llama Server Studio V1** introduces a high-performance modern workspace built with **Svelte 5** (Runes `$state`, `$derived`), **Vite**, and **TailwindCSS**, hosted inside an optimized native desktop wrapper:
+
+- **Dual-Pane Studio Layout:** Conversational agent and streaming markdown terminal on the left; real-time diffusion canvas, SwarmUI gallery, telemetry matrix, and model hub on the right.
+- **Instant 0ms Lifecycle:** Instantaneous window close with background asynchronous process tree termination (`taskkill /F /T`).
+- **Global Command Palette (`Ctrl+K`):** Fuzzy-search actions, quick model switching, persona presets, and KV cache flushes.
+- **Deep Chunk Inspector:** Inspect prompt, negative prompt, seed, steps, sampler, and CFG from generated PNGs in real-time.
+- **Hardware Telemetry HUD:** Low-overhead VRAM, RAM, and CPU telemetry capsules with background pause on blur.
+- **VRAM & Layer Offload Estimator:** Calculate required VRAM for any model, context size, and batch configuration before loading.
+
+### Running Studio V1
+
+To run Studio V1:
+```cmd
+cd v1
+npm install
+npm run build
+python main.py
+```
+
+For live hot-reload development mode:
+```cmd
+cd v1
+npm run dev
+# In another terminal:
+python main.py --dev
+```
+
+## Setup Instructions (Classic & V1)
 
 1. Clone this repository.
 2. Install the required Python packages:
    ```cmd
    pip install pywebview psutil pynvml requests huggingface_hub
    ```
-3. Run the application (or compile it to a `.exe`):
+3. Run Classic UI:
    ```cmd
    python app.py
    ```
-4. On the first launch, head over to the **Dashboard & Server** tab to set the path to your `llama-server.exe` binary.
-5. Head over to **Models Library** to specify the folder where you store your `.gguf` files.
+   Or run Next-Gen Studio V1:
+   ```cmd
+   python v1/main.py
+   ```
+4. On first launch, configure your `llama-server.exe` path and select your `.gguf` model file.
 
 ## License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+

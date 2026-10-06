@@ -34,3 +34,8 @@ Thumbs.db
 # Skills 
 agents.md
 .agents/**
+
+#ignore , old v1 
+ignore
+ignore/**
+ignore/*

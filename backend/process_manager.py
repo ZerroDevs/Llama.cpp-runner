@@ -124,55 +124,76 @@ class ProcessManager:
             pid = self.process.pid
             
             try:
-                import psutil
-                parent = psutil.Process(pid)
-                for child in parent.children(recursive=True):
-                    child.kill()
-                parent.kill()
+                subprocess.run(
+                    ["taskkill", "/F", "/T", "/PID", str(pid)],
+                    creationflags=subprocess.CREATE_NO_WINDOW,
+                    stdout=subprocess.DEVNULL,
+                    stderr=subprocess.DEVNULL
+                )
             except Exception:
                 try:
-                    subprocess.run(
-                        ["taskkill", "/F", "/T", "/PID", str(pid)],
-                        creationflags=subprocess.CREATE_NO_WINDOW,
-                        stdout=subprocess.DEVNULL,
-                        stderr=subprocess.DEVNULL
-                    )
+                    import psutil
+                    parent = psutil.Process(pid)
+                    for child in parent.children(recursive=True):
+                        child.kill()
+                    parent.kill()
                 except Exception:
                     pass
                     
-            try:
-                self.process.wait(timeout=2)
-            except Exception:
-                pass
-            
             if self.log_streamer:
                 self.log_streamer.stop()
                 
             self.process = None
             self.log_streamer = None
             
-        # Fallback scan for orphaned llama-server.exe
+        # Instant fallback for any orphaned llama-server.exe
         try:
-            import psutil
-            for proc in psutil.process_iter(['name', 'cmdline']):
-                try:
-                    name = proc.info.get('name', '')
-                    if name and 'llama-server' in name.lower():
-                        proc.kill()
-                except Exception:
-                    continue
+            subprocess.run(
+                ["taskkill", "/F", "/IM", "llama-server.exe"],
+                creationflags=subprocess.CREATE_NO_WINDOW,
+                stdout=subprocess.DEVNULL,
+                stderr=subprocess.DEVNULL
+            )
         except Exception:
-            try:
-                subprocess.run(
-                    ["taskkill", "/F", "/IM", "llama-server.exe"],
-                    creationflags=subprocess.CREATE_NO_WINDOW,
-                    stdout=subprocess.DEVNULL,
-                    stderr=subprocess.DEVNULL
-                )
-            except Exception:
-                pass
+            pass
             
         return {"status": "success", "message": "Server stopped."}
+
+    def flush_kv_cache(self, config):
+        if not self.check_status():
+            return {"status": "error", "message": "Server is not running."}
+            
+        port = int(config.get("port", 8080)) + 1 # internal port
+        api_key = config.get("api_key", "")
+        headers = {}
+        if api_key:
+            headers['Authorization'] = f"Bearer {api_key}"
+            
+        import requests
+        slots_cleared = 0
+        try:
+            # 1. Query /slots to get active slots
+            resp = requests.get(f"http://127.0.0.1:{port}/slots", headers=headers, timeout=3)
+            if resp.status_code == 200:
+                slots = resp.json()
+                if isinstance(slots, list):
+                    for slot in slots:
+                        slot_id = slot.get('id', 0)
+                        requests.post(f"http://127.0.0.1:{port}/slots/{slot_id}?action=erase", headers=headers, timeout=3)
+                        slots_cleared += 1
+            
+            # 2. General slot flush fallbacks
+            try:
+                requests.post(f"http://127.0.0.1:{port}/slots/0?action=erase", headers=headers, timeout=2)
+                requests.post(f"http://127.0.0.1:{port}/slots?action=erase", headers=headers, timeout=2)
+            except Exception:
+                pass
+                
+            self.log_ui(f"[INFO] [Llama] Flushed KV cache and context slots ({slots_cleared} slot(s) cleared to 0 tokens).")
+            return {"status": "success", "message": f"Flushed {slots_cleared} slot(s) and cleared KV Cache." if slots_cleared else "Context & KV Cache wiped successfully."}
+        except Exception as e:
+            self.log_ui(f"[WARN] [Llama] Failed to flush slots: {str(e)}")
+            return {"status": "error", "message": f"Failed to flush KV cache: {str(e)}"}
 
     def check_status(self):
         if self.process and self.process.poll() is None:

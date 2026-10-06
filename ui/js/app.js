@@ -1062,6 +1062,8 @@ if (btnRefreshSwarm) {
 const btnStart = document.getElementById('btn-start');
 const btnStop = document.getElementById('btn-stop');
 const btnEject = document.getElementById('btn-eject');
+const btnFlushKv = document.getElementById('btn-flush-kv');
+const btnDashFlushKv = document.getElementById('btn-dash-flush-kv');
 const statusDot = document.getElementById('status-dot');
 const statusText = document.getElementById('status-text');
 const btnWebchat = document.getElementById('btn-webchat');
@@ -1092,6 +1094,14 @@ function updateStatusUI(running) {
             btnEject.classList.remove('hidden');
             btnEject.classList.add('flex');
         }
+        if(btnFlushKv) {
+            btnFlushKv.classList.remove('hidden');
+            btnFlushKv.classList.add('flex');
+        }
+        if(btnDashFlushKv) {
+            btnDashFlushKv.classList.remove('hidden');
+            btnDashFlushKv.classList.add('flex');
+        }
         
         btnWebchat.classList.remove('opacity-50', 'pointer-events-none');
         btnWebchat.disabled = false;
@@ -1109,6 +1119,14 @@ function updateStatusUI(running) {
         if(btnEject) {
             btnEject.classList.add('hidden');
             btnEject.classList.remove('flex');
+        }
+        if(btnFlushKv) {
+            btnFlushKv.classList.add('hidden');
+            btnFlushKv.classList.remove('flex');
+        }
+        if(btnDashFlushKv) {
+            btnDashFlushKv.classList.add('hidden');
+            btnDashFlushKv.classList.remove('flex');
         }
         btnStart.classList.remove('hidden');
         
@@ -1180,6 +1198,49 @@ if (btnEject) {
     });
 }
 
+async function handleFlushKv() {
+    if (!window.pywebview) return;
+    const isRunning = await window.pywebview.api.check_status();
+    if (!isRunning) {
+        if (window.showToast) window.showToast('Server is not running.');
+        return;
+    }
+    
+    const originalHtml = btnFlushKv ? btnFlushKv.innerHTML : '';
+    if (btnFlushKv) {
+        btnFlushKv.innerHTML = '<i data-lucide="loader" class="w-4 h-4 animate-spin"></i> Flushing...';
+        btnFlushKv.classList.add('opacity-50', 'pointer-events-none');
+    }
+    if (btnDashFlushKv) {
+        btnDashFlushKv.classList.add('opacity-50', 'pointer-events-none');
+    }
+    if (window.lucide) window.lucide.createIcons();
+    
+    try {
+        const res = await window.pywebview.api.flush_kv_cache();
+        if (res && res.status === 'success') {
+            const msg = (translations[currentLang] && translations[currentLang].toast_kv_flushed) || res.message || 'Context & KV Cache Flushed!';
+            if (window.showToast) window.showToast(msg);
+        } else {
+            if (window.showToast) window.showToast(res ? res.message : 'Failed to flush context.');
+        }
+    } catch (e) {
+        if (window.showToast) window.showToast('Error flushing context.');
+    }
+    
+    if (btnFlushKv) {
+        btnFlushKv.innerHTML = originalHtml;
+        btnFlushKv.classList.remove('opacity-50', 'pointer-events-none');
+    }
+    if (btnDashFlushKv) {
+        btnDashFlushKv.classList.remove('opacity-50', 'pointer-events-none');
+    }
+    if (window.lucide) window.lucide.createIcons();
+}
+
+if (btnFlushKv) btnFlushKv.addEventListener('click', handleFlushKv);
+if (btnDashFlushKv) btnDashFlushKv.addEventListener('click', handleFlushKv);
+
 btnWebchat.addEventListener('click', () => {
     if (!window.pywebview) return;
     const host = configMap.host.value === '0.0.0.0' ? '127.0.0.1' : configMap.host.value;
@@ -1235,7 +1296,10 @@ function updateSwarmStatusUI(running) {
         btnStart.classList.add('hidden');
         btnStop.classList.remove('hidden');
         btnStop.classList.add('flex');
-        if (btnOpenSwarm) btnOpenSwarm.classList.remove('hidden');
+        if (btnOpenSwarm) {
+            btnOpenSwarm.classList.remove('hidden');
+            btnOpenSwarm.classList.add('flex');
+        }
         
         statusDot.classList.remove('bg-red-500');
         statusDot.classList.add('pulsating-dot');
@@ -1244,7 +1308,10 @@ function updateSwarmStatusUI(running) {
         btnStop.classList.add('hidden');
         btnStop.classList.remove('flex');
         btnStart.classList.remove('hidden');
-        if (btnOpenSwarm) btnOpenSwarm.classList.add('hidden');
+        if (btnOpenSwarm) {
+            btnOpenSwarm.classList.add('hidden');
+            btnOpenSwarm.classList.remove('flex');
+        }
         
         statusDot.classList.remove('pulsating-dot');
         statusDot.classList.add('bg-red-500');

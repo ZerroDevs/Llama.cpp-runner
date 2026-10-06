@@ -93,6 +93,10 @@ class ApiBridge:
     def stop_server(self):
         return self._process_manager.stop_server()
 
+    def flush_kv_cache(self):
+        config = self._config_manager.get_config()
+        return self._process_manager.flush_kv_cache(config)
+
     def check_status(self):
         return self._process_manager.check_status()
 
@@ -177,18 +181,18 @@ class ApiBridge:
                 return []
             
             swarm_dir = os.path.dirname(swarm_bat)
-            raw_dir = os.path.join(swarm_dir, 'Output', 'local', 'raw')
-            if not os.path.exists(raw_dir):
+            output_dir = os.path.join(swarm_dir, 'Output')
+            if not os.path.exists(output_dir):
                 return []
             
             image_files = []
-            for root, dirs, files in os.walk(raw_dir):
+            for root, dirs, files in os.walk(output_dir):
                 for f in files:
                     if f.lower().endswith(('.png', '.jpg', '.jpeg', '.webp')):
                         image_files.append(os.path.join(root, f))
                         
             image_files.sort(key=lambda x: os.path.getmtime(x), reverse=True)
-            image_files = image_files[:100] # Limit to 100
+            image_files = image_files[:500] # Raised limit to 500 images
             
             port = int(self._config_manager.get_config().get("port", 8080))
             import urllib.parse

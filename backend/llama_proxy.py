@@ -8,7 +8,26 @@ import socket
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from urllib.parse import urlparse
 
+SKIP_PROXY_HEADERS = (
+    'transfer-encoding', 'content-encoding', 'connection',
+    'content-length', 'cross-origin-embedder-policy',
+    'cross-origin-opener-policy', 'cross-origin-resource-policy',
+    'access-control-allow-origin', 'access-control-allow-methods',
+    'access-control-allow-headers', 'access-control-allow-credentials',
+    'access-control-expose-headers', 'access-control-max-age',
+    'access-control-allow-private-network'
+)
+
 class LlamaProxyHandler(BaseHTTPRequestHandler):
+    protocol_version = "HTTP/1.1"
+
+    def send_cors_headers(self):
+        self.send_header('Access-Control-Allow-Origin', '*')
+        self.send_header('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, DELETE, PATCH')
+        self.send_header('Access-Control-Allow-Headers', 'Content-Type, Authorization, Accept, X-Requested-With, Origin, Access-Control-Request-Private-Network')
+        self.send_header('Access-Control-Allow-Private-Network', 'true')
+        self.send_header('Access-Control-Expose-Headers', '*')
+
     def log_message(self, format, *args):
         pass # Suppress logging to keep console clean
 
@@ -40,40 +59,44 @@ class LlamaProxyHandler(BaseHTTPRequestHandler):
                 url=url,
                 headers=headers,
                 data=body,
-                timeout=30
+                stream=True,
+                timeout=300
             )
-            
-            body_bytes = resp.content  # auto-decompresses gzip/deflate
             
             self.send_response(resp.status_code)
-            skip_headers = (
-                'transfer-encoding', 'content-encoding', 'connection',
-                'content-length', 'cross-origin-embedder-policy',
-                'cross-origin-opener-policy', 'cross-origin-resource-policy'
-            )
             for k, v in resp.headers.items():
-                if k.lower() not in skip_headers:
+                if k.lower() not in SKIP_PROXY_HEADERS:
                     self.send_header(k, v)
-            self.send_header('Content-Length', str(len(body_bytes)))
+            self.send_cors_headers()
             self.send_header('Connection', 'close')
-            self.send_header('Access-Control-Allow-Origin', '*')
             self.end_headers()
-            self.wfile.write(body_bytes)
+            
+            for chunk in resp.iter_content(chunk_size=1024):
+                if chunk:
+                    self.wfile.write(chunk)
+                    self.wfile.flush()
+        except (ConnectionAbortedError, ConnectionResetError, BrokenPipeError):
+            pass
         except Exception as e:
             err_str = str(e)
             is_conn_refused = 'Connection refused' in err_str or '10061' in err_str or 'Max retries exceeded' in err_str
             if not is_conn_refused:
                 self.log_ui(f"[ERR] [Proxy] forward_request failed for {self.path}: {e}")
             if getattr(self.server, 'is_generating_image', False):
-                self.send_response(200)
-                self.send_header('Content-Type', 'application/json')
-                self.end_headers()
-                self.wfile.write(b"{}")
+                try:
+                    self.send_response(200)
+                    self.send_cors_headers()
+                    self.send_header('Content-Type', 'application/json')
+                    self.send_header('Connection', 'close')
+                    self.end_headers()
+                    self.wfile.write(b"{}")
+                except Exception:
+                    pass
                 return
             try:
                 self.send_response(503)
+                self.send_cors_headers()
                 self.send_header('Content-Type', 'application/json')
-                self.send_header('Access-Control-Allow-Origin', '*')
                 self.send_header('Connection', 'close')
                 self.end_headers()
                 self.wfile.write(b'{"error":{"message":"LLM server is offline. Start the model first.","code":503}}')
@@ -86,15 +109,30 @@ class LlamaProxyHandler(BaseHTTPRequestHandler):
             filename = os.path.basename(self.path)
             filepath = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'ui', 'generated_cache', filename)
             if os.path.exists(filepath):
-                self.send_response(200)
-                self.send_header('Content-Type', 'image/jpeg')
-                self.end_headers()
-                with open(filepath, 'rb') as f:
-                    self.wfile.write(f.read())
-                return
-            else:
-                self.send_error(404, "File not found")
-                return
+                try:
+                    file_size = os.path.getsize(filepath)
+                    self.send_response(200)
+                    self.send_cors_headers()
+                    self.send_header('Content-Type', 'image/jpeg')
+                    self.send_header('Content-Length', str(file_size))
+                    self.send_header('Cache-Control', 'public, max-age=86400')
+                    self.send_header('Connection', 'close')
+                    self.close_connection = True
+                    self.end_headers()
+                    with open(filepath, 'rb') as f:
+                        while True:
+                            chunk = f.read(65536)
+                            if not chunk:
+                                break
+                            self.wfile.write(chunk)
+                    self.wfile.flush()
+                    return
+                except (ConnectionAbortedError, ConnectionResetError, BrokenPipeError):
+                    return
+                except Exception:
+                    pass
+            self.send_error(404, "File not found")
+            return
                 
         if self.path.startswith('/local_image'):
             from urllib.parse import urlparse, parse_qs
@@ -102,21 +140,42 @@ class LlamaProxyHandler(BaseHTTPRequestHandler):
             if 'path' in query:
                 filepath = query['path'][0]
                 if os.path.exists(filepath) and filepath.lower().endswith(('.png', '.jpg', '.jpeg', '.webp')):
-                    self.send_response(200)
-                    self.send_header('Content-Type', f"image/{filepath.split('.')[-1].lower()}")
-                    self.send_header('Cache-Control', 'max-age=3600')
-                    self.send_header('Access-Control-Allow-Origin', '*')
-                    self.end_headers()
-                    with open(filepath, 'rb') as f:
-                        self.wfile.write(f.read())
-                    return
+                    try:
+                        file_size = os.path.getsize(filepath)
+                        ext = filepath.split('.')[-1].lower()
+                        mime_type = 'image/jpeg' if ext in ['jpg', 'jpeg'] else f'image/{ext}'
+                        
+                        self.send_response(200)
+                        self.send_cors_headers()
+                        self.send_header('Content-Type', mime_type)
+                        self.send_header('Content-Length', str(file_size))
+                        self.send_header('Cache-Control', 'public, max-age=86400')
+                        self.send_header('Connection', 'close')
+                        self.close_connection = True
+                        self.end_headers()
+                        with open(filepath, 'rb') as f:
+                            while True:
+                                chunk = f.read(65536)
+                                if not chunk:
+                                    break
+                                self.wfile.write(chunk)
+                        self.wfile.flush()
+                        return
+                    except (ConnectionAbortedError, ConnectionResetError, BrokenPipeError):
+                        return
+                    except Exception:
+                        pass
             self.send_error(404, "Image not found")
             return
                 
         self.forward_request()
 
     def do_OPTIONS(self):
-        self.forward_request()
+        self.send_response(200, "OK")
+        self.send_cors_headers()
+        self.send_header('Content-Length', '0')
+        self.send_header('Connection', 'close')
+        self.end_headers()
 
     def do_POST(self):
         if self.path in ['/v1/chat/completions', '/completion']:
@@ -173,13 +232,17 @@ class LlamaProxyHandler(BaseHTTPRequestHandler):
                             self.server.process_manager.start_server(self.server.config_manager.get_config())
                             time.sleep(4)
                     
+                    if "/imagine " in text_prompt or text_prompt.startswith("/imagine"):
+                        self.log_ui("[INFO] Intercepted /imagine command. Initiating direct AI image generation without prompt modification...")
+                        self.handle_draw_request(text_prompt.replace("/imagine", "", 1).strip(), payload, is_art=False, is_guess_confirm=False, is_raw=True)
+                        return
                     if "/draw " in text_prompt or text_prompt.startswith("/draw"):
                         self.log_ui("[INFO] Intercepted /draw command. Initiating AI image generation pipeline...")
-                        self.handle_draw_request(text_prompt.replace("/draw", "").strip(), payload, is_art=False)
+                        self.handle_draw_request(text_prompt.replace("/draw", "", 1).strip(), payload, is_art=False)
                         return
                     if "/art " in text_prompt or text_prompt.startswith("/art"):
                         self.log_ui("[INFO] Intercepted /art command. Initiating enhanced AI image generation pipeline...")
-                        self.handle_draw_request(text_prompt.replace("/art", "").strip(), payload, is_art=True)
+                        self.handle_draw_request(text_prompt.replace("/art", "", 1).strip(), payload, is_art=True)
                         return
                     if text_prompt.startswith("/guess"):
                         self.log_ui("[INFO] Intercepted /guess command. Injecting visual analysis prompt...")
@@ -208,8 +271,9 @@ class LlamaProxyHandler(BaseHTTPRequestHandler):
                     if text_prompt == "/help":
                         help_msg = (
                             "**Available Commands:**\n"
-                            "- `/draw <prompt>` : Generate an image\n"
-                            "- `/art <prompt>` : Auto-enhance prompt and generate image\n"
+                            "- `/imagine <prompt> | <negative>` : Generate image directly without AI editing prompts\n"
+                            "- `/draw <prompt> | <negative>` : AI enhances positive prompt, keeps negative as-is\n"
+                            "- `/art <prompt> | <negative>` : AI enhances both positive and negative prompts\n"
                             "- `/guess` : AI visually analyzes last image and guesses a prompt\n"
                             "- `/yes` : Confirm and generate the AI's guessed prompt\n"
                             "- `/cfg <0-20>` : Set image generation CFG scale (e.g. `/cfg 7.5`)\n"
@@ -315,53 +379,69 @@ class LlamaProxyHandler(BaseHTTPRequestHandler):
                 headers['Accept-Encoding'] = 'gzip, deflate'
                 
                 try:
-                    resp = requests.post(url, headers=headers, data=body_data, timeout=30)
-                    body_bytes = resp.content  # auto-decompresses gzip/deflate
+                    resp = requests.post(url, headers=headers, data=body_data, stream=True, timeout=300)
                     self.send_response(resp.status_code)
-                    skip_headers = (
-                        'transfer-encoding', 'content-encoding', 'connection',
-                        'content-length', 'cross-origin-embedder-policy',
-                        'cross-origin-opener-policy', 'cross-origin-resource-policy'
-                    )
                     for k, v in resp.headers.items():
-                        if k.lower() not in skip_headers:
+                        if k.lower() not in SKIP_PROXY_HEADERS:
                             self.send_header(k, v)
-                    self.send_header('Content-Length', str(len(body_bytes)))
+                    self.send_cors_headers()
                     self.send_header('Connection', 'close')
-                    self.send_header('Access-Control-Allow-Origin', '*')
                     self.end_headers()
-                    self.wfile.write(body_bytes)
+                    
+                    for chunk in resp.iter_content(chunk_size=1024):
+                        if chunk:
+                            self.wfile.write(chunk)
+                            self.wfile.flush()
+                except (ConnectionAbortedError, ConnectionResetError, BrokenPipeError):
+                    pass
                 except Exception as e:
                     if getattr(self.server, 'is_generating_image', False):
-                        self.send_response(200)
-                        self.send_header('Content-Type', 'application/json')
-                        self.end_headers()
-                        self.wfile.write(b'{"error": "Currently generating image..."}')
+                        try:
+                            self.send_response(200)
+                            self.send_cors_headers()
+                            self.send_header('Content-Type', 'application/json')
+                            self.send_header('Connection', 'close')
+                            self.end_headers()
+                            self.wfile.write(b'{"error": "Currently generating image..."}')
+                        except Exception:
+                            pass
                         return
-                    self.send_error(502, f"Bad Gateway: {str(e)}")
+                    try:
+                        self.send_response(502)
+                        self.send_cors_headers()
+                        self.send_header('Content-Type', 'application/json')
+                        self.send_header('Connection', 'close')
+                        self.end_headers()
+                        self.wfile.write(json.dumps({"error": {"message": f"Bad Gateway: {str(e)}", "code": 502}}).encode('utf-8'))
+                    except Exception:
+                        pass
                 return
 
         self.forward_request()
 
     def send_assistant_message(self, text, is_stream):
-        self.send_response(200)
-        self.send_header('Content-Type', 'text/event-stream' if is_stream else 'application/json')
-        self.send_header('Cache-Control', 'no-cache')
-        self.send_header('Connection', 'keep-alive')
-        self.end_headers()
-        
-        if is_stream:
-            chunk = {"choices":[{"delta":{"content": text}}]}
-            self.wfile.write(f"data: {json.dumps(chunk)}\n\n".encode('utf-8'))
-            self.wfile.write(b"data: [DONE]\n\n")
-            self.wfile.flush()
-        else:
-            resp = {
-                "choices": [{
-                    "message": {"role": "assistant", "content": text}
-                }]
-            }
-            self.wfile.write(json.dumps(resp).encode('utf-8'))
+        try:
+            self.send_response(200)
+            self.send_cors_headers()
+            self.send_header('Content-Type', 'text/event-stream' if is_stream else 'application/json')
+            self.send_header('Cache-Control', 'no-cache')
+            self.send_header('Connection', 'close')
+            self.end_headers()
+            
+            if is_stream:
+                chunk = {"choices":[{"delta":{"content": text}}]}
+                self.wfile.write(f"data: {json.dumps(chunk)}\n\n".encode('utf-8'))
+                self.wfile.write(b"data: [DONE]\n\n")
+                self.wfile.flush()
+            else:
+                resp = {
+                    "choices": [{
+                        "message": {"role": "assistant", "content": text}
+                    }]
+                }
+                self.wfile.write(json.dumps(resp).encode('utf-8'))
+        except (ConnectionAbortedError, ConnectionResetError, BrokenPipeError):
+            pass
 
     def handle_eject_request(self, payload):
         self.send_assistant_message("*Model ejected. VRAM cleared.*\n\n*(Type any message to wake me back up)*", payload.get('stream', False))
@@ -420,7 +500,14 @@ class LlamaProxyHandler(BaseHTTPRequestHandler):
         self.send_assistant_message(msg, payload.get('stream', False))
 
     def handle_clear_request(self, payload):
-        msg = "*Chat context wiped from server!*\n\n*(Note: To clear the messages from your screen, please refresh the page or click 'New Chat' in your client).* "
+        try:
+            cfg = self.server.config_manager.get_config() if hasattr(self.server, 'config_manager') else self.server.config
+            if hasattr(self.server, 'process_manager') and self.server.process_manager:
+                self.server.process_manager.flush_kv_cache(cfg)
+        except Exception:
+            pass
+            
+        msg = "*Chat context & KV Cache wiped from server (0 tokens active)!*\n\n*(Note: To clear the messages from your screen, please refresh the page or click 'New Chat' in your client).* "
         self.send_assistant_message(msg, payload.get('stream', False))
 
     def handle_compact_request(self, payload):
@@ -624,14 +711,14 @@ This server flawlessly intercepts standard OpenAI API calls (`/v1/chat/completio
             self.end_headers()
             self.wfile.write(b"{}")
 
-    def handle_draw_request(self, original_prompt, payload, is_art=False, is_guess_confirm=False):
+    def handle_draw_request(self, original_prompt, payload, is_art=False, is_guess_confirm=False, is_raw=False):
         self.server.is_generating_image = True
         try:
-            self._do_handle_draw_request(original_prompt, payload, is_art, is_guess_confirm)
+            self._do_handle_draw_request(original_prompt, payload, is_art, is_guess_confirm, is_raw)
         finally:
             self.server.is_generating_image = False
             
-    def _do_handle_draw_request(self, original_prompt, payload, is_art, is_guess_confirm):
+    def _do_handle_draw_request(self, original_prompt, payload, is_art, is_guess_confirm, is_raw=False):
         is_stream = payload.get('stream', False)
         
         # Manually extract user's negative prompt if provided via '|'
@@ -642,11 +729,27 @@ This server flawlessly intercepts standard OpenAI API calls (`/v1/chat/completio
             user_pos = parts[0].strip()
             user_neg = parts[1].strip()
 
-        if is_guess_confirm:
-            # If it's a confirmation of a previous guess, we don't need to ask the LLM again.
-            # We just parse the original_prompt (which is the assistant's previous message content).
+        if is_raw:
+            self.send_response(200)
+            self.send_cors_headers()
+            self.send_header('Content-Type', 'text/event-stream' if is_stream else 'application/json')
+            self.send_header('Cache-Control', 'no-cache')
+            self.send_header('Connection', 'keep-alive')
+            self.end_headers()
+            
+            def send_chunk(text):
+                if is_stream:
+                    chunk = {"choices":[{"delta":{"content": text}}]}
+                    self.wfile.write(f"data: {json.dumps(chunk)}\n\n".encode('utf-8'))
+                    self.wfile.flush()
+                    
+            disp_neg = user_neg if user_neg else "(Default Negative Prompt)"
+            send_chunk(f"*Direct prompt received:*\n- **Positive:** `{user_pos}`\n- **Negative:** `{disp_neg}`\n\n")
+            generated_prompt = user_pos
+        elif is_guess_confirm:
             is_stream = payload.get('stream', False)
             self.send_response(200)
+            self.send_cors_headers()
             self.send_header('Content-Type', 'text/event-stream' if is_stream else 'application/json')
             self.send_header('Cache-Control', 'no-cache')
             self.send_header('Connection', 'keep-alive')
@@ -793,7 +896,10 @@ This server flawlessly intercepts standard OpenAI API calls (`/v1/chat/completio
             
             default_neg = "ugly, blurry, low quality, deformed, mutated, bad anatomy, bad proportions, poorly drawn face, poorly drawn hands, extra limbs, cloned face, disfigured, gross proportions"
             
-            if is_art or is_guess_confirm:
+            if is_raw:
+                pos_prompt = user_pos
+                neg_prompt = user_neg if user_neg else default_neg
+            elif is_art or is_guess_confirm:
                 pos_prompt = user_pos
                 neg_prompt = user_neg if user_neg else default_neg
                 gen_text = generated_prompt.strip()
@@ -1013,5 +1119,13 @@ class LlamaProxyServer(threading.Thread):
         
     def stop(self):
         if self.httpd:
-            self.httpd.shutdown()
-            self.httpd.server_close()
+            try:
+                def _do_shutdown():
+                    try:
+                        self.httpd.shutdown()
+                        self.httpd.server_close()
+                    except Exception:
+                        pass
+                threading.Thread(target=_do_shutdown, daemon=True).start()
+            except Exception:
+                pass
