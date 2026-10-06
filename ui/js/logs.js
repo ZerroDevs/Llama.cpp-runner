@@ -1,128 +1,71 @@
-const logContainer = document.getElementById('log-container');
-const autoScrollCheckbox = document.getElementById('auto-scroll');
+/**
+ * Llama Server Control - Live Logs Terminal Controller
+ */
 
-function resetSwarmItsTimeout() {
-    clearTimeout(window.swarmItsTimeout);
-    window.swarmItsTimeout = setTimeout(() => {
-        window.currentSwarmIts = 0;
-    }, 2000);
-}
+import { api } from './api.js';
+import { state } from './state.js';
 
-window.receiveLog = function(logLine) {
-    if (!logLine) return;
-    
-    const div = document.createElement('div');
-    div.className = 'whitespace-pre-wrap log-line';
-    
-    if (logLine.startsWith('[SWARM] ')) {
-        div.dataset.source = 'swarm';
-        logLine = logLine.substring(8);
-        div.classList.add('text-indigo-400');
-        
-        // Parse it/s or s/it for telemetry
-        const itsMatch = logLine.match(/([\d.]+)\s*it\/s/i);
-        if (itsMatch) {
-            window.currentSwarmIts = parseFloat(itsMatch[1]);
-            resetSwarmItsTimeout();
-        } else {
-            const sitMatch = logLine.match(/([\d.]+)\s*s\/it/i);
-            if (sitMatch) {
-                const sIt = parseFloat(sitMatch[1]);
-                if (sIt > 0) {
-                    window.currentSwarmIts = (1 / sIt);
-                    resetSwarmItsTimeout();
-                }
-            }
-        }
+export function setupLogs() {
+  const terminal = document.getElementById('terminal-box');
+  const countEl = document.getElementById('log-count');
+  const filterInput = document.getElementById('input-log-filter');
+  const autoScrollBtn = document.getElementById('btn-log-autoscroll');
+  const clearBtn = document.getElementById('btn-clear-logs');
+
+  autoScrollBtn?.addEventListener('click', () => {
+    state.logAutoScroll = !state.logAutoScroll;
+    if (state.logAutoScroll) {
+      autoScrollBtn.className = 'px-2.5 py-1 rounded-lg border border-emerald-500/30 bg-emerald-500/15 text-emerald-400 text-xs font-medium';
+      if (terminal) terminal.scrollTop = terminal.scrollHeight;
     } else {
-        div.dataset.source = 'llama';
-        if (logLine.includes('WARN')) {
-            div.classList.add('log-warn');
-        } else if (logLine.includes('ERR') || logLine.includes('fail')) {
-            div.classList.add('log-error');
-        } else if (logLine.includes('INFO') || logLine.includes('llama_')) {
-            div.classList.add('log-info');
-        } else {
-            div.classList.add('text-gray-300', 'dark:text-gray-400');
+      autoScrollBtn.className = 'px-2.5 py-1 rounded-lg border border-[var(--border)] bg-[var(--bg-elevated)] text-[var(--text-muted)] text-xs font-medium';
+    }
+  });
+
+  clearBtn?.addEventListener('click', () => {
+    state.logs = [];
+    if (terminal) terminal.textContent = '';
+    if (countEl) countEl.textContent = '0 lines';
+  });
+
+  filterInput?.addEventListener('input', () => {
+    state.logFilter = filterInput.value.toLowerCase().trim();
+    renderLogs();
+  });
+
+  // Listen to IPC stream events
+  api.on('log', (line) => {
+    if (!line) return;
+    state.logs.push(line);
+
+    // Enforce strict 500-line buffer cap per project directives
+    if (state.logs.length > 500) {
+      state.logs.shift();
+    }
+
+    if (countEl) countEl.textContent = `${state.logs.length} lines`;
+
+    if (!state.logFilter || line.toLowerCase().includes(state.logFilter)) {
+      if (terminal) {
+        terminal.textContent += line + '\n';
+        if (state.logAutoScroll) {
+          terminal.scrollTop = terminal.scrollHeight;
         }
+      }
     }
-    
-    div.textContent = logLine;
-    logContainer.appendChild(div);
-    
-    while (logContainer.childElementCount > 500) {
-        logContainer.removeChild(logContainer.firstChild);
-    }
-    
-    if (autoScrollCheckbox.checked) {
-        logContainer.scrollTop = logContainer.scrollHeight;
-    }
-};
-
-document.getElementById('btn-clear-logs')?.addEventListener('click', () => {
-    logContainer.innerHTML = '';
-});
-
-document.getElementById('btn-copy-logs')?.addEventListener('click', () => {
-    const text = logContainer.innerText;
-    navigator.clipboard.writeText(text).then(() => {
-        if (window.showToast) {
-            window.showToast(translations[currentLang].toast_copied || 'Copied!');
-        }
-    });
-});
-
-document.getElementById('btn-export-logs')?.addEventListener('click', () => {
-    const text = logContainer.innerText;
-    const blob = new Blob([text], { type: 'text/plain' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `llama-server-logs-${new Date().toISOString().replace(/[:.]/g, '-')}.txt`;
-    a.click();
-    URL.revokeObjectURL(url);
-});
-
-// Log Filter Logic
-const filterAll = document.getElementById('log-filter-all');
-const filterLlama = document.getElementById('log-filter-llama');
-const filterSwarm = document.getElementById('log-filter-swarm');
-
-function setLogFilter(source) {
-    const activeClass = ['bg-brand', 'text-white', 'shadow-sm'];
-    const inactiveClass = ['text-textMuted', 'hover:text-textPrimary'];
-    
-    [filterAll, filterLlama, filterSwarm].forEach(btn => {
-        if (btn) {
-            btn.classList.remove(...activeClass);
-            btn.classList.add(...inactiveClass);
-        }
-    });
-
-    if (source === 'all') {
-        filterAll.classList.remove(...inactiveClass);
-        filterAll.classList.add(...activeClass);
-        logContainer.className = "h-full overflow-y-auto font-mono text-[13px] leading-relaxed break-all select-text space-y-1 p-1 filter-all";
-    } else if (source === 'llama') {
-        filterLlama.classList.remove(...inactiveClass);
-        filterLlama.classList.add(...activeClass);
-        logContainer.className = "h-full overflow-y-auto font-mono text-[13px] leading-relaxed break-all select-text space-y-1 p-1 filter-llama";
-    } else if (source === 'swarm') {
-        filterSwarm.classList.remove(...inactiveClass);
-        filterSwarm.classList.add(...activeClass);
-        logContainer.className = "h-full overflow-y-auto font-mono text-[13px] leading-relaxed break-all select-text space-y-1 p-1 filter-swarm";
-    }
+  });
 }
 
-filterAll?.addEventListener('click', () => setLogFilter('all'));
-filterLlama?.addEventListener('click', () => setLogFilter('llama'));
-filterSwarm?.addEventListener('click', () => setLogFilter('swarm'));
+function renderLogs() {
+  const terminal = document.getElementById('terminal-box');
+  if (!terminal) return;
 
-// Initial state css is handled in style.css or dynamically:
-// We need to inject styles for these classes to hide unwanted logs
-const style = document.createElement('style');
-style.innerHTML = `
-    .filter-llama .log-line[data-source="swarm"] { display: none !important; }
-    .filter-swarm .log-line[data-source="llama"] { display: none !important; }
-`;
-document.head.appendChild(style);
+  const filtered = state.logFilter
+    ? state.logs.filter(l => l.toLowerCase().includes(state.logFilter))
+    : state.logs;
+
+  terminal.textContent = filtered.join('\n');
+  if (state.logAutoScroll) {
+    terminal.scrollTop = terminal.scrollHeight;
+  }
+}

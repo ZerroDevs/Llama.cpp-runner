@@ -1,0 +1,235 @@
+<!-- ========================================== -->
+<!-- TAB 1: DASHBOARD & SERVER ENGINE           -->
+<!-- ========================================== -->
+<section id="tab-dashboard" class="tab-pane active p-6 space-y-5 max-w-5xl mx-auto">
+  <!-- Network Access Card -->
+  <div class="p-4 rounded-2xl bg-[var(--bg-card)] border border-[var(--border)] flex items-center justify-between shadow-xs">
+    <div class="flex items-center gap-3">
+      <div class="w-10 h-10 rounded-xl bg-[var(--brand-muted)] border border-[var(--brand)]/20 flex items-center justify-center text-[var(--brand)]">
+        <i data-lucide="network" class="w-5 h-5"></i>
+      </div>
+      <div>
+        <div class="text-xs font-bold text-[var(--brand)] uppercase tracking-wider font-mono">Local Network Endpoint</div>
+        <div class="text-xs text-[var(--text-muted)]">OpenAI-compatible chat & completions endpoint for external agents (Cline, Cursor, etc.)</div>
+      </div>
+    </div>
+    <div class="flex items-center gap-2">
+      <code id="lbl-network-endpoint" class="font-mono text-xs px-3 py-1.5 rounded-lg bg-[var(--bg-base)] border border-[var(--border)] text-emerald-400 font-semibold select-all">http://127.0.0.1:8080/v1</code>
+      <button id="btn-copy-network" class="p-1.5 rounded-lg border border-[var(--border)] hover:bg-[var(--bg-elevated)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors" title="Copy URL">
+        <i data-lucide="copy" class="w-4 h-4"></i>
+      </button>
+    </div>
+  </div>
+
+  <!-- Missing Binary Alert Banner -->
+  <div id="banner-missing-binary" class="hidden p-4 rounded-2xl bg-rose-500/10 border border-rose-500/30 flex items-center justify-between">
+    <div class="flex items-center gap-3">
+      <i data-lucide="alert-triangle" class="w-5 h-5 text-rose-400"></i>
+      <div>
+        <div class="text-xs font-bold text-rose-400 uppercase tracking-wider font-mono">llama-server.exe Binary Not Found</div>
+        <div class="text-xs text-[var(--text-muted)]">Please locate your compiled llama.cpp server binary to enable model inference.</div>
+      </div>
+    </div>
+    <button id="btn-banner-locate" class="px-3.5 py-1.5 rounded-xl bg-rose-500 text-white font-semibold text-xs hover:bg-rose-600 transition-colors">
+      Locate Binary
+    </button>
+  </div>
+
+  <!-- Server Engine Configuration Card -->
+  <div class="p-5 rounded-2xl bg-[var(--bg-card)] border border-[var(--border)] space-y-4 shadow-xs">
+    <div class="flex items-center justify-between border-b border-[var(--border)] pb-3">
+      <div class="flex items-center gap-2">
+        <i data-lucide="cpu" class="w-4 h-4 text-emerald-400"></i>
+        <span class="text-xs font-bold uppercase tracking-wider font-mono text-[var(--text-primary)]">Core Engine Setup</span>
+      </div>
+      <div class="flex items-center gap-2">
+        <button id="btn-save-config" class="px-3 py-1.5 rounded-xl bg-[var(--brand)] text-black text-xs font-semibold hover:bg-[var(--brand-hover)] transition-colors flex items-center gap-1.5 shadow-xs">
+          <i data-lucide="save" class="w-3.5 h-3.5"></i>
+          <span>Save Setup</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- PRIMARY DROPDOWN 1: Model Selection & Advanced Options -->
+    <div class="space-y-2">
+      <div class="flex items-center justify-between">
+        <label for="select-model" class="text-xs font-semibold text-[var(--text-primary)] flex items-center gap-1.5">
+          <span>Model Selection</span>
+          <span class="text-[10px] text-emerald-400 font-mono">(Direct Dropdown)</span>
+        </label>
+        <div class="flex items-center gap-2">
+          <button id="btn-rescan-models" type="button" class="text-[11px] text-[var(--text-secondary)] hover:text-cyan-400 flex items-center gap-1 transition-colors">
+            <i data-lucide="refresh-cw" class="w-3 h-3"></i>
+            <span>Rescan Folder</span>
+          </button>
+          <span>•</span>
+          <button id="btn-browse-model" type="button" class="text-[11px] text-[var(--text-secondary)] hover:text-emerald-400 flex items-center gap-1 transition-colors">
+            <i data-lucide="folder-open" class="w-3 h-3"></i>
+            <span>Browse Other...</span>
+          </button>
+        </div>
+      </div>
+      <select id="select-model" class="w-full bg-[var(--bg-input)] border border-[var(--border)] focus:border-[var(--brand)] rounded-xl px-3.5 py-2.5 text-xs text-[var(--text-primary)] outline-none font-mono cursor-pointer transition-colors">
+        <option value="">-- No models scanned yet --</option>
+      </select>
+
+      <!-- Advanced options > Accordion -->
+      <div class="pt-0.5">
+        <button id="btn-toggle-advanced-models" type="button" class="flex items-center gap-1.5 text-xs font-medium text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors py-1 cursor-pointer select-none">
+          <i data-lucide="chevron-right" id="icon-advanced-chevron" class="w-3.5 h-3.5 text-emerald-400 transition-transform duration-200"></i>
+          <span class="font-semibold">Advanced options &gt;</span>
+          <span class="text-[11px] text-[var(--text-muted)]">(Vision, Draft &amp; LoRA)</span>
+        </button>
+
+        <div id="panel-advanced-models" class="hidden mt-2 p-3.5 rounded-xl bg-[var(--bg-elevated)] border border-[var(--border)] space-y-3.5 animate-in fade-in">
+          <!-- Vision Model -->
+          <div class="space-y-1">
+            <div class="flex items-center justify-between">
+              <label for="select-vision-model" class="text-[11px] font-mono text-[var(--text-muted)] uppercase flex items-center gap-1.5">
+                <i data-lucide="eye" class="w-3.5 h-3.5 text-indigo-400"></i>
+                <span>Vision Model (mmproj)</span>
+              </label>
+              <button id="btn-browse-mmproj" type="button" class="text-[11px] text-indigo-400 hover:text-indigo-300 flex items-center gap-1 transition-colors">
+                <i data-lucide="folder-open" class="w-3 h-3"></i>
+                <span>Browse Projector...</span>
+              </button>
+            </div>
+            <select id="select-vision-model" class="w-full bg-[var(--bg-input)] border border-[var(--border)] focus:border-indigo-400 rounded-xl px-3 py-2 text-xs text-[var(--text-primary)] font-mono outline-none cursor-pointer">
+              <option value="">-- Disabled / No Vision Projector --</option>
+            </select>
+          </div>
+
+          <!-- Draft Model -->
+          <div class="space-y-1">
+            <div class="flex items-center justify-between">
+              <label for="select-draft-model" class="text-[11px] font-mono text-[var(--text-muted)] uppercase flex items-center gap-1.5">
+                <i data-lucide="zap" class="w-3.5 h-3.5 text-amber-400"></i>
+                <span>Draft Model (Speculative Decoding)</span>
+              </label>
+              <button id="btn-browse-draft" type="button" class="text-[11px] text-amber-400 hover:text-amber-300 flex items-center gap-1 transition-colors">
+                <i data-lucide="folder-open" class="w-3 h-3"></i>
+                <span>Browse Draft...</span>
+              </button>
+            </div>
+            <select id="select-draft-model" class="w-full bg-[var(--bg-input)] border border-[var(--border)] focus:border-amber-400 rounded-xl px-3 py-2 text-xs text-[var(--text-primary)] font-mono outline-none cursor-pointer">
+              <option value="">-- Disabled / No Draft Model --</option>
+            </select>
+          </div>
+
+          <!-- LoRA Model -->
+          <div class="space-y-1">
+            <div class="flex items-center justify-between">
+              <label for="input-lora-model" class="text-[11px] font-mono text-[var(--text-muted)] uppercase flex items-center gap-1.5">
+                <i data-lucide="layers" class="w-3.5 h-3.5 text-rose-400"></i>
+                <span>LoRA Model (Adapter)</span>
+              </label>
+              <button id="btn-browse-lora" type="button" class="text-[11px] text-rose-400 hover:text-rose-300 flex items-center gap-1 transition-colors">
+                <i data-lucide="folder-open" class="w-3 h-3"></i>
+                <span>Browse Adapter...</span>
+              </button>
+            </div>
+            <div class="flex items-center gap-2">
+              <input id="input-lora-model" placeholder="Path to LoRA adapter file or comma-separated adapters..." class="flex-1 bg-[var(--bg-input)] border border-[var(--border)] focus:border-rose-400 rounded-xl px-3 py-2 text-xs text-[var(--text-primary)] font-mono outline-none truncate" />
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Binary Path Input -->
+    <div class="space-y-1.5">
+      <label for="input-binary-path" class="text-xs font-semibold text-[var(--text-primary)]">llama-server.exe Binary Location</label>
+      <div class="flex items-center gap-2">
+        <input id="input-binary-path" placeholder="Path to llama-server.exe..." class="flex-1 bg-[var(--bg-input)] border border-[var(--border)] focus:border-[var(--brand)] rounded-xl px-3.5 py-2 text-xs text-[var(--text-primary)] font-mono outline-none" />
+        <button id="btn-browse-binary" class="p-2 rounded-xl border border-[var(--border)] bg-[var(--bg-elevated)] hover:bg-[var(--border)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors" title="Browse binary">
+          <i data-lucide="folder-open" class="w-4 h-4 text-cyan-400"></i>
+        </button>
+      </div>
+    </div>
+
+    <!-- Compute Parameters & Dropdowns Grid -->
+    <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 pt-2">
+      <!-- PRIMARY DROPDOWN 2: Context Size Dropdown (Preserved!) -->
+      <div class="space-y-1">
+        <label for="select-context-size" class="text-[11px] font-mono text-[var(--text-muted)] uppercase">Context Size (-c)</label>
+        <select id="select-context-size" class="w-full bg-[var(--bg-input)] border border-[var(--border)] focus:border-[var(--brand)] rounded-xl px-3 py-2 text-xs text-[var(--text-primary)] font-mono outline-none cursor-pointer">
+          <option value="2048">2,048 tokens</option>
+          <option value="4096" selected>4,096 tokens</option>
+          <option value="8192">8,192 tokens</option>
+          <option value="16384">16,384 tokens</option>
+          <option value="32768">32,768 tokens</option>
+          <option value="65536">65,536 tokens</option>
+          <option value="124000">124,000 tokens (124k)</option>
+          <option value="131072">131,072 tokens (128k)</option>
+        </select>
+      </div>
+
+      <!-- PRIMARY DROPDOWN 3: Cache Type K Dropdown (Preserved!) -->
+      <div class="space-y-1">
+        <label for="select-cache-k" class="text-[11px] font-mono text-[var(--text-muted)] uppercase">Cache K (--ctk)</label>
+        <select id="select-cache-k" class="w-full bg-[var(--bg-input)] border border-[var(--border)] focus:border-[var(--brand)] rounded-xl px-3 py-2 text-xs text-[var(--text-primary)] font-mono outline-none cursor-pointer">
+          <option value="f16" selected>f16 (Full)</option>
+          <option value="q8_0">q8_0 (Balanced)</option>
+          <option value="q4_0">q4_0 (Low VRAM)</option>
+        </select>
+      </div>
+
+      <!-- PRIMARY DROPDOWN 4: Cache Type V Dropdown (Preserved!) -->
+      <div class="space-y-1">
+        <label for="select-cache-v" class="text-[11px] font-mono text-[var(--text-muted)] uppercase">Cache V (--ctv)</label>
+        <select id="select-cache-v" class="w-full bg-[var(--bg-input)] border border-[var(--border)] focus:border-[var(--brand)] rounded-xl px-3 py-2 text-xs text-[var(--text-primary)] font-mono outline-none cursor-pointer">
+          <option value="f16" selected>f16 (Full)</option>
+          <option value="q8_0">q8_0 (Balanced)</option>
+          <option value="q4_0">q4_0 (Low VRAM)</option>
+        </select>
+      </div>
+
+      <!-- GPU Layers Input -->
+      <div class="space-y-1">
+        <label for="input-gpu-layers" class="text-[11px] font-mono text-[var(--text-muted)] uppercase">GPU Layers (-ngl)</label>
+        <input id="input-gpu-layers" type="number" value="99" class="w-full bg-[var(--bg-input)] border border-[var(--border)] focus:border-[var(--brand)] rounded-xl px-3 py-2 text-xs text-[var(--text-primary)] font-mono outline-none" />
+      </div>
+
+      <!-- CPU Threads Input -->
+      <div class="space-y-1">
+        <label for="input-threads" class="text-[11px] font-mono text-[var(--text-muted)] uppercase">CPU Threads (-t)</label>
+        <input id="input-threads" type="number" value="8" class="w-full bg-[var(--bg-input)] border border-[var(--border)] focus:border-[var(--brand)] rounded-xl px-3 py-2 text-xs text-[var(--text-primary)] font-mono outline-none" />
+      </div>
+
+      <!-- Batch Size Input -->
+      <div class="space-y-1">
+        <label for="input-batch-size" class="text-[11px] font-mono text-[var(--text-muted)] uppercase">Batch Size (-b)</label>
+        <input id="input-batch-size" type="number" value="512" class="w-full bg-[var(--bg-input)] border border-[var(--border)] focus:border-[var(--brand)] rounded-xl px-3 py-2 text-xs text-[var(--text-primary)] font-mono outline-none" />
+      </div>
+
+      <!-- Port Input -->
+      <div class="space-y-1">
+        <label for="input-port" class="text-[11px] font-mono text-[var(--text-muted)] uppercase">Server Port</label>
+        <input id="input-port" type="number" value="8080" class="w-full bg-[var(--bg-input)] border border-[var(--border)] focus:border-[var(--brand)] rounded-xl px-3 py-2 text-xs text-[var(--text-primary)] font-mono outline-none" />
+      </div>
+
+      <!-- Host Select -->
+      <div class="space-y-1">
+        <label for="select-host" class="text-[11px] font-mono text-[var(--text-muted)] uppercase">Host Bind</label>
+        <select id="select-host" class="w-full bg-[var(--bg-input)] border border-[var(--border)] focus:border-[var(--brand)] rounded-xl px-3 py-2 text-xs text-[var(--text-primary)] font-mono outline-none cursor-pointer">
+          <option value="127.0.0.1" selected>127.0.0.1 (Local Only)</option>
+          <option value="0.0.0.0">0.0.0.0 (LAN Share)</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Flash Attention Checkbox -->
+    <div class="pt-1 pb-1">
+      <label class="flex items-center gap-2 text-xs text-[var(--text-primary)] cursor-pointer select-none">
+        <input id="check-flash-attn" type="checkbox" checked class="w-4 h-4 accent-[var(--brand)]" />
+        <span class="font-medium">Enable Flash Attention (-fa on)</span>
+      </label>
+    </div>
+
+    <!-- Custom Arguments -->
+    <div class="space-y-1">
+      <label for="input-custom-args" class="text-[11px] font-mono text-[var(--text-muted)] uppercase">Custom Extra Arguments</label>
+      <input id="input-custom-args" placeholder="e.g. --temp 0.8 --repeat-penalty 1.1 --mlock" class="w-full bg-[var(--bg-input)] border border-[var(--border)] rounded-xl px-3 py-2 text-xs text-[var(--text-primary)] font-mono outline-none" />
+    </div>
+  </div>
+</section>

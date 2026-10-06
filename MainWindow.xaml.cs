@@ -1,0 +1,107 @@
+using System;
+using System.IO;
+using System.Threading.Tasks;
+using System.Windows;
+using Microsoft.Web.WebView2.Core;
+using LlamaServerControl.Backend;
+
+namespace LlamaServerControl
+{
+    public partial class MainWindow : Window
+    {
+        private ConfigManager _configManager = null!;
+        private ProcessManager _processManager = null!;
+        private SwarmManager _swarmManager = null!;
+        private HardwareMonitor _hardwareMonitor = null!;
+        private HubManager _hubManager = null!;
+        private NativeBridge _nativeBridge = null!;
+        private StreamingProxy _streamingProxy = null!;
+
+        public MainWindow()
+        {
+            InitializeComponent();
+            Loaded += MainWindow_Loaded;
+            Closing += MainWindow_Closing;
+        }
+
+        private async void MainWindow_Loaded(object sender, RoutedEventArgs e)
+        {
+            string appDir = AppDomain.CurrentDomain.BaseDirectory;
+            string parentDir = Directory.GetParent(appDir)?.Parent?.Parent?.Parent?.FullName ?? appDir;
+            string configPath = Path.Combine(parentDir, "config.json");
+            if (!File.Exists(configPath))
+            {
+                configPath = Path.Combine(appDir, "config.json");
+            }
+
+            _configManager = new ConfigManager(configPath);
+            _processManager = new ProcessManager();
+            _swarmManager = new SwarmManager();
+            _hardwareMonitor = new HardwareMonitor();
+            _hubManager = new HubManager();
+
+            _nativeBridge = new NativeBridge(_configManager, _processManager, _swarmManager, _hardwareMonitor, _hubManager);
+
+            _streamingProxy = new StreamingProxy(_processManager, _configManager, _swarmManager);
+            _streamingProxy.Start(8081);
+
+            // Locate UI directory (prioritize source dev directory for instant live updates)
+            string devUiDir = Path.Combine(parentDir, "ui");
+            string uiDir = Directory.Exists(devUiDir) ? devUiDir : Path.Combine(appDir, "ui");
+
+            // Initialize WebView2
+            await webView.EnsureCoreWebView2Async();
+
+            _nativeBridge.SetWebView(webView.CoreWebView2);
+
+            // Virtual host mapping for 0 latency local loading
+            webView.CoreWebView2.SetVirtualHostNameToFolderMapping(
+                "app.local",
+                uiDir,
+                CoreWebView2HostResourceAccessKind.Allow
+            );
+
+            webView.CoreWebView2.WebMessageReceived += async (s, args) =>
+            {
+                try
+                {
+                    string messageJson = args.WebMessageAsJson;
+                    string responseJson = await _nativeBridge.HandleMessageAsync(messageJson);
+                    if (!Dispatcher.CheckAccess())
+                    {
+                        await Dispatcher.InvokeAsync(() => webView.CoreWebView2.PostWebMessageAsJson(responseJson));
+                    }
+                    else
+                    {
+                        webView.CoreWebView2.PostWebMessageAsJson(responseJson);
+                    }
+                }
+                catch { }
+            };
+
+            webView.CoreWebView2.Navigate("https://app.local/index.html");
+        }
+
+        private void MainWindow_Closing(object? sender, System.ComponentModel.CancelEventArgs e)
+        {
+            // Instant 0ms window hide
+            Hide();
+
+            // Background async shutdown
+            Task.Run(() =>
+            {
+                try
+                {
+                    _processManager.StopServer();
+                    _swarmManager.StopSwarm();
+                    _streamingProxy.Stop();
+                }
+                catch { }
+                finally
+                {
+                    Environment.Exit(0);
+                }
+            });
+        }
+    }
+}

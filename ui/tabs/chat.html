@@ -1,0 +1,57 @@
+<!-- ========================================== -->
+<!-- TAB 2: AI CHAT WORKSPACE                   -->
+<!-- ========================================== -->
+<section id="tab-chat" class="tab-pane h-full min-h-0">
+  <!-- Persona Bar -->
+  <div class="px-5 py-2.5 bg-[var(--bg-card)] border-b border-[var(--border)] flex items-center justify-between shrink-0">
+    <div class="flex items-center gap-1.5 overflow-x-auto">
+      <span class="text-[10px] font-mono font-semibold uppercase text-[var(--text-muted)] mr-1">Persona:</span>
+      <button class="chat-preset-btn active px-2.5 py-1 rounded-lg text-xs font-semibold bg-[var(--brand)] text-black" data-preset="general">General</button>
+      <button class="chat-preset-btn px-2.5 py-1 rounded-lg text-xs font-medium bg-[var(--bg-elevated)] text-[var(--text-secondary)] hover:text-[var(--text-primary)]" data-preset="coder">Coder</button>
+      <button class="chat-preset-btn px-2.5 py-1 rounded-lg text-xs font-medium bg-[var(--bg-elevated)] text-[var(--text-secondary)] hover:text-[var(--text-primary)]" data-preset="vision">Vision</button>
+      <button class="chat-preset-btn px-2.5 py-1 rounded-lg text-xs font-medium bg-[var(--bg-elevated)] text-[var(--text-secondary)] hover:text-[var(--text-primary)]" data-preset="creative">Creative</button>
+      <button class="chat-preset-btn px-2.5 py-1 rounded-lg text-xs font-medium bg-[var(--bg-elevated)] text-[var(--text-secondary)] hover:text-[var(--text-primary)]" data-preset="uncensored">Uncensored</button>
+    </div>
+
+    <div class="flex items-center gap-2">
+      <div id="chat-tps-badge" class="hidden items-center gap-1 px-2 py-0.5 rounded bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 font-mono text-[11px] font-bold">
+        <i data-lucide="zap" class="w-3 h-3 fill-current"></i>
+        <span id="chat-tps-text">0.0 T/s</span>
+      </div>
+      <button id="btn-clear-chat" class="p-1.5 rounded-lg hover:bg-[var(--bg-elevated)] text-[var(--text-muted)] hover:text-rose-400 transition-colors" title="Clear conversation">
+        <i data-lucide="trash-2" class="w-4 h-4"></i>
+      </button>
+    </div>
+  </div>
+
+  <!-- Chat Stream -->
+  <div id="chat-messages" class="flex-1 overflow-y-auto p-5 space-y-4 select-text min-h-0">
+    <div class="flex flex-col items-center justify-center text-center p-12 text-[var(--text-muted)] select-none">
+      <div class="w-12 h-12 rounded-2xl bg-[var(--bg-elevated)] border border-[var(--border)] flex items-center justify-center mb-3">
+        <i data-lucide="sparkles" class="w-6 h-6 text-[var(--brand)]"></i>
+      </div>
+      <h3 class="text-sm font-semibold text-[var(--text-primary)]">Ready for Conversation</h3>
+      <p class="text-xs text-[var(--text-secondary)] mt-1 max-w-sm">Type your prompt below, use slash commands like <code class="text-emerald-400">/imagine</code> for diffusion rendering, or attach images for vision.</p>
+    </div>
+  </div>
+
+  <!-- Slash Command Menu Overlay -->
+  <div id="slash-menu" class="hidden mx-5 mb-2 p-1.5 bg-[var(--bg-card)] border border-[var(--border)] rounded-xl shadow-2xl flex flex-col gap-1 max-h-48 overflow-y-auto z-20"></div>
+
+  <!-- Attached Images Preview -->
+  <div id="chat-attachment-preview" class="hidden px-5 py-2 bg-[var(--bg-card)] border-t border-[var(--border)] flex items-center gap-2 overflow-x-auto"></div>
+
+  <!-- Chat Input Bar -->
+  <div class="p-3 bg-[var(--bg-card)] border-t border-[var(--border)] shrink-0">
+    <div class="flex items-end gap-2 bg-[var(--bg-elevated)] border border-[var(--border)] focus-within:border-[var(--brand)] rounded-2xl p-2 transition-colors">
+      <label class="p-2 text-[var(--text-secondary)] hover:text-cyan-400 cursor-pointer rounded-xl hover:bg-[var(--bg-base)] transition-colors shrink-0" title="Attach image for vision">
+        <i data-lucide="paperclip" class="w-4 h-4"></i>
+        <input id="input-file-vision" type="file" accept="image/*" class="hidden" />
+      </label>
+      <textarea id="chat-input" rows="1" placeholder="Type a message or '/' for commands..." class="flex-1 bg-transparent text-xs text-[var(--text-primary)] placeholder-[var(--text-muted)] resize-none outline-none max-h-32 py-1.5 leading-relaxed"></textarea>
+      <button id="btn-chat-send" class="p-2 bg-[var(--brand)] hover:bg-[var(--brand-hover)] text-black rounded-xl font-bold transition-all shrink-0">
+        <i data-lucide="send" class="w-4 h-4"></i>
+      </button>
+    </div>
+  </div>
+</section>

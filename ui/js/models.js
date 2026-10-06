@@ -1,204 +1,291 @@
-// models.js
+/**
+ * Llama Server Control - Local Models & GGUF Discovery Controller
+ */
 
-const btnScan = document.getElementById('btn-scan-models');
-const modelsDirInput = document.getElementById('cfg-models_dir');
-const modelsGrid = document.getElementById('models-grid');
+import { api } from './api.js';
+import { state } from './state.js';
+import { showToast } from './toast.js';
+import { updateServerUI } from './dashboard.js';
 
-btnScan?.addEventListener('click', async () => {
-    if (!window.pywebview) return;
-    
-    const rootDir = modelsDirInput.value;
-    if (!rootDir) {
-        alert(translations[currentLang].err_no_dir || 'Please select a directory first.');
-        return;
-    }
-    
-    btnScan.disabled = true;
-    btnScan.innerHTML = '<i data-lucide="loader" class="w-4 h-4 animate-spin"></i> Scanning...';
-    lucide.createIcons();
-    
-    const result = await window.pywebview.api.scan_models(rootDir);
-    btnScan.disabled = false;
-    btnScan.innerHTML = '<i data-lucide="refresh-cw" class="w-4 h-4"></i> Scan Directory';
-    lucide.createIcons();
-    
-    if (result.status === 'error') {
-        alert(result.message);
-        return;
-    }
-    
-    renderModelsGrid(result.models);
-    if (window.showToast) window.showToast(`Found ${result.models.length} models.`);
-});
+export function setupModels() {
+  document.getElementById('btn-rescan-models')?.addEventListener('click', () => scanLocalModels());
+  document.getElementById('btn-rescan-library')?.addEventListener('click', () => scanLocalModels());
 
-async function backgroundScanModels() {
-    if (!window.pywebview) return;
-    const rootDir = modelsDirInput.value;
-    if (rootDir) {
-        const result = await window.pywebview.api.scan_models(rootDir);
-        if (result.status === 'success') {
-            renderModelsGrid(result.models);
-        }
-    }
-}
-
-document.getElementById('btn-browse-models-dir')?.addEventListener('click', async () => {
-    if (!window.pywebview) return;
-    const path = await window.pywebview.api.select_directory();
+  // Browse model from Dashboard
+  document.getElementById('btn-browse-model')?.addEventListener('click', async () => {
+    const path = await api.invoke('select_file', 'model');
     if (path) {
-        modelsDirInput.value = path;
-        saveConfig();
-        btnScan.click();
-    }
-});
-
-function renderModelsGrid(models) {
-    modelsGrid.innerHTML = '';
-    
-    if (models.length === 0) {
-        modelsGrid.innerHTML = `<div class="col-span-full text-center p-8 text-textMuted">${translations[currentLang].no_models_found || 'No .gguf models found in this directory.'}</div>`;
-        return;
-    }
-    
-    const projectors = models.filter(m => m.is_mmproj);
-    
-    updateDashboardDropdowns(models);
-    
-    models.forEach(model => {
-        const card = document.createElement('div');
-        card.className = 'card p-5 rounded-xl border border-border flex flex-col gap-3 hover:border-brand transition-colors';
-        
-        const isProjector = model.is_mmproj;
-        const badgeColor = isProjector ? 'bg-sec/20 text-sec border-sec/30' : 'bg-brand/20 text-brand border-brand/30';
-        
-        let projectorDropdown = '';
-        if (!isProjector && projectors.length > 0) {
-            let options = '<option value="">None (Standalone)</option>';
-            projectors.forEach(p => {
-                options += `<option value="${p.path}">${p.name}</option>`;
-            });
-            projectorDropdown = `
-                <div class="mt-2 text-xs">
-                    <label class="block text-textMuted mb-1 font-semibold">Attach Vision Projector:</label>
-                    <select class="w-full bg-bgDark border border-border rounded px-2 py-1.5 proj-select text-textMuted outline-none focus:border-brand transition-colors">
-                        ${options}
-                    </select>
-                </div>
-            `;
+      state.config.model_path = path;
+      await api.invoke('save_config', state.config);
+      const select = document.getElementById('select-model');
+      if (select) {
+        let opt = Array.from(select.options).find(o => o.value === path);
+        if (!opt) {
+          opt = document.createElement('option');
+          opt.value = path;
+          opt.textContent = `Custom: ${path.split(/[\\/]/).pop()}`;
+          select.prepend(opt);
         }
-        
-        card.innerHTML = `
-            <div class="flex items-start justify-between gap-2">
-                <h4 class="font-bold text-sm truncate flex-1" title="${model.name}">${model.name}</h4>
-                <span class="px-2 py-0.5 rounded text-[10px] font-bold border ${badgeColor}">${model.quant}</span>
-            </div>
-            <div class="text-xs text-textMuted flex items-center justify-between">
-                <span>${model.size_gb} GB</span>
-                <span>${isProjector ? 'Vision Projector' : 'LLM'}</span>
-            </div>
-            ${projectorDropdown}
-            <button class="btn-secondary w-full py-1.5 mt-2 text-xs flex items-center justify-center gap-2 load-btn">
-                <i data-lucide="play" class="w-3.5 h-3.5"></i> ${translations[currentLang].btn_load_run || 'Load & Run'}
+        select.value = path;
+      }
+      showToast('Model Loaded', path.split(/[\\/]/).pop(), 'success');
+      updateServerUI();
+    }
+  });
+
+  // Change Models Directory
+  document.getElementById('btn-change-models-dir')?.addEventListener('click', async () => {
+    const dir = await api.invoke('select_directory');
+    if (dir) {
+      state.config.models_dir = dir;
+      await api.invoke('save_config', state.config);
+      showToast('Directory Set', dir, 'info');
+      await scanLocalModels(dir);
+    }
+  });
+}
+
+// Scanned Models & Dropdown Population (PRIMARY DROPDOWN 1)
+export async function scanLocalModels(folderPath = null) {
+  let dir = folderPath || state.config.models_dir;
+  if (!dir && state.config.model_path) {
+    const idx = Math.max(state.config.model_path.lastIndexOf('\\'), state.config.model_path.lastIndexOf('/'));
+    if (idx !== -1) dir = state.config.model_path.substring(0, idx);
+  }
+  if (!dir) return;
+
+  try {
+    const models = await api.invoke('scan_models', dir);
+    if (Array.isArray(models)) {
+      models.forEach(m => {
+        if (m.name.toLowerCase().includes('mmproj') || m.is_vision) {
+          m.is_vision = true;
+          m.tag = 'Vision';
+        }
+      });
+      state.models = models;
+      populateModelDropdown(models);
+      populateVisionDropdown(models);
+      populateDraftDropdown(models);
+      renderModelsLibrary(models);
+    }
+  } catch (err) {
+    console.error('Model scan error:', err);
+  }
+}
+
+export function populateModelDropdown(models) {
+  const select = document.getElementById('select-model');
+  if (!select) return;
+
+  select.innerHTML = '';
+
+  if (models.length === 0) {
+    select.innerHTML = '<option value="">-- No models found in folder --</option>';
+    return;
+  }
+
+  const currentPath = state.config.model_path || '';
+  let matched = false;
+
+  models.forEach(m => {
+    const isVision = m.is_vision || m.name.toLowerCase().includes('mmproj');
+    const opt = document.createElement('option');
+    opt.value = m.path;
+    opt.textContent = isVision ? `👁️ [Vision] ${m.name} (${m.size_gb} GB)` : `${m.name} (${m.size_gb} GB)`;
+    if (m.path === currentPath) {
+      opt.selected = true;
+      matched = true;
+    }
+    select.appendChild(opt);
+  });
+
+  if (!matched && currentPath) {
+    const customOpt = document.createElement('option');
+    customOpt.value = currentPath;
+    customOpt.textContent = `Custom: ${currentPath.split(/[\\/]/).pop()}`;
+    customOpt.selected = true;
+    select.prepend(customOpt);
+  }
+
+  select.onchange = () => {
+    state.config.model_path = select.value;
+    api.invoke('save_config', state.config);
+    showToast('Model Selected', select.options[select.selectedIndex]?.text, 'info', 2000);
+    updateServerUI();
+  };
+}
+
+export function populateVisionDropdown(models) {
+  const select = document.getElementById('select-vision-model');
+  if (!select) return;
+
+  select.innerHTML = '<option value="">-- Disabled / No Vision Projector --</option>';
+  const currentVision = state.config.mmproj_path || state.config.vision_projector || '';
+  let matched = false;
+
+  // Sort mmproj / vision models first in vision dropdown
+  const visionSorted = [...models].sort((a, b) => {
+    const aV = a.is_vision || a.name.toLowerCase().includes('mmproj');
+    const bV = b.is_vision || b.name.toLowerCase().includes('mmproj');
+    if (aV && !bV) return -1;
+    if (!aV && bV) return 1;
+    return a.name.localeCompare(b.name);
+  });
+
+  visionSorted.forEach(m => {
+    const isVision = m.is_vision || m.name.toLowerCase().includes('mmproj');
+    const opt = document.createElement('option');
+    opt.value = m.path;
+    opt.textContent = isVision ? `⭐ [Vision Model] ${m.name} (${m.size_gb} GB)` : `${m.name} (${m.size_gb} GB)`;
+    if (m.path === currentVision) {
+      opt.selected = true;
+      matched = true;
+    }
+    select.appendChild(opt);
+  });
+
+  if (!matched && currentVision) {
+    const customOpt = document.createElement('option');
+    customOpt.value = currentVision;
+    customOpt.textContent = `Custom: ${currentVision.split(/[\\/]/).pop()}`;
+    customOpt.selected = true;
+    select.appendChild(customOpt);
+  }
+
+  // Auto-flag and suggest first detected mmproj model if none currently selected
+  if (!matched && !currentVision) {
+    const firstVision = models.find(m => m.is_vision || m.name.toLowerCase().includes('mmproj'));
+    if (firstVision) {
+      select.value = firstVision.path;
+      state.config.mmproj_path = firstVision.path;
+      state.config.vision_projector = firstVision.path;
+      api.invoke('save_config', state.config);
+    }
+  }
+
+  select.onchange = () => {
+    state.config.mmproj_path = select.value;
+    state.config.vision_projector = select.value;
+    api.invoke('save_config', state.config);
+    showToast('Vision Model', select.value ? select.options[select.selectedIndex]?.text : 'Disabled', 'info', 2000);
+  };
+}
+
+export function populateDraftDropdown(models) {
+  const select = document.getElementById('select-draft-model');
+  if (!select) return;
+
+  select.innerHTML = '<option value="">-- Disabled / No Draft Model --</option>';
+  const currentDraft = state.config.draft_model || '';
+  let matched = false;
+
+  models.forEach(m => {
+    const opt = document.createElement('option');
+    opt.value = m.path;
+    opt.textContent = `${m.name} (${m.size_gb} GB)`;
+    if (m.path === currentDraft) {
+      opt.selected = true;
+      matched = true;
+    }
+    select.appendChild(opt);
+  });
+
+  if (!matched && currentDraft) {
+    const customOpt = document.createElement('option');
+    customOpt.value = currentDraft;
+    customOpt.textContent = `Custom: ${currentDraft.split(/[\\/]/).pop()}`;
+    customOpt.selected = true;
+    select.appendChild(customOpt);
+  }
+
+  select.onchange = () => {
+    state.config.draft_model = select.value;
+    api.invoke('save_config', state.config);
+    showToast('Draft Model', select.value ? select.options[select.selectedIndex]?.text : 'Disabled', 'info', 2000);
+  };
+}
+
+export function renderModelsLibrary(models) {
+  const container = document.getElementById('models-list');
+  if (!container) return;
+  container.innerHTML = '';
+
+  if (models.length === 0) {
+    container.innerHTML = '<div class="col-span-2 text-center py-10 text-xs text-[var(--text-muted)]">No .gguf models found in configured directory.</div>';
+    return;
+  }
+
+  models.forEach(m => {
+    const isVision = m.is_vision || m.name.toLowerCase().includes('mmproj');
+    const card = document.createElement('div');
+    card.className = `p-4 rounded-2xl bg-[var(--bg-card)] border ${isVision ? 'border-fuchsia-500/40 bg-fuchsia-950/10' : 'border-[var(--border)]'} hover:border-[var(--brand)] transition-all flex flex-col justify-between gap-3 shadow-xs`;
+    card.innerHTML = `
+      <div>
+        <div class="flex items-start justify-between gap-2">
+          <div class="flex items-center gap-2 truncate max-w-sm">
+            <h4 class="font-mono text-xs font-bold text-[var(--text-primary)] truncate">${m.name}</h4>
+            ${isVision ? `
+              <span class="px-2 py-0.5 rounded-full text-[10px] font-mono font-bold bg-fuchsia-500/15 border border-fuchsia-500/30 text-fuchsia-400 flex items-center gap-1 shrink-0">
+                <i data-lucide="eye" class="w-3 h-3"></i>
+                <span>Vision Model</span>
+              </span>
+            ` : ''}
+          </div>
+          <span class="text-[10px] font-mono px-2 py-0.5 rounded bg-[var(--bg-elevated)] border border-[var(--border)] text-emerald-400 font-bold shrink-0">${m.size_gb} GB</span>
+        </div>
+        <div class="text-[11px] text-[var(--text-muted)] mt-1 font-mono flex items-center justify-between">
+          <span>Modified: ${m.modified}</span>
+          ${isVision ? '<span class="text-fuchsia-400/90 font-semibold text-[10px]">Type: Vision Projector (mmproj)</span>' : ''}
+        </div>
+      </div>
+      <div class="flex items-center justify-between pt-2 border-t border-[var(--border)] text-xs">
+        <div class="flex items-center gap-1.5">
+          ${isVision ? `
+            <button class="btn-set-vision px-3 py-1 rounded-lg bg-fuchsia-500/15 border border-fuchsia-500/30 text-fuchsia-400 hover:bg-fuchsia-500/25 font-semibold text-xs transition-colors flex items-center gap-1">
+              <i data-lucide="eye" class="w-3 h-3"></i>
+              <span>Set as Vision</span>
             </button>
-        `;
-        
-        const loadBtn = card.querySelector('.load-btn');
-        loadBtn.addEventListener('click', async () => {
-            if (isProjector) {
-                configMap.vision_projector.value = model.path;
-            } else {
-                configMap.model_path.value = model.path;
-                const projSelect = card.querySelector('.proj-select');
-                if (projSelect && projSelect.value !== "") {
-                    configMap.vision_projector.value = projSelect.value;
-                } else if (projSelect && projSelect.value === "") {
-                    configMap.vision_projector.value = "";
-                }
-            }
-            ensureOptionExists(configMap.model_path, configMap.model_path.value);
-            ensureOptionExists(configMap.vision_projector, configMap.vision_projector.value);
-            saveConfig();
-            
-            // Switch to main tab
-            document.querySelector('[data-target="tab-main"]').click();
-            
-            // Highlight the fields to show they updated
-            const el = isProjector ? configMap.vision_projector : configMap.model_path;
-            el.classList.add('ring-2', 'ring-brand');
-            setTimeout(() => el.classList.remove('ring-2', 'ring-brand'), 1500);
-            
-            if (!isProjector) {
-                const isRunning = await window.pywebview.api.check_status();
-                if (isRunning) {
-                    if (window.showToast) window.showToast('Restarting server with new model...');
-                    const btnStop = document.getElementById('btn-stop-server');
-                    const btnStart = document.getElementById('btn-start-server');
-                    
-                    btnStop.click();
-                    
-                    let retries = 20;
-                    while (retries > 0 && await window.pywebview.api.check_status()) {
-                        await new Promise(r => setTimeout(r, 250));
-                        retries--;
-                    }
-                    
-                    btnStart.click();
-                } else {
-                    if (window.showToast) window.showToast('Model selected! Click Start Server.');
-                }
-            }
-        });
-        
-        modelsGrid.appendChild(card);
-    });
-    lucide.createIcons();
-}
+            <button class="btn-select-model px-2.5 py-1 rounded-lg bg-[var(--bg-elevated)] text-[var(--text-secondary)] hover:text-white text-xs transition-colors">Select Primary</button>
+          ` : `
+            <button class="btn-select-model px-3 py-1 rounded-lg bg-[var(--brand-muted)] text-[var(--brand)] hover:bg-[var(--brand)] hover:text-black font-semibold text-xs transition-colors">Select Model</button>
+          `}
+        </div>
+        <button class="btn-auto-vram text-[11px] text-cyan-400 hover:underline flex items-center gap-1"><i data-lucide="calculator" class="w-3 h-3"></i><span>Auto VRAM</span></button>
+      </div>
+    `;
 
-function updateDashboardDropdowns(models) {
-    const modelSelect = document.getElementById('cfg-model_path');
-    const projSelect = document.getElementById('cfg-vision_projector');
-    
-    if (!modelSelect || !projSelect) return;
-    
-    const currentModel = modelSelect.value;
-    const currentProj = projSelect.value;
-    
-    while (modelSelect.options.length > 1) modelSelect.remove(1);
-    while (projSelect.options.length > 1) projSelect.remove(1);
-    
-    models.forEach(m => {
-        const opt = document.createElement('option');
-        opt.value = m.path;
-        opt.text = m.name;
-        
-        if (m.is_mmproj) {
-            projSelect.appendChild(opt);
-        } else {
-            modelSelect.appendChild(opt);
-        }
+    card.querySelector('.btn-set-vision')?.addEventListener('click', () => {
+      state.config.mmproj_path = m.path;
+      state.config.vision_projector = m.path;
+      const selectV = document.getElementById('select-vision-model');
+      if (selectV) selectV.value = m.path;
+      api.invoke('save_config', state.config);
+      showToast('Vision Model Set', m.name, 'success');
     });
-    
-    ensureOptionExists(modelSelect, currentModel);
-    ensureOptionExists(projSelect, currentProj);
-}
 
-function ensureOptionExists(selectEl, value) {
-    if (!value) {
-        selectEl.value = '';
-        return;
-    }
-    let exists = false;
-    for (let i = 0; i < selectEl.options.length; i++) {
-        if (selectEl.options[i].value === value) {
-            exists = true;
-            break;
-        }
-    }
-    if (!exists) {
-        const opt = document.createElement('option');
-        opt.value = value;
-        opt.text = value.split('\\').pop().split('/').pop();
-        selectEl.appendChild(opt);
-    }
-    selectEl.value = value;
+    card.querySelector('.btn-select-model')?.addEventListener('click', () => {
+      state.config.model_path = m.path;
+      const select = document.getElementById('select-model');
+      if (select) select.value = m.path;
+      api.invoke('save_config', state.config);
+      showToast('Model Switched', m.name, 'success');
+      updateServerUI();
+    });
+
+    card.querySelector('.btn-auto-vram').addEventListener('click', async () => {
+      const vramRes = await api.invoke('calculate_vram', {
+        model_path: m.path,
+        context_size: parseInt(document.getElementById('select-context-size')?.value || 4096),
+        batch_size: 512
+      });
+      if (vramRes && vramRes.status === 'success') {
+        showToast('VRAM Estimation', `Model: ${vramRes.model_vram_gb} GB | KV: ${vramRes.kv_cache_vram_gb} GB | Total: ${vramRes.total_vram_gb} GB`, 'info', 4500);
+      }
+    });
+
+    container.appendChild(card);
+  });
+
+  if (window.lucide) window.lucide.createIcons({ root: container });
 }

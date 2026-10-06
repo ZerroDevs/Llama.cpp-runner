@@ -1,0 +1,30 @@
+<!-- ========================================== -->
+<!-- TAB 10: SETTINGS & ABOUT                   -->
+<!-- ========================================== -->
+<section id="tab-settings" class="tab-pane p-6 space-y-4 max-w-5xl mx-auto">
+  <div class="p-5 rounded-2xl bg-[var(--bg-card)] border border-[var(--border)] space-y-4">
+    <div class="border-b border-[var(--border)] pb-3">
+      <h3 class="text-xs font-bold uppercase tracking-wider font-mono text-[var(--text-primary)]">System Integrations</h3>
+      <p class="text-xs text-[var(--text-muted)]">Configure Windows integration and notifications.</p>
+    </div>
+
+    <div class="space-y-3 text-xs">
+      <div class="space-y-1">
+        <label for="input-discord-webhook" class="font-semibold text-[var(--text-primary)]">Discord Webhook URL</label>
+        <input id="input-discord-webhook" placeholder="https://discord.com/api/webhooks/..." class="w-full bg-[var(--bg-input)] border border-[var(--border)] rounded-xl px-3 py-2 text-xs font-mono outline-none" />
+      </div>
+
+      <div class="flex flex-col gap-2 pt-2">
+        <label class="flex items-center gap-2 text-xs text-[var(--text-primary)] cursor-pointer">
+          <input id="check-tray" type="checkbox" class="accent-[var(--brand)]" />
+          <span>Minimize to Windows System Tray on Close</span>
+        </label>
+
+        <label class="flex items-center gap-2 text-xs text-[var(--text-primary)] cursor-pointer">
+          <input id="check-startup" type="checkbox" class="accent-[var(--brand)]" />
+          <span>Launch on Windows Startup</span>
+        </label>
+      </div>
+    </div>
+  </div>
+</section>

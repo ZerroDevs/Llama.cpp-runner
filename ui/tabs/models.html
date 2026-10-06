@@ -1,0 +1,23 @@
+<!-- ========================================== -->
+<!-- TAB 3: MODELS LIBRARY                      -->
+<!-- ========================================== -->
+<section id="tab-models" class="tab-pane p-6 space-y-4 max-w-5xl mx-auto">
+  <div class="p-4 rounded-2xl bg-[var(--bg-card)] border border-[var(--border)] flex items-center justify-between">
+    <div>
+      <h3 class="text-xs font-bold uppercase tracking-wider font-mono text-[var(--text-primary)]">Local GGUF Models Directory</h3>
+      <p class="text-xs text-[var(--text-muted)]">Scan and manage all `.gguf` weight files on your machine.</p>
+    </div>
+    <div class="flex items-center gap-2">
+      <button id="btn-change-models-dir" class="px-3 py-1.5 rounded-xl border border-[var(--border)] bg-[var(--bg-elevated)] hover:bg-[var(--border)] text-xs font-medium text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors flex items-center gap-1.5">
+        <i data-lucide="folder" class="w-3.5 h-3.5 text-cyan-400"></i>
+        <span>Change Folder</span>
+      </button>
+      <button id="btn-rescan-library" class="px-3 py-1.5 rounded-xl bg-[var(--brand)] text-black text-xs font-semibold hover:bg-[var(--brand-hover)] transition-colors flex items-center gap-1.5">
+        <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i>
+        <span>Scan Now</span>
+      </button>
+    </div>
+  </div>
+
+  <div id="models-list" class="grid grid-cols-1 md:grid-cols-2 gap-3"></div>
+</section>

@@ -1,0 +1,19 @@
+<!-- ========================================== -->
+<!-- TAB 9: LIVE LOGS TERMINAL                  -->
+<!-- ========================================== -->
+<section id="tab-logs" class="tab-pane p-6 space-y-4 max-w-5xl mx-auto h-full min-h-0">
+  <div class="flex items-center justify-between shrink-0">
+    <div class="flex items-center gap-2">
+      <i data-lucide="terminal" class="w-4 h-4 text-emerald-400"></i>
+      <span class="text-xs font-bold uppercase tracking-wider font-mono text-[var(--text-primary)]">Process Terminal Output</span>
+      <span id="log-count" class="text-[10px] font-mono text-[var(--text-muted)] bg-[var(--bg-elevated)] px-1.5 py-0.5 rounded border border-[var(--border)]">0 lines</span>
+    </div>
+    <div class="flex items-center gap-2">
+      <input id="input-log-filter" placeholder="Filter logs..." class="bg-[var(--bg-input)] border border-[var(--border)] rounded-lg px-2.5 py-1 text-xs text-[var(--text-primary)] outline-none w-40" />
+      <button id="btn-log-autoscroll" class="px-2.5 py-1 rounded-lg border border-emerald-500/30 bg-emerald-500/15 text-emerald-400 text-xs font-medium">Auto-scroll</button>
+      <button id="btn-clear-logs" class="p-1 rounded-lg hover:text-rose-400 text-[var(--text-muted)] transition-colors"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+    </div>
+  </div>
+
+  <div id="terminal-box" class="flex-1 bg-[#02070c] border border-[var(--border)] rounded-2xl p-4 font-mono text-xs text-emerald-400 overflow-y-auto leading-relaxed select-text min-h-0 whitespace-pre-wrap"></div>
+</section>

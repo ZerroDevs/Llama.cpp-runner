@@ -93,56 +93,99 @@ Our vision is to build the absolute lightest, most performant, zero-waste local 
 
 ## Requirements
 
-- Windows OS
-- Python 3.10+
-- `llama-server.exe` (Downloadable via the [Llama.cpp project](https://github.com/ggml-org/llama.cpp))
-- (Optional) [SwarmUI](https://github.com/mcmonkeyprojects/SwarmUI) installed locally for image generation features (SwarmUI is powered by [ComfyUI](https://github.com/Comfy-Org/ComfyUI) under the hood, which it downloads automatically during its own installation).
+## Requirements
 
-## Studio V1 (Next-Generation Workspace)
+- **Operating System:** Windows 10 / 11 (x64)
+- **Runtimes:**
+  - For **Native Engine**: .NET 10 Runtime / SDK & Microsoft Edge WebView2 (preinstalled on modern Windows)
+  - For **Classic Engine (`app.py`)**: Python 3.10+ (`pywebview`, `psutil`, `pynvml`, `requests`, `huggingface_hub`)
+- **Server Binaries:**
+  - `llama-server.exe` (Downloadable via the [Llama.cpp project](https://github.com/ggml-org/llama.cpp))
+  - *(Optional)* [SwarmUI](https://github.com/mcmonkeyprojects/SwarmUI) installed locally for image generation features (SwarmUI is powered by [ComfyUI](https://github.com/Comfy-Org/ComfyUI) under the hood)
 
-Located in `v1/`, the **Llama Server Studio V1** introduces a high-performance modern workspace built with **Svelte 5** (Runes `$state`, `$derived`), **Vite**, and **TailwindCSS**, hosted inside an optimized native desktop wrapper:
+---
 
-- **Dual-Pane Studio Layout:** Conversational agent and streaming markdown terminal on the left; real-time diffusion canvas, SwarmUI gallery, telemetry matrix, and model hub on the right.
-- **Instant 0ms Lifecycle:** Instantaneous window close with background asynchronous process tree termination (`taskkill /F /T`).
-- **Global Command Palette (`Ctrl+K`):** Fuzzy-search actions, quick model switching, persona presets, and KV cache flushes.
-- **Deep Chunk Inspector:** Inspect prompt, negative prompt, seed, steps, sampler, and CFG from generated PNGs in real-time.
-- **Hardware Telemetry HUD:** Low-overhead VRAM, RAM, and CPU telemetry capsules with background pause on blur.
-- **VRAM & Layer Offload Estimator:** Calculate required VRAM for any model, context size, and batch configuration before loading.
+## Native Engine (Zero-Waste High Performance Architecture)
 
-### Running Studio V1
+The **Llama Server Control Native Engine** is engineered in **C# / .NET 10** with **Microsoft Edge WebView2**. It completely eliminates Python runtime dependencies, PyInstaller bootloader overhead, and extraction lag, achieving sub-45MB idle memory and instantaneous 0ms application startup.
 
-To run Studio V1:
+### Key Native Enhancements:
+- **Preserved Classic Workflow Dropdowns:**
+  - **Active Model File Dropdown (`#select-model`):** Auto-scans `.gguf` models in your directory, displaying formatted filenames and exact file size badges (e.g. `4.2 GB`).
+  - **Context Size Dropdown (`#select-context-size`):** Instant selector for 2K, 4K, 8K, 16K, 32K, and 64K tokens without manual typing.
+  - **Cache K/V Quant Dropdowns (`#select-cache-k`, `#select-cache-v`):** Directly pick `f16` (Full), `q8_0` (Balanced), or `q4_0` (Low VRAM).
+  - **SwarmUI Date Folders Dropdown (`#select-gallery-folder`):** Filter generated generations cleanly by date-stamped output folders.
+- **Dedicated 10-Tab Interface:**
+  1. **Dashboard & Server Engine:** Direct server configuration, local network endpoints (`http://127.0.0.1:8080/v1`), binary path picker, and 1-click Start/Stop/Flush/Eject actions.
+  2. **AI Chat & Vision:** Real-time conversational interface with streaming markdown, code syntax highlighting, vision image attachments, and slash commands (`/imagine`, `/draw`, `/art`, `/guess`, `/yes`, `/clear`, `/compact`, `/cfg`, `/step`, `/res`, `/hook`).
+  3. **Models Library:** Visual model gallery displaying all discovered local GGUF models, sizes, timestamps, 1-click model switching, and Auto VRAM calculation.
+  4. **Model Hub:** Direct HuggingFace integration to search GGUF repositories, inspect quants, and download models with live chunked speed & ETA telemetry.
+  5. **Hardware Monitor:** Real-time telemetry matrix tracking Dedicated VRAM, System RAM, GPU Core Temp, and CPU utilization via ultra-low-footprint Win32 native calls.
+  6. **Performance Tuning:** Speculative decoding draft model selection, draft max tokens, and custom flags.
+  7. **API Playground:** Built-in JSON request tester for OpenAI-compatible completions with live latency timing.
+  8. **SwarmUI Studio & Gallery:** SwarmUI background launcher, interactive image gallery, bulk selection/deletion, censorship blur mask (`censored.json`), Discord webhook dispatch, and deep zero-copy PNG metadata chunk inspection (`tEXt` / `iTXt`).
+  9. **Live Logs:** Ring-buffered terminal stream for `llama-server` and `SwarmUI` with search filters and auto-scroll control.
+  10. **Settings & About:** Global configuration management, system tray toggles, startup behavior, and dark/light obsidian theme control.
+- **Productivity & Shortcuts:**
+  - **Quick Model Switcher (`Ctrl+M`):** Instant modal to search and swap local models from any tab.
+  - **Command Palette (`Ctrl+K`):** Global action menu for quick navigation and server commands.
+  - **Native Process Tree Management:** Spawns `llama-server` with `CREATE_NO_WINDOW` and performs clean process tree termination (`Kill(entireProcessTree: true)`) on shutdown or model swaps.
+  - **Instant 0ms Window Hide:** Closing the app window hides the UI instantly while performing clean background process teardown.
+- **Clean Modular UI Architecture (`ui/`):**
+  - **Modular Tab Partials (`ui/tabs/*.html`):** 10 isolated HTML views loaded dynamically with zero latency.
+  - **Modular Modals (`ui/modals/*.html`):** Dedicated HTML components for Command Palette, Quick Model Switcher, and PNG Inspector.
+  - **Modular CSS System (`ui/css/*.css`):** 8 focused stylesheets (`base.css`, `layout.css`, `components.css`, `chat.css`, `gallery.css`, `terminal.css`, `modals.css`, `styles.css`) with strict `.tab-pane` visibility (`display: none !important;`) preventing overlapping or stacked views.
+  - **Modular ES Modules (`ui/js/*.js`):** 17 decoupled JavaScript controllers covering IPC, global state, telemetry, chat streaming, and media manipulation.
+- **SwarmUI Studio & Gallery Enhancements:**
+  - **Generation Parameters Control:** Integrated Width (256–2048 px), Height (256–2048 px), Generation Steps (0–50), and CFG Scale (0–20) sliders with live numerical badges and persistent configuration.
+  - **Silent Headless Swarm Server Mode:** Toggle "Open in Web Browser on Launch" to run SwarmUI in the background without automatically launching a browser window (`--launch_mode none`), alongside a dedicated "Open Swarm Web" button.
+  - **Enhanced Image Gallery Actions:** Quick card actions for 1-click Image Copying to system clipboard, Open Containing Folder in File Explorer, and Image Deletion.
+  - **Deep Generation Specs Inspector:** Flawlessly extracts and renders generation parameters matching modern specs:
+    - **PROMPT** with 1-click clipboard copy.
+    - **NEGATIVE PROMPT** with 1-click clipboard copy.
+    - **RESOLUTION** with calculated aspect ratio (e.g., `1152x1152 (1:1)`).
+    - **SEED** with instant click-to-copy.
+    - **STEPS** and **CFG SCALE** badges.
+  - **Interactive Fullscreen Zoom & Pan:** View high-res images in Fullscreen mode with mouse wheel zoom (1x–7x), smooth drag-to-pan navigation, double-click reset, and a prominent floating top-right "Exit Fullscreen" button.
+- **Robust Telemetry & Engine Execution Fixes:**
+  - **Vision Model Auto-Detection & Tagging:** Automatically scans local `.gguf` models and identifies any file containing `mmproj` as a Vision Projector, tagging it with high-visibility badges in the Models Library, Model Dropdown, and Quick Switcher, prioritizing it in the Vision dropdown, and offering 1-click "Set as Vision" activation.
+  - **Expanded High-Context Windows (124k / 128k):** Context Size selector expanded with 124,000 tokens (124k) and 131,072 tokens (128k) for massive document ingestion and agentic workflows.
+  - **Dynamic Action Button States:** Fixed SwarmUI and LLM Server runner buttons to toggle both text and icons dynamically (switching from Play to Stop square icons with rose danger styling when running, and restoring back cleanly when stopped).
+  - **Sidebar Fast Controls:** Integrated a dedicated `Start/Stop SwarmUI` button directly beside `Start/Stop LLM Server` in the persistent sidebar navigation rail for 1-click dual-engine management.
+  - **Model Selection & Advanced Options Accordion:** Direct primary model dropdown with an expandable "Advanced options >" panel enabling hot-selection of Vision Projectors (`--mmproj`), Draft Models (`--model-draft`), and LoRA Adapters (`--lora`), complete with dedicated file pickers.
+  - **Reparse Point & Symlink Size Resolution:** Enhanced Model Scanner to resolve underlying Windows file streams for HuggingFace Hub cached snapshot symlinks, accurately computing true gigabyte sizes (e.g., `4.82 GB`, `0.86 GB`) instead of defaulting to `0 GB`.
+  - **Zero-Latency Telemetry HUD:** Fixed key mapping between native metrics (`_pct` / `_percent`) and frontend controllers, ensuring live VRAM, RAM, and CPU telemetry percentages render accurately.
+  - **Modern Llama.cpp CLI Flag Alignment:** Automatically generates modern CLI syntax (`-fa on`, `-ctk`, `-ctv`, `-ub`, `--lora`) to prevent argument parse crashes on startup.
+  - **UI Dispatcher Thread Marshalling:** Marshals background process `stdout`/`stderr` events safely to the WPF UI thread, ensuring continuous live logging in the terminal box.
+  - **Resilient Upstream Streaming Proxy:** Provides clear status feedback (503 with informative diagnostics) when models are actively loading into VRAM instead of opaque connection dropouts.
+
+### Running & Building Native Engine
+
+#### Run in Development Mode:
 ```cmd
-cd v1
-npm install
-npm run build
-python main.py
+dotnet run
 ```
 
-For live hot-reload development mode:
+#### Build / Compile:
 ```cmd
-cd v1
-npm run dev
-# In another terminal:
-python main.py --dev
+dotnet build .\LlamaServerControl.csproj
+```
+The compiled executable will be located at:
+`bin/Debug/net10.0-windows/LlamaServerControl.exe`
+
+#### Publish as a Standalone Single-File Executable:
+```cmd
+dotnet publish .\LlamaServerControl.csproj -c Release -r win-x64 --self-contained false -p:PublishSingleFile=true -o .\dist
 ```
 
-## Setup Instructions (Classic & V1)
+---
 
-1. Clone this repository.
-2. Install the required Python packages:
-   ```cmd
-   pip install pywebview psutil pynvml requests huggingface_hub
-   ```
-3. Run Classic UI:
-   ```cmd
-   python app.py
-   ```
-   Or run Next-Gen Studio V1:
-   ```cmd
-   python v1/main.py
-   ```
-4. On first launch, configure your `llama-server.exe` path and select your `.gguf` model file.
+## Running Classic Engine (Python)
+
+If you prefer to run the original Python version:
+```cmd
+python app.py
+```
 
 ## License
 

@@ -1,0 +1,36 @@
+<!-- ========================================== -->
+<!-- TAB 7: API PLAYGROUND                      -->
+<!-- ========================================== -->
+<section id="tab-api" class="tab-pane p-6 space-y-4 max-w-5xl mx-auto">
+  <div class="p-5 rounded-2xl bg-[var(--bg-card)] border border-[var(--border)] space-y-4">
+    <div class="flex items-center justify-between border-b border-[var(--border)] pb-3">
+      <div class="flex items-center gap-2">
+        <i data-lucide="code-2" class="w-4 h-4 text-violet-400"></i>
+        <span class="text-xs font-bold uppercase tracking-wider font-mono text-[var(--text-primary)]">API Endpoint Tester</span>
+      </div>
+      <button id="btn-api-send" class="px-4 py-1.5 rounded-xl bg-[var(--brand)] text-black text-xs font-bold hover:bg-[var(--brand-hover)] transition-colors flex items-center gap-1.5">
+        <i data-lucide="play" class="w-3.5 h-3.5 fill-current"></i>
+        <span>Send Request</span>
+      </button>
+    </div>
+
+    <div class="space-y-2">
+      <textarea id="api-request-body" rows="6" class="w-full bg-[var(--bg-input)] border border-[var(--border)] rounded-xl p-3 font-mono text-xs text-[var(--text-primary)] outline-none leading-relaxed">{
+  "messages": [
+    { "role": "system", "content": "You are a helpful assistant." },
+    { "role": "user", "content": "Hello! Introduce yourself." }
+  ],
+  "temperature": 0.7,
+  "max_tokens": 128
+}</textarea>
+    </div>
+
+    <div class="space-y-1.5">
+      <div class="flex items-center justify-between text-[11px] font-mono text-[var(--text-muted)]">
+        <span>RESPONSE:</span>
+        <span id="api-latency">0 ms</span>
+      </div>
+      <pre id="api-response-output" class="bg-[#02070c] border border-[var(--border)] rounded-xl p-3 font-mono text-xs text-emerald-400 overflow-x-auto min-h-[140px] whitespace-pre-wrap select-text">// Click Send Request to test endpoint response...</pre>
+    </div>
+  </div>
+</section>

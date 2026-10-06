@@ -1,0 +1,26 @@
+/* Live Process Terminal Styling */
+
+#terminal-box {
+  background-color: #02070c;
+  border: 1px solid var(--border);
+  border-radius: 1rem;
+  padding: 1rem;
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  color: #34d399;
+  overflow-y: auto;
+  line-height: 1.6;
+  user-select: text;
+  -webkit-user-select: text;
+  white-space: pre-wrap;
+  word-break: break-all;
+}
+
+#terminal-box::-webkit-scrollbar {
+  width: 5px;
+}
+
+#terminal-box::-webkit-scrollbar-thumb {
+  background: #162b3c;
+  border-radius: 3px;
+}

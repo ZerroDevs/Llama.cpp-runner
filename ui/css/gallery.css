@@ -1,0 +1,49 @@
+/* SwarmUI Gallery & Image Inspection */
+
+/* Image Zoom & Pan Viewer inside Modal */
+.image-zoom-container {
+  overflow: hidden;
+  cursor: grab;
+  user-select: none;
+}
+
+.image-zoom-container:active {
+  cursor: grabbing;
+}
+
+/* Censorship Blur Mask */
+.censored-blur {
+  filter: blur(28px) brightness(0.6);
+  transition: filter 0.25s ease;
+}
+
+.censored-blur:hover {
+  filter: blur(4px) brightness(0.9);
+}
+
+/* Gallery Thumbnail Cards */
+.gallery-card {
+  position: relative;
+  border-radius: 1rem;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  background-color: var(--bg-card);
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.gallery-card:hover {
+  border-color: var(--brand);
+  transform: translateY(-2px);
+}
+
+/* Fullscreen Viewport Mode */
+#inspector-img-viewport:fullscreen,
+#inspector-img-viewport:-webkit-full-screen {
+  width: 100vw;
+  height: 100vh;
+  border-radius: 0;
+  background-color: #000;
+  padding: 0;
+  margin: 0;
+}
+

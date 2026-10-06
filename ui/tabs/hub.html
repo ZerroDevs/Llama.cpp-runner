@@ -1,0 +1,38 @@
+<!-- ========================================== -->
+<!-- TAB 4: MODEL HUB (HUGGINGFACE)             -->
+<!-- ========================================== -->
+<section id="tab-hub" class="tab-pane p-6 space-y-4 max-w-5xl mx-auto">
+  <div class="p-4 rounded-2xl bg-[var(--bg-card)] border border-[var(--border)] space-y-3">
+    <div class="flex items-center gap-2">
+      <div class="flex-1 flex items-center gap-2 bg-[var(--bg-input)] border border-[var(--border)] focus-within:border-[var(--brand)] rounded-xl px-3 py-2">
+        <i data-lucide="search" class="w-4 h-4 text-[var(--text-muted)]"></i>
+        <input id="input-hub-search" placeholder="Search GGUF models on HuggingFace (e.g. Qwen2.5, Llama-3.3, Mistral)..." value="Qwen2.5-Coder" class="bg-transparent text-xs w-full text-[var(--text-primary)] placeholder-[var(--text-muted)] outline-none" />
+      </div>
+      <label class="flex items-center gap-1.5 text-xs text-[var(--text-secondary)] cursor-pointer px-3 py-2 rounded-xl border border-[var(--border)] bg-[var(--bg-elevated)] shrink-0">
+        <input id="check-hub-uncensored" type="checkbox" class="accent-[var(--brand)]" />
+        <span class="font-medium">Uncensored Only</span>
+      </label>
+      <button id="btn-hub-search" class="px-4 py-2 rounded-xl bg-[var(--brand)] text-black text-xs font-bold hover:bg-[var(--brand-hover)] transition-colors flex items-center gap-1.5 shrink-0">
+        <i data-lucide="search" class="w-3.5 h-3.5"></i>
+        <span>Search</span>
+      </button>
+    </div>
+
+    <!-- Active Download Telemetry Banner -->
+    <div id="hub-download-banner" class="hidden p-3 bg-emerald-950/40 border border-emerald-500/30 rounded-xl space-y-2">
+      <div class="flex items-center justify-between text-xs font-semibold">
+        <span id="hub-dl-filename" class="text-emerald-400 truncate max-w-md">Downloading model...</span>
+        <span id="hub-dl-percent" class="font-mono text-emerald-300">0%</span>
+      </div>
+      <div class="w-full h-1.5 bg-emerald-950 rounded-full overflow-hidden">
+        <div id="hub-dl-bar" class="h-full bg-emerald-400 transition-all duration-300" style="width: 0%"></div>
+      </div>
+      <div class="flex items-center justify-between text-[11px] font-mono text-[var(--text-muted)]">
+        <span id="hub-dl-speed">0 MB/s</span>
+        <span id="hub-dl-eta">ETA: Calculating...</span>
+      </div>
+    </div>
+  </div>
+
+  <div id="hub-results" class="grid grid-cols-1 md:grid-cols-2 gap-3"></div>
+</section>
