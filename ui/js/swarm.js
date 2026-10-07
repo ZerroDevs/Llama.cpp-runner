@@ -89,8 +89,64 @@ export function setupSwarm() {
       state.config.swarm_launcher_path = p;
       await api.invoke('save_config', state.config);
       showToast('Swarm Launcher Set', p.split(/[\\/]/).pop(), 'success');
+      await scanSwarmModels();
     }
   });
+
+  // Swarm Models Directory & Active Model Setup
+  const modelsPathInput = document.getElementById('input-swarm-models-path');
+  const selectModel = document.getElementById('select-swarm-model');
+  const nameInput = document.getElementById('input-swarm-model-name');
+
+  if (modelsPathInput) {
+    if (state.config.swarm_models_path) {
+      modelsPathInput.value = state.config.swarm_models_path;
+    } else if (state.config.swarm_launcher_path) {
+      const sDir = state.config.swarm_launcher_path.replace(/[\\/][^\\/]+$/, '');
+      modelsPathInput.value = `${sDir}\\Models`;
+    }
+
+    modelsPathInput.addEventListener('change', async () => {
+      state.config.swarm_models_path = modelsPathInput.value.trim();
+      await api.invoke('save_config', state.config);
+      await scanSwarmModels(state.config.swarm_models_path);
+    });
+  }
+
+  document.getElementById('btn-browse-swarm-models-path')?.addEventListener('click', async () => {
+    const dir = await api.invoke('select_directory');
+    if (dir) {
+      if (modelsPathInput) modelsPathInput.value = dir;
+      state.config.swarm_models_path = dir;
+      await api.invoke('save_config', state.config);
+      await scanSwarmModels(dir);
+      showToast('Models Folder Set', dir.split(/[\\/]/).pop(), 'success');
+    }
+  });
+
+  document.getElementById('btn-rescan-swarm-models')?.addEventListener('click', async () => {
+    await scanSwarmModels();
+    showToast('Rescanned Models', 'Updated diffusion models list.', 'info', 1500);
+  });
+
+  selectModel?.addEventListener('change', async () => {
+    const val = selectModel.value;
+    state.config.swarm_model = val;
+    if (nameInput) nameInput.value = val;
+    await api.invoke('save_config', state.config);
+    showToast('Active Diffusion Model', val, 'success', 2000);
+  });
+
+  document.getElementById('btn-save-swarm-model')?.addEventListener('click', async () => {
+    const val = nameInput?.value?.trim() || 'qwen-image-2.1-UC-Q6_K.gguf';
+    state.config.swarm_model = val;
+    await api.invoke('save_config', state.config);
+    await scanSwarmModels();
+    showToast('Swarm Model Saved', val, 'success');
+  });
+
+  // Initial models scan
+  scanSwarmModels();
 
   // Refresh Gallery Button
   document.getElementById('btn-refresh-gallery')?.addEventListener('click', () => refreshGallery());
@@ -386,4 +442,64 @@ function filterAndRenderGallery() {
 function updateSelectedCount() {
   const el = document.getElementById('gallery-selected-count');
   if (el) el.textContent = `${state.gallerySelected.size} selected`;
+}
+
+export async function scanSwarmModels(folderPath = null) {
+  const inputPath = document.getElementById('input-swarm-models-path');
+  const path = folderPath !== null ? folderPath : (inputPath?.value || state.config.swarm_models_path || '');
+  try {
+    const models = await api.invoke('scan_swarm_models', path);
+    populateSwarmModels(models);
+  } catch (err) {
+    console.error('[SwarmUI] Error scanning models:', err);
+  }
+}
+
+export function populateSwarmModels(models) {
+  const select = document.getElementById('select-swarm-model');
+  const countBadge = document.getElementById('swarm-model-count-badge');
+  const nameInput = document.getElementById('input-swarm-model-name');
+  if (!select) return;
+
+  select.innerHTML = '';
+  const activeModel = state.config.swarm_model || 'qwen-image-2.1-UC-Q6_K.gguf';
+
+  if (!models || models.length === 0) {
+    const opt = document.createElement('option');
+    opt.value = 'qwen-image-2.1-UC-Q6_K.gguf';
+    opt.textContent = 'qwen-image-2.1-UC-Q6_K.gguf (Default)';
+    opt.selected = true;
+    select.appendChild(opt);
+    if (countBadge) countBadge.textContent = '1 found';
+    if (nameInput) nameInput.value = 'qwen-image-2.1-UC-Q6_K.gguf';
+    return;
+  }
+
+  if (countBadge) countBadge.textContent = `${models.length} found`;
+
+  let matched = false;
+
+  models.forEach(m => {
+    const opt = document.createElement('option');
+    opt.value = m.name;
+    opt.textContent = `${m.name} (${m.formatted_size})`;
+    if (m.name === activeModel || m.relative_path === activeModel) {
+      opt.selected = true;
+      matched = true;
+    }
+    select.appendChild(opt);
+  });
+
+  // If activeModel is a custom alias (e.g. "Qwen21") and not directly in scan list, add it as selected option
+  if (!matched && activeModel) {
+    const opt = document.createElement('option');
+    opt.value = activeModel;
+    opt.textContent = `${activeModel} (Custom Active)`;
+    opt.selected = true;
+    select.prepend(opt);
+  }
+
+  if (nameInput) {
+    nameInput.value = activeModel;
+  }
 }

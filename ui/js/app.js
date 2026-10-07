@@ -11,6 +11,7 @@ import { setupNavigation, switchTab } from './navigation.js';
 import { setupDashboard, applyConfigToForm, checkServerStatuses } from './dashboard.js';
 import { setupModels, scanLocalModels } from './models.js';
 import { setupChat } from './chat.js';
+import { setupLlamaWeb } from './llama-web.js';
 import { setupHub } from './hub.js';
 import { setupTelemetry } from './hardware.js';
 import { setupTuning } from './tuning.js';
@@ -31,6 +32,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     setupDashboard();
     setupModels();
     setupChat();
+    setupLlamaWeb();
     setupHub();
     setupTelemetry();
     setupTuning();

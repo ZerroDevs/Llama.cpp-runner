@@ -27,8 +27,19 @@ namespace LlamaServerControl.Backend
             _hub = hub;
             _proxy = proxy;
 
-            _process.OnLog += (line) => EmitEvent("log", line);
-            _swarm.OnLog += (line) => EmitEvent("log", line);
+            _process.OnLog += (line) =>
+            {
+                string src = "llama";
+                if (line.StartsWith("[Proxy", StringComparison.OrdinalIgnoreCase) ||
+                    line.StartsWith("[Auto-Sleep", StringComparison.OrdinalIgnoreCase) ||
+                    line.StartsWith("[Hub", StringComparison.OrdinalIgnoreCase) ||
+                    line.StartsWith("[ACTION", StringComparison.OrdinalIgnoreCase))
+                {
+                    src = "other";
+                }
+                EmitEvent("log", new { text = line, source = src });
+            };
+            _swarm.OnLog += (line) => EmitEvent("log", new { text = line, source = "swarm" });
             _process.OnExited += () => EmitEvent("server_exited", new { running = false });
         }
 
@@ -137,6 +148,11 @@ namespace LlamaServerControl.Backend
 
                     case "get_swarm_status":
                         result = _swarm.CheckStatus();
+                        break;
+
+                    case "scan_swarm_models":
+                        string customDir = args.ValueKind == JsonValueKind.String ? args.GetString() ?? "" : "";
+                        result = _swarm.ScanSwarmModels(customDir, _config.GetConfig());
                         break;
 
                     case "get_swarm_images":

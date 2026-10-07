@@ -23,7 +23,15 @@ namespace LlamaServerControl.Backend
         private readonly ConfigManager _configManager;
         private readonly SwarmManager _swarmManager;
         private readonly HardwareMonitor _hardwareMonitor;
-        private readonly HttpClient _http = new() { Timeout = TimeSpan.FromMinutes(10) };
+        private readonly HttpClient _http = new(new SocketsHttpHandler
+        {
+            AutomaticDecompression = DecompressionMethods.All,
+            PooledConnectionLifetime = TimeSpan.FromMinutes(15),
+            PooledConnectionIdleTimeout = TimeSpan.FromMinutes(2)
+        })
+        {
+            Timeout = TimeSpan.FromMinutes(10)
+        };
         private CancellationTokenSource? _cts;
         private int _activePort = 8080;
         public int ActivePort => _activePort;
@@ -47,7 +55,14 @@ namespace LlamaServerControl.Backend
             "Upgrade",
             "Proxy-Connection",
             "Trailer",
-            "Trailers"
+            "Trailers",
+            "X-Frame-Options",
+            "Content-Security-Policy",
+            "Content-Encoding",
+            "Content-Length",
+            "Cross-Origin-Embedder-Policy",
+            "Cross-Origin-Opener-Policy",
+            "Cross-Origin-Resource-Policy"
         };
 
         public StreamingProxy(ProcessManager processManager, ConfigManager configManager, SwarmManager swarmManager, HardwareMonitor hardwareMonitor)
@@ -101,6 +116,16 @@ namespace LlamaServerControl.Backend
                         await next();
                     });
 
+                    // 404 upstream fallback middleware for static assets, SPAs, and deep web UI files
+                    app.Use(async (context, next) =>
+                    {
+                        await next();
+                        if (context.Response.StatusCode == 404 && !context.Response.HasStarted)
+                        {
+                            await ForwardUpstream(context);
+                        }
+                    });
+
                     // Routes
                     app.MapGet("/local_image", HandleLocalImage);
                     app.MapGet("/generated_cache/{fileName}", HandleGeneratedCache);
@@ -109,7 +134,7 @@ namespace LlamaServerControl.Backend
                     app.MapPost("/completion", ctx => HandleChatCompletions(ctx, true));
 
                     // Catch-all fallback for web UI (/#/, /index.html, static assets, etc.)
-                    app.MapFallback(ForwardUpstream);
+                    app.MapFallback("{*path}", ForwardUpstream);
 
                     _app = app;
                     _processManager.Log($"[Proxy] Server listening on http://0.0.0.0:{port} (forwarding to internal 127.0.0.1:{port + 1})");
@@ -224,8 +249,17 @@ namespace LlamaServerControl.Backend
 
             if (File.Exists(cachePath))
             {
-                context.Response.ContentType = "image/jpeg";
+                string ext = Path.GetExtension(cachePath).ToLowerInvariant();
+                string mime = ext switch
+                {
+                    ".jpg" or ".jpeg" => "image/jpeg",
+                    ".png" => "image/png",
+                    ".webp" => "image/webp",
+                    _ => "application/octet-stream"
+                };
+                context.Response.ContentType = mime;
                 context.Response.Headers.Append("Cache-Control", "public, max-age=86400");
+                context.Response.Headers.Append("Access-Control-Allow-Origin", "*");
                 await context.Response.SendFileAsync(cachePath);
                 return;
             }
@@ -299,46 +333,86 @@ namespace LlamaServerControl.Backend
 
             textPrompt = textPrompt.Trim();
 
-            // Auto-wake if server is offline and auto-sleep is enabled
+            // Auto-wake if server is offline and auto_wake_llm or auto-sleep is enabled
             if (!_processManager.CheckStatus())
             {
                 var cfg = _configManager.GetConfig();
-                bool autoSleep = false;
-                if (cfg.TryGetValue("auto_sleep", out var asObj))
+                bool autoWakeLlm = true;
+                if (cfg.TryGetValue("auto_wake_llm", out var awObj))
                 {
-                    if (asObj is bool b) autoSleep = b;
-                    else if (asObj is JsonElement je && (je.ValueKind == JsonValueKind.True || je.ValueKind == JsonValueKind.False)) autoSleep = je.GetBoolean();
-                    else if (bool.TryParse(asObj?.ToString(), out var pb)) autoSleep = pb;
+                    if (awObj is bool b) autoWakeLlm = b;
+                    else if (awObj is JsonElement je && (je.ValueKind == JsonValueKind.True || je.ValueKind == JsonValueKind.False)) autoWakeLlm = je.GetBoolean();
+                    else if (bool.TryParse(awObj?.ToString(), out var pb)) autoWakeLlm = pb;
+                }
+                else if (cfg.TryGetValue("auto_sleep", out var asObj))
+                {
+                    if (asObj is bool b) autoWakeLlm = b;
+                    else if (asObj is JsonElement je && (je.ValueKind == JsonValueKind.True || je.ValueKind == JsonValueKind.False)) autoWakeLlm = je.GetBoolean();
+                    else if (bool.TryParse(asObj?.ToString(), out var pb)) autoWakeLlm = pb;
                 }
 
-                if (autoSleep)
+                if (autoWakeLlm && !textPrompt.StartsWith("/"))
                 {
                     if (isStream)
                     {
                         context.Response.ContentType = "text/event-stream";
-                        await SendChunkAsync(context, "*Waking up LLM from Auto-Sleep...*\n\n", isLegacyCompletion);
+                        await SendChunkAsync(context, "<status>\nAuto-waking LLM server on request...\n", isLegacyCompletion);
                         _processManager.StartServer(cfg);
 
-                        int retries = 30;
-                        while (retries-- > 0 && !_processManager.CheckStatus())
+                        int retries = 45;
+                        int internalPort = ProcessManager.GetInternalPort(cfg);
+                        bool isUp = false;
+                        while (retries-- > 0)
                         {
-                            await Task.Delay(1000);
+                            try
+                            {
+                                using var healthReq = new HttpRequestMessage(HttpMethod.Get, $"http://127.0.0.1:{internalPort}/health");
+                                using var healthResp = await _http.SendAsync(healthReq, context.RequestAborted);
+                                if (healthResp.StatusCode == HttpStatusCode.OK || healthResp.StatusCode == HttpStatusCode.NotFound)
+                                {
+                                    isUp = true;
+                                    break;
+                                }
+                            }
+                            catch { }
+                            await Task.Delay(1000, context.RequestAborted);
                             await SendChunkAsync(context, "", isLegacyCompletion);
                         }
-                        await Task.Delay(3000);
-                        await SendChunkAsync(context, "*LLM restored! Processing request...*\n\n", isLegacyCompletion);
+                        if (isUp)
+                        {
+                            await SendChunkAsync(context, "LLM online and ready! Processing prompt...\n</status>\n\n", isLegacyCompletion);
+                        }
+                        else
+                        {
+                            await SendChunkAsync(context, "LLM failed to become ready within timeout.\n</status>\n\n*[Error: LLM server timed out while loading]*\n\n", isLegacyCompletion);
+                            await context.Response.WriteAsync("data: [DONE]\n\n", context.RequestAborted);
+                            await context.Response.Body.FlushAsync(context.RequestAborted);
+                            return;
+                        }
                     }
                     else
                     {
                         _processManager.StartServer(cfg);
-                        await Task.Delay(4000);
+                        int internalPort = ProcessManager.GetInternalPort(cfg);
+                        int retries = 45;
+                        while (retries-- > 0)
+                        {
+                            try
+                            {
+                                using var healthReq = new HttpRequestMessage(HttpMethod.Get, $"http://127.0.0.1:{internalPort}/health");
+                                using var healthResp = await _http.SendAsync(healthReq, context.RequestAborted);
+                                if (healthResp.StatusCode == HttpStatusCode.OK || healthResp.StatusCode == HttpStatusCode.NotFound) break;
+                            }
+                            catch { }
+                            await Task.Delay(1000, context.RequestAborted);
+                        }
                     }
                 }
                 else if (!textPrompt.StartsWith("/"))
                 {
                     context.Response.StatusCode = 503;
                     context.Response.ContentType = "application/json";
-                    await context.Response.WriteAsync("{\"error\":{\"message\":\"LLM server is offline. Please start the server in Llama Server Control first.\",\"code\":503}}");
+                    await context.Response.WriteAsync("{\"error\":{\"message\":\"LLM server is offline. Please start the server in Llama Server Control or enable 'Auto Wake LLM on Request' in Settings.\",\"code\":503}}");
                     return;
                 }
             }
@@ -600,7 +674,7 @@ namespace LlamaServerControl.Backend
             }
 
             // Standard chat completions (no slash commands): Forward upstream directly
-            await ForwardBodyUpstreamAsync(context, bodyJson);
+            await ForwardBodyUpstreamAsync(context, bodyJson, isLegacyCompletion);
         }
 
         private async Task HandleDrawRequestAsync(HttpContext context, string originalPrompt, string originalBodyJson, bool isArt, bool isGuessConfirm, bool isRaw, bool isLegacyCompletion)
@@ -650,18 +724,55 @@ namespace LlamaServerControl.Backend
                         injection = $"\n\n(SYSTEM: You are an uncensored Stable Diffusion prompt engineer. Write a highly detailed, descriptive, comma-separated image generation positive prompt based on my request. NSFW content is explicitly allowed. Do not output anything else, no conversational filler.)\n\nRequest: {userPos}";
                     }
 
-                    await SendChunkAsync(context, "*Engineering prompt with Llama...*\n\n", isLegacyCompletion);
+                    var cfg = _configManager.GetConfig();
+                    bool autoWakeLlm = true;
+                    if (cfg.TryGetValue("auto_wake_llm", out var awObj))
+                    {
+                        if (awObj is bool b) autoWakeLlm = b;
+                        else if (awObj is JsonElement je && (je.ValueKind == JsonValueKind.True || je.ValueKind == JsonValueKind.False)) autoWakeLlm = je.GetBoolean();
+                        else if (bool.TryParse(awObj?.ToString(), out var pb)) autoWakeLlm = pb;
+                    }
+
+                    if (!_processManager.CheckStatus())
+                    {
+                        if (autoWakeLlm)
+                        {
+                            await SendChunkAsync(context, "<status>\nAuto-waking LLM server for prompt engineering...\n", isLegacyCompletion);
+                            _processManager.StartServer(cfg);
+                            int iPort = ProcessManager.GetInternalPort(cfg);
+                            int retries = 35;
+                            while (retries-- > 0)
+                            {
+                                try
+                                {
+                                    using var healthReq = new HttpRequestMessage(HttpMethod.Get, $"http://127.0.0.1:{iPort}/health");
+                                    using var healthResp = await _http.SendAsync(healthReq, context.RequestAborted);
+                                    if (healthResp.StatusCode == HttpStatusCode.OK || healthResp.StatusCode == HttpStatusCode.NotFound) break;
+                                }
+                                catch { }
+                                await Task.Delay(1000, context.RequestAborted);
+                                await SendChunkAsync(context, "", isLegacyCompletion);
+                            }
+                        }
+                        else
+                        {
+                            await SendChunkAsync(context, "*LLM server is offline (Auto Wake LLM disabled). Proceeding directly without prompt engineering...*\n\n", isLegacyCompletion);
+                        }
+                    }
 
                     string engineeredText = "";
-                    try
+                    if (_processManager.CheckStatus())
                     {
-                        var cfg = _configManager.GetConfig();
-                        int internalPort = ProcessManager.GetInternalPort(cfg);
-                        string upstreamUrl = $"http://127.0.0.1:{internalPort}/v1/chat/completions";
+                        await SendChunkAsync(context, "LLM online! Engineering prompt with Llama...\n</status>\n\n", isLegacyCompletion);
 
-                        string modifiedBody = InjectPromptIntoBody(originalBodyJson, injection);
-                        using var engContent = new StringContent(modifiedBody, Encoding.UTF8, "application/json");
-                        using var engResp = await _http.PostAsync(upstreamUrl, engContent);
+                        try
+                        {
+                            int internalPort = ProcessManager.GetInternalPort(cfg);
+                            string upstreamUrl = $"http://127.0.0.1:{internalPort}/v1/chat/completions";
+
+                            string modifiedBody = InjectPromptIntoBody(originalBodyJson, injection);
+                            using var engContent = new StringContent(modifiedBody, Encoding.UTF8, "application/json");
+                            using var engResp = await _http.PostAsync(upstreamUrl, engContent);
 
                         if (engResp.IsSuccessStatusCode)
                         {
@@ -694,6 +805,7 @@ namespace LlamaServerControl.Backend
                     {
                         await SendChunkAsync(context, $"\n*[Error generating prompt: {ex.Message}]*\n", isLegacyCompletion);
                     }
+                }
 
                     if (isArt)
                     {
@@ -723,10 +835,85 @@ namespace LlamaServerControl.Backend
                 double cfgScale = double.TryParse(freshCfg.GetValueOrDefault("swarm_cfg", 7.0)?.ToString(), System.Globalization.CultureInfo.InvariantCulture, out double cs) ? cs : 7.0;
                 int width = int.TryParse(freshCfg.GetValueOrDefault("swarm_width", 1024)?.ToString(), out int w) ? w : 1024;
                 int height = int.TryParse(freshCfg.GetValueOrDefault("swarm_height", 1024)?.ToString(), out int h) ? h : 1024;
+                string launcherPath = freshCfg.GetValueOrDefault("swarm_launcher_path", "")?.ToString() ?? "";
+
+                // Auto-Wake Swarm if offline
+                if (!_swarmManager.CheckStatus())
+                {
+                    bool autoWakeSwarm = true;
+                    if (freshCfg.TryGetValue("auto_wake_swarm", out var awsObj))
+                    {
+                        if (awsObj is bool b) autoWakeSwarm = b;
+                        else if (awsObj is JsonElement je && (je.ValueKind == JsonValueKind.True || je.ValueKind == JsonValueKind.False)) autoWakeSwarm = je.GetBoolean();
+                        else if (bool.TryParse(awsObj?.ToString(), out var pb)) autoWakeSwarm = pb;
+                    }
+
+                    if (autoWakeSwarm)
+                    {
+                        await SendChunkAsync(context, "<status>\nSwarmUI is offline. Auto-waking SwarmUI engine...\n", isLegacyCompletion);
+                        var startRes = _swarmManager.StartSwarm(freshCfg);
+                        if (startRes.TryGetValue("status", out var sStatus) && sStatus?.ToString() == "error")
+                        {
+                            string sMsg = startRes.GetValueOrDefault("message", "Could not start SwarmUI.")?.ToString() ?? "";
+                            await SendChunkAsync(context, $"*[Auto-Wake Swarm Failed: {sMsg}]*\n</status>\n\n", isLegacyCompletion);
+                            throw new Exception($"Auto-wake SwarmUI failed: {sMsg}");
+                        }
+
+                        // Wait for SwarmUI port to accept connections
+                        int maxWaitSec = 60;
+                        bool swarmOnline = false;
+                        string checkHost = swarmHost == "0.0.0.0" ? "127.0.0.1" : swarmHost;
+                        while (maxWaitSec-- > 0)
+                        {
+                            try
+                            {
+                                using var tcp = new System.Net.Sockets.TcpClient();
+                                var connectTask = tcp.ConnectAsync(checkHost, swarmPort);
+                                var delayTask = Task.Delay(1000);
+                                if (await Task.WhenAny(connectTask, delayTask) == connectTask && tcp.Connected)
+                                {
+                                    swarmOnline = true;
+                                    break;
+                                }
+                            }
+                            catch { }
+                            await SendChunkAsync(context, "", isLegacyCompletion);
+                        }
+
+                        if (swarmOnline)
+                        {
+                            await SendChunkAsync(context, "SwarmUI engine online! Proceeding with GPU generation...\n</status>\n\n", isLegacyCompletion);
+                            await Task.Delay(2500);
+                        }
+                        else
+                        {
+                            await SendChunkAsync(context, "SwarmUI process active, dispatching generation...\n</status>\n\n", isLegacyCompletion);
+                        }
+                    }
+                    else
+                    {
+                        await SendChunkAsync(context, "*[Error: SwarmUI is not running. Please start SwarmUI in SwarmUI Studio, or enable 'Auto Wake Swarm on Request' in Settings.]*\n\n", isLegacyCompletion);
+                        throw new Exception("SwarmUI is offline and Auto Wake Swarm is disabled.");
+                    }
+                }
 
                 await SendChunkAsync(context, "*Generating image on GPU with SwarmUI...*\n\n", isLegacyCompletion);
 
-                string imagePath = await _swarmManager.GenerateImageAsync(finalPos, finalNeg, width, height, cfgScale, steps, null, swarmHost, swarmPort);
+                string swarmModel = freshCfg.GetValueOrDefault("swarm_model", "qwen-image-2.1-UC-Q6_K.gguf")?.ToString() ?? "qwen-image-2.1-UC-Q6_K.gguf";
+                if (string.IsNullOrWhiteSpace(swarmModel)) swarmModel = "qwen-image-2.1-UC-Q6_K.gguf";
+
+                // SSE keep-alive loop during image generation
+                var genTask = _swarmManager.GenerateImageAsync(finalPos, finalNeg, width, height, cfgScale, steps, swarmModel, swarmHost, swarmPort, launcherPath);
+                while (!genTask.IsCompleted)
+                {
+                    var completed = await Task.WhenAny(genTask, Task.Delay(2000));
+                    if (completed != genTask)
+                    {
+                        await SendChunkAsync(context, "", isLegacyCompletion);
+                    }
+                }
+
+                string imagePath = await genTask;
 
                 string reqHost = context.Request.Host.Value ?? $"127.0.0.1:{_activePort}";
                 string safePath = Uri.EscapeDataString(imagePath);
@@ -740,30 +927,62 @@ namespace LlamaServerControl.Backend
                 {
                     _ = _swarmManager.DispatchDiscordWebhookAsync(imagePath, finalPos, finalNeg, width, height, cfgScale, steps, webhook);
                 }
-
-                // 3. Restore llama-server into VRAM
-                await SendChunkAsync(context, "\n*Restoring Llama server to VRAM...*\n", isLegacyCompletion);
-                _processManager.StartServer(freshCfg);
-
-                int maxWait = 30;
-                while (maxWait-- > 0 && !_processManager.CheckStatus())
-                {
-                    await Task.Delay(1000);
-                }
-                await SendChunkAsync(context, "*Llama server successfully restored!*\n", isLegacyCompletion);
-
-                await context.Response.WriteAsync("data: [DONE]\n\n");
-                await context.Response.Body.FlushAsync();
             }
             catch (Exception ex)
             {
                 await SendChunkAsync(context, $"\n\n*[Failed to generate image: {ex.Message}]*\n\n", isLegacyCompletion);
-                await context.Response.WriteAsync("data: [DONE]\n\n");
-                await context.Response.Body.FlushAsync();
             }
             finally
             {
                 _isGeneratingImage = false;
+
+                // 3. Guaranteed Auto-Reload: restore llama-server into VRAM so it is ready to chat
+                try
+                {
+                    await SendChunkAsync(context, "<status>\nRestoring Llama server to VRAM...\n", isLegacyCompletion);
+                    var reloadCfg = _configManager.GetConfig();
+                    _processManager.StartServer(reloadCfg);
+
+                    int internalPort = ProcessManager.GetInternalPort(reloadCfg);
+                    int maxWait = 35;
+                    bool restored = false;
+                    while (maxWait-- > 0)
+                    {
+                        try
+                        {
+                            using var healthReq = new HttpRequestMessage(HttpMethod.Get, $"http://127.0.0.1:{internalPort}/health");
+                            using var healthResp = await _http.SendAsync(healthReq);
+                            if (healthResp.StatusCode == HttpStatusCode.OK || healthResp.StatusCode == HttpStatusCode.NotFound)
+                            {
+                                restored = true;
+                                break;
+                            }
+                        }
+                        catch { }
+                        await Task.Delay(1000);
+                        await SendChunkAsync(context, "", isLegacyCompletion);
+                    }
+
+                    if (restored)
+                    {
+                        await SendChunkAsync(context, "Llama server successfully restored and ready to chat!\n</status>\n\n", isLegacyCompletion);
+                    }
+                    else
+                    {
+                        await SendChunkAsync(context, "Llama server launched.\n</status>\n\n", isLegacyCompletion);
+                    }
+                }
+                catch (Exception rex)
+                {
+                    await SendChunkAsync(context, $"\n*[Notice: Failed to auto-reload LLM: {rex.Message}]*\n</status>\n\n", isLegacyCompletion);
+                }
+
+                try
+                {
+                    await context.Response.WriteAsync("data: [DONE]\n\n");
+                    await context.Response.Body.FlushAsync();
+                }
+                catch { }
             }
         }
 
@@ -868,7 +1087,7 @@ namespace LlamaServerControl.Backend
             await context.Response.Body.FlushAsync();
         }
 
-        private async Task ForwardBodyUpstreamAsync(HttpContext context, string bodyJson)
+        private async Task ForwardBodyUpstreamAsync(HttpContext context, string bodyJson, bool isLegacyCompletion = false)
         {
             var cfg = _configManager.GetConfig();
             int internalPort = ProcessManager.GetInternalPort(cfg);
@@ -890,23 +1109,57 @@ namespace LlamaServerControl.Backend
                 upstreamReq.Headers.TryAddWithoutValidation(header.Key, (IEnumerable<string>)header.Value);
             }
 
+            if (!upstreamReq.Headers.Contains("Accept-Encoding"))
+            {
+                upstreamReq.Headers.TryAddWithoutValidation("Accept-Encoding", "gzip, deflate, br");
+            }
+
             try
             {
                 using var upstreamResp = await _http.SendAsync(upstreamReq, HttpCompletionOption.ResponseHeadersRead, context.RequestAborted);
-                context.Response.StatusCode = (int)upstreamResp.StatusCode;
 
-                bool isChunked = upstreamResp.Headers.TransferEncodingChunked == true;
-
-                foreach (var header in upstreamResp.Headers)
+                if (context.Response.HasStarted)
                 {
-                    if (DisallowedResponseHeaders.Contains(header.Key)) continue;
-                    context.Response.Headers[header.Key] = header.Value.ToArray();
+                    // Response already started (e.g., auto-wake status chunks were sent)
+                    if (!upstreamResp.IsSuccessStatusCode)
+                    {
+                        string errBody = await upstreamResp.Content.ReadAsStringAsync(context.RequestAborted);
+                        string errDesc = "Upstream LLM engine error";
+                        try
+                        {
+                            using var errDoc = JsonDocument.Parse(errBody);
+                            if (errDoc.RootElement.TryGetProperty("error", out var eObj))
+                            {
+                                if (eObj.TryGetProperty("message", out var mObj)) errDesc = mObj.GetString() ?? errBody;
+                            }
+                        }
+                        catch
+                        {
+                            if (!string.IsNullOrWhiteSpace(errBody)) errDesc = errBody;
+                        }
+                        await SendChunkAsync(context, $"\n\n*[LLM Engine Error ({upstreamResp.StatusCode}): {errDesc}]*\n\n", isLegacyCompletion);
+                        await context.Response.WriteAsync("data: [DONE]\n\n", context.RequestAborted);
+                        await context.Response.Body.FlushAsync(context.RequestAborted);
+                        return;
+                    }
                 }
-                foreach (var header in upstreamResp.Content.Headers)
+                else
                 {
-                    if (DisallowedResponseHeaders.Contains(header.Key)) continue;
-                    if (header.Key.Equals("Content-Length", StringComparison.OrdinalIgnoreCase) && isChunked) continue;
-                    context.Response.Headers[header.Key] = header.Value.ToArray();
+                    context.Response.StatusCode = (int)upstreamResp.StatusCode;
+
+                    bool isChunked = upstreamResp.Headers.TransferEncodingChunked == true;
+
+                    foreach (var header in upstreamResp.Headers)
+                    {
+                        if (DisallowedResponseHeaders.Contains(header.Key)) continue;
+                        context.Response.Headers[header.Key] = header.Value.ToArray();
+                    }
+                    foreach (var header in upstreamResp.Content.Headers)
+                    {
+                        if (DisallowedResponseHeaders.Contains(header.Key)) continue;
+                        if (header.Key.Equals("Content-Length", StringComparison.OrdinalIgnoreCase) && isChunked) continue;
+                        context.Response.Headers[header.Key] = header.Value.ToArray();
+                    }
                 }
 
                 using var stream = await upstreamResp.Content.ReadAsStreamAsync(context.RequestAborted);
@@ -934,6 +1187,16 @@ namespace LlamaServerControl.Backend
                         : "llama-server is offline. Please start the server from Llama Server Control first.";
                     await context.Response.WriteAsync($"{{\"error\":{{\"message\":\"{errMsg}\",\"details\":\"{ex.Message}\",\"code\":503}}}}");
                 }
+                else
+                {
+                    try
+                    {
+                        await SendChunkAsync(context, $"\n\n*[Error streaming from llama-server: {ex.Message}]*\n\n", isLegacyCompletion);
+                        await context.Response.WriteAsync("data: [DONE]\n\n");
+                        await context.Response.Body.FlushAsync();
+                    }
+                    catch { }
+                }
             }
         }
 
@@ -956,6 +1219,11 @@ namespace LlamaServerControl.Backend
                 upstreamReq.Headers.TryAddWithoutValidation(header.Key, (IEnumerable<string>)header.Value);
             }
 
+            if (!upstreamReq.Headers.Contains("Accept-Encoding"))
+            {
+                upstreamReq.Headers.TryAddWithoutValidation("Accept-Encoding", "gzip, deflate, br");
+            }
+
             if (HttpMethods.IsPost(context.Request.Method) || HttpMethods.IsPut(context.Request.Method) || HttpMethods.IsPatch(context.Request.Method))
             {
                 upstreamReq.Content = new StreamContent(context.Request.Body);
@@ -968,20 +1236,23 @@ namespace LlamaServerControl.Backend
             try
             {
                 using var upstreamResp = await _http.SendAsync(upstreamReq, HttpCompletionOption.ResponseHeadersRead, context.RequestAborted);
-                context.Response.StatusCode = (int)upstreamResp.StatusCode;
-
-                bool isChunked = upstreamResp.Headers.TransferEncodingChunked == true;
-
-                foreach (var header in upstreamResp.Headers)
+                if (!context.Response.HasStarted)
                 {
-                    if (DisallowedResponseHeaders.Contains(header.Key)) continue;
-                    context.Response.Headers[header.Key] = header.Value.ToArray();
-                }
-                foreach (var header in upstreamResp.Content.Headers)
-                {
-                    if (DisallowedResponseHeaders.Contains(header.Key)) continue;
-                    if (header.Key.Equals("Content-Length", StringComparison.OrdinalIgnoreCase) && isChunked) continue;
-                    context.Response.Headers[header.Key] = header.Value.ToArray();
+                    context.Response.StatusCode = (int)upstreamResp.StatusCode;
+
+                    bool isChunked = upstreamResp.Headers.TransferEncodingChunked == true;
+
+                    foreach (var header in upstreamResp.Headers)
+                    {
+                        if (DisallowedResponseHeaders.Contains(header.Key)) continue;
+                        context.Response.Headers[header.Key] = header.Value.ToArray();
+                    }
+                    foreach (var header in upstreamResp.Content.Headers)
+                    {
+                        if (DisallowedResponseHeaders.Contains(header.Key)) continue;
+                        if (header.Key.Equals("Content-Length", StringComparison.OrdinalIgnoreCase) && isChunked) continue;
+                        context.Response.Headers[header.Key] = header.Value.ToArray();
+                    }
                 }
 
                 using var stream = await upstreamResp.Content.ReadAsStreamAsync(context.RequestAborted);

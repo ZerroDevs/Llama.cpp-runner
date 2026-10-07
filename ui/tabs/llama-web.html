@@ -1,0 +1,60 @@
+<!-- ========================================== -->
+<!-- TAB: LLAMA.CPP DEFAULT BROWSER WEB UI       -->
+<!-- ========================================== -->
+<section id="tab-llama-web" class="tab-pane h-full min-h-0 flex flex-col bg-[var(--bg-base)]">
+  <!-- Top Control Bar -->
+  <div class="px-5 py-2.5 bg-[var(--bg-card)] border-b border-[var(--border)] flex items-center justify-between shrink-0">
+    <div class="flex items-center gap-3">
+      <div class="flex items-center gap-2">
+        <i data-lucide="globe" class="w-4 h-4 text-cyan-400"></i>
+        <span class="text-xs font-bold font-mono uppercase text-[var(--text-primary)]">Llama.cpp Web UI</span>
+      </div>
+      <div class="flex items-center gap-1.5 px-2.5 py-0.5 rounded-lg bg-[var(--bg-elevated)] border border-[var(--border)] text-[11px] font-mono text-[var(--text-secondary)]">
+        <span id="llama-web-url-text">http://127.0.0.1:8080/</span>
+        <button id="btn-copy-llama-web-url" class="p-0.5 hover:text-cyan-400 transition-colors cursor-pointer" title="Copy URL">
+          <i data-lucide="copy" class="w-3 h-3"></i>
+        </button>
+      </div>
+    </div>
+
+    <!-- Quick Tab Switcher Pill & Actions -->
+    <div class="flex items-center gap-2">
+      <!-- Switch to Studio Chat Pill -->
+      <button id="btn-switch-to-studio" class="flex items-center gap-1.5 px-2.5 py-1 rounded-lg border border-[var(--brand)]/30 bg-[var(--brand)]/10 text-[var(--brand)] text-xs font-medium hover:bg-[var(--brand)]/20 transition-all cursor-pointer shadow-xs" title="Switch back to Studio Chat">
+        <i data-lucide="sparkles" class="w-3.5 h-3.5"></i>
+        <span>Studio Chat</span>
+      </button>
+
+      <!-- Reload Frame -->
+      <button id="btn-reload-llama-web" class="flex items-center gap-1.5 px-2.5 py-1 rounded-lg border border-[var(--border)] bg-[var(--bg-elevated)] hover:bg-[var(--bg-card)] text-xs text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors cursor-pointer" title="Reload Web UI">
+        <i data-lucide="rotate-cw" class="w-3.5 h-3.5"></i>
+        <span class="hidden sm:inline">Reload</span>
+      </button>
+
+      <!-- Open in External Browser -->
+      <button id="btn-open-llama-web-ext" class="flex items-center gap-1.5 px-2.5 py-1 rounded-lg border border-[var(--border)] bg-[var(--bg-elevated)] hover:bg-[var(--bg-card)] text-xs text-[var(--text-secondary)] hover:text-cyan-400 transition-colors cursor-pointer" title="Open in default browser">
+        <i data-lucide="external-link" class="w-3.5 h-3.5"></i>
+        <span class="hidden sm:inline">Open in Browser</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Main Iframe Container -->
+  <div class="flex-1 relative w-full h-full min-h-0 bg-[#0d1117] overflow-hidden">
+    <!-- Server Offline Overlay -->
+    <div id="llama-web-offline-overlay" class="hidden absolute inset-0 z-10 bg-[var(--bg-base)]/95 backdrop-blur-md flex flex-col items-center justify-center p-6 text-center select-none">
+      <div class="w-14 h-14 rounded-2xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center mb-3 text-amber-400">
+        <i data-lucide="power-off" class="w-7 h-7"></i>
+      </div>
+      <h3 class="text-sm font-semibold text-[var(--text-primary)]">Llama Server is Offline</h3>
+      <p class="text-xs text-[var(--text-secondary)] mt-1.5 max-w-sm leading-relaxed">The default Llama browser chat runs on port <span id="llama-web-port-hint" class="font-mono text-cyan-400">8080</span>. Start the LLM Server to activate the engine and web interface.</p>
+      <button id="btn-web-start-server" class="mt-4 px-4 py-2 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-black font-bold text-xs transition-all cursor-pointer shadow-lg flex items-center gap-2">
+        <i data-lucide="play" class="w-3.5 h-3.5 fill-current"></i>
+        <span>Start LLM Server</span>
+      </button>
+    </div>
+
+    <!-- Embedded Browser Iframe -->
+    <iframe id="iframe-llama-web" src="about:blank" class="w-full h-full border-0 block" allow="clipboard-read; clipboard-write; microphone; camera"></iframe>
+  </div>
+</section>

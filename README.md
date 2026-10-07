@@ -38,8 +38,11 @@ Our vision is to build the absolute lightest, most performant, zero-waste local 
 - **Live Logs Terminal:** Watch raw `stdout` and `stderr` streams directly from `llama-server` and `SwarmUI` with auto-scrolling and one-click copying.
 - **Benchmarking Tools:** Run localized benchmarks to evaluate Prompt Processing speed and Token Generation (T/s) using the actively loaded model.
 
-### 💬 Chat Interface & Personas
-- **Local AI Chat:** Chat directly with your loaded models right in the app.
+- **Dual Chat Interfaces (Studio Chat & Embedded Llama.cpp Web UI):**
+  - **Expandable AI Chat Navigation:** The sidebar "AI Chat" section features an interactive toggle accordion allowing instant navigation between **Studio Chat** (rich markdown, code blocks, vision attachments, edit/regenerate) and the official **Llama Web UI** (`http://127.0.0.1:8080/`).
+  - **Embedded Default Llama Web UI (`tab-llama-web`):** Run and interact with llama.cpp's built-in web client directly inside the desktop application with zero external browser tabs required.
+  - **Integrated Web Controls:** Header toolbar with active port/URL display, 1-click clipboard URL copying, iframe reload, quick-jump to Studio Chat, and direct "Open in Browser" button.
+  - **Smart Offline Detection & 1-Click Launch:** Automatically detects when the server is offline and displays an interactive overlay with a 1-click "Start LLM Server" button.
 - **Proxy Slash Commands:** The backend proxy features an internal interception engine that allows you to type slash commands directly into your chat window (or external clients like Cline/Hermes) for instant control:
   - `/imagine <prompt> | <negative>`: Directly dispatches your exact positive and negative prompts to SwarmUI for GPU rendering without any LLM alteration. If negative is omitted, a robust default negative prompt is used.
   - `/draw <prompt> | <negative>`: Auto-ejects the LLM, fires up SwarmUI to generate an image natively on the GPU, pipes it back into the chat, and wakes the LLM. The LLM enhances your positive prompt but takes your negative prompt exactly as-is. (Auto-generates negative tags if omitted).
@@ -71,6 +74,12 @@ Our vision is to build the absolute lightest, most performant, zero-waste local 
 
 ### ⚙️ UI & Personalization
 - **Modern Aesthetic:** Deeply customized UI featuring glassmorphism, smooth micro-animations, and striking neon accents.
+- **Engine Automation & On-Demand Lifecycle:**
+  - **Auto Wake LLM on Request (`auto_wake_llm`):** Toggleable setting that automatically starts `llama-server` and loads the model into VRAM on demand when any chat prompt, API completion, or slash command arrives while offline. Actively monitors `/health` model weights readiness with keep-alive heartbeats, and immediately processes and streams the response to the user's prompt without requiring a re-send.
+  - **Auto Wake Swarm on Request (`auto_wake_swarm`):** Toggleable setting that automatically launches SwarmUI when `/imagine`, `/draw`, `/art`, or diffusion generation is requested while SwarmUI is offline, probing the port until online before dispatching jobs.
+  - **Auto-Sleep LLM on Inactivity (`auto_sleep`):** Toggleable timer that unloads model weights after 10 minutes of idle time to conserve GPU memory and power.
+  - **Collapsible Engine Lifecycle & Status Card (`<status>`):** Formats engine wake-up, reload, and restoration notices inside a closeable/openable accordion card with animated pulse indicators and rotating chevron toggles (matching the reasoning process design), keeping chat history clean and organized.
+  - **Auto-Save & Instant Feedback:** Toggle settings automatically persist to `config.json` upon change with instant toast confirmation and a dedicated Save Settings action.
 - **Localization:** Instantly switch the entire interface between English and Arabic (`العربية`).
 - **Theming:** Full Dark/Light mode support.
 - **System Tray:** Minimize to the system tray to keep your servers running silently in the background. Features quick actions to open SwarmUI or stop servers.
@@ -117,7 +126,7 @@ The **Llama Server Control Native Engine** is engineered in **C# / .NET 10** wit
   - **SwarmUI Date Folders Dropdown (`#select-gallery-folder`):** Filter generated generations cleanly by date-stamped output folders.
 - **Dedicated 10-Tab Interface:**
   1. **Dashboard & Server Engine:** Direct server configuration, local network endpoints (`http://127.0.0.1:8080/v1`), binary path picker, and 1-click Start/Stop/Flush/Eject actions.
-  2. **AI Chat & Vision:** Real-time conversational interface with streaming markdown, code syntax highlighting, vision image attachments, and slash commands (`/imagine`, `/draw`, `/art`, `/guess`, `/yes`, `/clear`, `/compact`, `/cfg`, `/step`, `/res`, `/hook`).
+  2. **AI Chat & Vision (Dual View):** Expandable sidebar accordion featuring **Studio Chat** (markdown, code syntax highlighting, vision attachments, edit/regenerate, slash commands) and **Embedded Llama Web UI** (direct embedded `http://127.0.0.1:8080/` view with reload, external launch, and live offline fallback).
   3. **Models Library:** Visual model gallery displaying all discovered local GGUF models, sizes, timestamps, 1-click model switching, and Auto VRAM calculation.
   4. **Model Hub:** Direct HuggingFace integration to search GGUF repositories, inspect quants, and download models with live chunked speed & ETA telemetry.
   5. **Hardware Monitor:** Real-time telemetry matrix tracking Dedicated VRAM, System RAM, GPU Core Temp, and CPU utilization via ultra-low-footprint Win32 native calls.
@@ -132,11 +141,13 @@ The **Llama Server Control Native Engine** is engineered in **C# / .NET 10** wit
   - **Native Process Tree Management:** Spawns `llama-server` with `CREATE_NO_WINDOW` and performs clean process tree termination (`Kill(entireProcessTree: true)`) on shutdown or model swaps.
   - **Instant 0ms Window Hide:** Closing the app window hides the UI instantly while performing clean background process teardown.
 - **Clean Modular UI Architecture (`ui/`):**
-  - **Modular Tab Partials (`ui/tabs/*.html`):** 10 isolated HTML views loaded dynamically with zero latency.
+  - **Modular Tab Partials (`ui/tabs/*.html`):** 11 isolated HTML views loaded dynamically with zero latency.
   - **Modular Modals (`ui/modals/*.html`):** Dedicated HTML components for Command Palette, Quick Model Switcher, and PNG Inspector.
   - **Modular CSS System (`ui/css/*.css`):** 8 focused stylesheets (`base.css`, `layout.css`, `components.css`, `chat.css`, `gallery.css`, `terminal.css`, `modals.css`, `styles.css`) with strict `.tab-pane` visibility (`display: none !important;`) preventing overlapping or stacked views.
-  - **Modular ES Modules (`ui/js/*.js`):** 17 decoupled JavaScript controllers covering IPC, global state, telemetry, chat streaming, and media manipulation.
+  - **Modular ES Modules (`ui/js/*.js`):** 18 decoupled JavaScript controllers covering IPC, global state, telemetry, chat streaming, and media manipulation.
 - **SwarmUI Studio & Gallery Enhancements:**
+  - **Diffusion Model Auto-Detection & Directory Scanner:** Auto-scans SwarmUI `Models` and `diffusion_models` directories (or custom user-selected folders) for `.gguf`, `.safetensors`, and `.ckpt` files with formatted file size badges.
+  - **Active Diffusion Model Picker & Custom Alias:** Dropdown selector and editable model field, defaulting to `qwen-image-2.1-UC-Q6_K.gguf` (Qwen21). Guarantees valid non-empty model payload dispatch to SwarmUI `/API/GenerateText2Image`, eliminating the "No model input given" error.
   - **Generation Parameters Control:** Integrated Width (256–2048 px), Height (256–2048 px), Generation Steps (0–50), and CFG Scale (0–20) sliders with live numerical badges and persistent configuration.
   - **Silent Headless Swarm Server Mode:** Toggle "Open in Web Browser on Launch" to run SwarmUI in the background without automatically launching a browser window (`--launch_mode none`), alongside a dedicated "Open Swarm Web" button.
   - **Enhanced Image Gallery Actions:** Quick card actions for 1-click Image Copying to system clipboard, Open Containing Folder in File Explorer, and Image Deletion.
@@ -152,12 +163,28 @@ The **Llama Server Control Native Engine** is engineered in **C# / .NET 10** wit
   - **Inline User Message Editing:** Edit prior user prompts in-place with "Save & Submit" and "Cancel", dynamically truncating subsequent messages and automatically re-streaming fresh responses.
   - **1-Click Assistant Regeneration:** Re-roll responses from any assistant turn directly using the message action toolbar.
   - **Message Clipboard Copy:** 1-click clipboard export on all chat cards.
+- **Multi-Source Live Logs Terminal:**
+  - **Categorized Source Tabs & Live Counters:** Filter real-time terminal streams seamlessly by **Show All**, **Llama** (llama.cpp engine), **SwarmUI** (diffusion pipeline), and **Other** (reverse proxy, auto-sleep, and system actions) with dynamic counter badges.
+  - **Distinct Color Coding & Severity Badges:** Visual differentiation with emerald/mint for Llama, lavender/violet for SwarmUI, sky blue for Proxy/System, warm amber for warnings (`[Warning]`, `W `), and crimson red for errors (`[ERR]`, `E `).
+  - **Automated Milestone Readiness Notifications:** Real-time log detection triggers instant notifications when key services are online:
+    - `llama_server: model loaded` $\rightarrow$ *"Model Ready: Model started and ready to use!"*
+    - `Self-Start ComfyUI-0 on port 7821 started.` $\rightarrow$ *"ComfyUI Started: Self-Start ComfyUI backend started."*
+    - `SwarmUI vn.n.n.n - Local is now running.` $\rightarrow$ *"SwarmUI Started: SwarmUI is now running and ready."*
+  - **Zero-Lag Bounded DOM Streaming:** Appends new lines in constant time while enforcing a strict 500-line ring buffer to maintain zero CPU/RAM footprint during intensive logging.
+  - **1-Click Clipboard Copy & Real-Time Search:** Instant search filter across active source tabs and 1-click clipboard export of visible logs.
 - **Universal Kestrel Reverse Proxy & Slash Commands:**
   - **Dual Local & LAN Access (`0.0.0.0:{port}`):** High-performance Kestrel reverse proxy listening on all network interfaces without requiring administrator URLACL reservations. Seamlessly serves the native `llama-server` web UI at `http://127.0.0.1:8080/#/` and local LAN access (`http://192.168.1.100:8080/#/`).
-  - **Hop-by-Hop Header Sanitization & True SSE Chunk Streaming:** Correctly suppresses hop-by-hop headers (`Transfer-Encoding`, `Connection`) from being invalidly written to Kestrel responses while immediately flushing chunked SSE byte blocks with zero-buffering latency.
+  - **Transparent Upstream Gzip Negotiation & Decompression:** Explicitly negotiates `Accept-Encoding: gzip, deflate, br` with upstream `llama-server` and utilizes high-performance `SocketsHttpHandler` automatic decompression while stripping `Content-Encoding` and `Content-Length` headers from relayed responses. Completely resolves the `"Error: gzip is not supported by this browser"` issue when viewing embedded or external web UI clients.
+  - **Full Static Asset & SPA Routing (`{*path}`):** Configures ASP.NET Core catch-all endpoint fallback (`{*path}`) and automated 404 upstream fallback middleware, correctly proxying all nested Svelte/Vue bundles, chunks, and CSS assets (`/_app/immutable/bundle.*.js`) rather than returning 404.
+  - **COEP / COOP Security Header Sanitization:** Suppresses `Cross-Origin-Embedder-Policy` (`require-corp`), `Cross-Origin-Opener-Policy` (`same-origin`), `X-Frame-Options`, and `Content-Security-Policy` from upstream responses, allowing seamless WebView2 iframe embedding and unrestricted LAN browser rendering (`http://192.168.1.100:8080/`).
   - **Zero-Copy Local Image Endpoint (`/local_image`):** Dynamically resolves SwarmUI gallery assets across Unicode/Arabic paths with automatic query unescaping and CORS compliance, resolving both thumbnail grids and deep metadata inspector views.
   - **Universal Slash Command Interception:** Intercepts slash commands (`/imagine`, `/draw`, `/art`, `/guess`, `/yes`, `/cfg`, `/step`, `/res`, `/sys`, `/hw`, `/eject`, `/unload`, `/models`, `/clear`, `/compact`, `/hook`, `/api`, `/help`) across all clients—including the desktop chat tab, the browser web UI, external agents (Cline/Cursor), and mobile devices.
-  - **Dual-Engine Auto-VRAM Orchestration:** Automatically halts `llama-server` to reclaim 100% VRAM when generating images via SwarmUI, then automatically hot-reloads the LLM back into VRAM once generation completes.
+  - **Dual-Engine Auto-VRAM Orchestration & Hot-Reload:** Seamlessly orchestrates LLM and Diffusion workloads without VRAM collisions or CUDA OOM:
+    1. **Prompt Engineering:** Llama enhances positive prompt and formats generation directives on the internal port.
+    2. **Zero-Waste VRAM Ejection:** Automatically stops `llama-server` and flushes GPU memory so SwarmUI has 100% VRAM headroom.
+    3. **SSE Keep-Alive Heartbeat:** Streams empty SSE delta frames every 2 seconds during multi-minute diffusion generations, preventing WebView2 and TCP socket idle timeouts.
+    4. **Multi-Tier Image Retrieval:** Resolves generated images using a 3-tier fallback (Base64 decode, instantaneous direct disk copy from SwarmUI local `Output/` storage, and 30-minute resilient HTTP retrieval via `/ViewImage?image=`), guaranteeing the image renders in chat.
+    5. **Guaranteed Auto-Reload to VRAM:** Automatically starts `llama-server` and probes the engine port with keep-alive signals until model weights are loaded back into VRAM and ready to chat.
 
 ### Running & Building Native Engine
 

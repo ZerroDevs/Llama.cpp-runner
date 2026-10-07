@@ -48,7 +48,10 @@ namespace LlamaServerControl.Backend
                 { "discord_webhook", "" },
                 { "minimize_to_tray", false },
                 { "run_on_startup", false },
-                { "language", "en" }
+                { "language", "en" },
+                { "auto_wake_llm", true },
+                { "auto_wake_swarm", true },
+                { "auto_sleep", false }
             };
         }
 

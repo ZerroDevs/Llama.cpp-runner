@@ -18,6 +18,7 @@ export const state = {
   gallerySelectMode: false,
   logs: [],
   logFilter: '',
+  logSourceFilter: 'all',
   logAutoScroll: true,
   currentTps: 0,
   tokenCount: 0,

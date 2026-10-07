@@ -582,15 +582,32 @@ function updateAssistantMessage(msgDiv, markdownText, isComplete = false, msgInd
 function renderMarkdownWithThinking(text) {
   if (!text) return '';
 
+  // Auto-wrap legacy auto-wake messages if missing explicit <status> tag
+  if (!text.includes('<status>') && text.includes('Auto-waking LLM server')) {
+    text = text.replace(/(\*?Auto-waking LLM server[\s\S]*?(?:Processing prompt\.\.\.|processing\.\.\.)\*?\n*)/gi, '<status>$1</status>\n\n');
+  }
+
+  // Parse completed <status> ... </status> tags (Engine Lifecycle & Auto-Wake)
+  let processed = text.replace(/<status>([\s\S]*?)<\/status>/gi, (match, p1) => {
+    return `<details open class="mb-3 group/status"><summary class="text-cyan-400 font-semibold cursor-pointer flex items-center gap-1.5 select-none hover:text-cyan-300 transition-colors"><svg class="w-3.5 h-3.5 transition-transform duration-200 details-chevron text-cyan-400 shrink-0" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"/></svg><span class="w-2 h-2 rounded-full bg-cyan-400 shrink-0"></span> Engine Status</summary><div class="text-xs text-[var(--text-secondary)] font-mono mt-1.5 p-2.5 bg-[var(--bg-base)] border border-[var(--border)] rounded-xl leading-relaxed whitespace-pre-wrap select-text">${escapeHtml(p1.trim())}</div></details>`;
+  });
+
+  // Handle active status (while waking or executing)
+  if (processed.includes('<status>') && !processed.includes('</status>')) {
+    processed = processed.replace(/<status>([\s\S]*)$/gi, (match, p1) => {
+      return `<details open class="mb-3 group/status"><summary class="text-cyan-400 flex items-center gap-1.5 font-semibold cursor-pointer select-none hover:text-cyan-300 transition-colors"><svg class="w-3.5 h-3.5 transition-transform duration-200 details-chevron text-cyan-400 shrink-0" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"/></svg><span class="w-2 h-2 rounded-full bg-cyan-400 animate-ping shrink-0"></span> Auto-Waking Engine...</summary><div class="text-xs text-[var(--text-secondary)] font-mono mt-1.5 p-2.5 bg-[var(--bg-base)] border border-[var(--border)] rounded-xl leading-relaxed whitespace-pre-wrap select-text">${escapeHtml(p1.trim())}</div></details>`;
+    });
+  }
+
   // Parse completed <think> ... </think> tags
-  let processed = text.replace(/<think>([\s\S]*?)<\/think>/gi, (match, p1) => {
-    return `<details open><summary class="text-emerald-400 font-semibold cursor-pointer">Reasoning Process</summary><div class="text-xs text-[var(--text-secondary)] font-mono mt-1 p-2.5 bg-[var(--bg-base)] border border-[var(--border)] rounded-xl leading-relaxed">${escapeHtml(p1.trim())}</div></details>`;
+  processed = processed.replace(/<think>([\s\S]*?)<\/think>/gi, (match, p1) => {
+    return `<details open class="mb-3 group/think"><summary class="text-emerald-400 font-semibold cursor-pointer flex items-center gap-1.5 select-none hover:text-emerald-300 transition-colors"><svg class="w-3.5 h-3.5 transition-transform duration-200 details-chevron text-emerald-400 shrink-0" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"/></svg> Reasoning Process</summary><div class="text-xs text-[var(--text-secondary)] font-mono mt-1.5 p-2.5 bg-[var(--bg-base)] border border-[var(--border)] rounded-xl leading-relaxed select-text">${escapeHtml(p1.trim())}</div></details>`;
   });
 
   // Handle active thinking
   if (processed.includes('<think>') && !processed.includes('</think>')) {
     processed = processed.replace(/<think>([\s\S]*)$/gi, (match, p1) => {
-      return `<details open><summary class="text-emerald-400 flex items-center gap-1.5 font-semibold cursor-pointer"><span class="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span> Thinking...</summary><div class="text-xs text-[var(--text-secondary)] font-mono mt-1 p-2.5 bg-[var(--bg-base)] border border-[var(--border)] rounded-xl leading-relaxed">${escapeHtml(p1.trim())}</div></details>`;
+      return `<details open class="mb-3 group/think"><summary class="text-emerald-400 flex items-center gap-1.5 font-semibold cursor-pointer select-none hover:text-emerald-300 transition-colors"><svg class="w-3.5 h-3.5 transition-transform duration-200 details-chevron text-emerald-400 shrink-0" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"/></svg><span class="w-2 h-2 rounded-full bg-emerald-400 animate-ping shrink-0"></span> Thinking...</summary><div class="text-xs text-[var(--text-secondary)] font-mono mt-1.5 p-2.5 bg-[var(--bg-base)] border border-[var(--border)] rounded-xl leading-relaxed select-text">${escapeHtml(p1.trim())}</div></details>`;
     });
   }
 

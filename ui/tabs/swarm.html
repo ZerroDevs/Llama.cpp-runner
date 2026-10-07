@@ -34,6 +34,44 @@
       </div>
     </div>
 
+    <!-- SwarmUI Diffusion Models Section -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-3 text-xs pt-3 border-t border-[var(--border)]">
+      <div class="md:col-span-2 space-y-1">
+        <div class="flex items-center justify-between">
+          <label for="input-swarm-models-path" class="text-[11px] font-mono text-[var(--text-muted)] uppercase">SwarmUI Models Folder</label>
+          <span class="text-[10px] text-fuchsia-400 font-mono">e.g. SwarmUI\Models or diffusion_models</span>
+        </div>
+        <div class="flex items-center gap-2">
+          <input id="input-swarm-models-path" placeholder="Path to Models folder (e.g. E:\GE Ui\SwarmUI\Models)..." class="flex-1 bg-[var(--bg-input)] border border-[var(--border)] rounded-xl px-3 py-2 text-xs font-mono outline-none truncate" />
+          <button id="btn-browse-swarm-models-path" class="p-2 rounded-xl border border-[var(--border)] hover:bg-[var(--bg-elevated)] text-[var(--text-secondary)]" title="Browse Models Directory">
+            <i data-lucide="folder-open" class="w-4 h-4 text-cyan-400"></i>
+          </button>
+          <button id="btn-rescan-swarm-models" class="p-2 rounded-xl border border-[var(--border)] hover:bg-[var(--bg-elevated)] text-[var(--text-secondary)]" title="Rescan Models Folder">
+            <i data-lucide="refresh-cw" class="w-4 h-4 text-emerald-400"></i>
+          </button>
+        </div>
+      </div>
+
+      <div class="space-y-1">
+        <div class="flex items-center justify-between">
+          <label for="select-swarm-model" class="text-[11px] font-mono text-[var(--text-muted)] uppercase">Diffusion Model</label>
+          <span id="swarm-model-count-badge" class="text-[10px] text-emerald-400 font-mono font-bold">1 found</span>
+        </div>
+        <select id="select-swarm-model" class="w-full bg-[var(--bg-elevated)] border border-[var(--border)] rounded-xl px-3 py-2 text-xs font-mono text-[var(--text-primary)] outline-none cursor-pointer">
+          <option value="qwen-image-2.1-UC-Q6_K.gguf">qwen-image-2.1-UC-Q6_K.gguf (Default)</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Active Swarm Model Override / Alias -->
+    <div class="flex items-center gap-2 text-xs pt-1">
+      <span class="text-[11px] font-mono text-[var(--text-muted)]">Active Model:</span>
+      <input id="input-swarm-model-name" placeholder="Model name (e.g. qwen-image-2.1-UC-Q6_K.gguf, Qwen21)" class="flex-1 bg-[var(--bg-input)] border border-[var(--border)] rounded-lg px-2.5 py-1 text-xs font-mono text-cyan-400 outline-none" />
+      <button id="btn-save-swarm-model" class="px-3 py-1 rounded-lg bg-[var(--brand)] hover:bg-[var(--brand-hover)] text-black font-semibold text-xs transition-colors cursor-pointer shadow-xs">
+        Save Model
+      </button>
+    </div>
+
     <!-- Swarm Launch Mode & Browser Toggle -->
     <div class="flex flex-wrap items-center justify-between gap-3 pt-3 border-t border-[var(--border)]">
       <label class="flex items-center gap-2 cursor-pointer select-none text-xs text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors">

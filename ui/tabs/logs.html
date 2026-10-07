@@ -1,19 +1,67 @@
 <!-- ========================================== -->
 <!-- TAB 9: LIVE LOGS TERMINAL                  -->
 <!-- ========================================== -->
-<section id="tab-logs" class="tab-pane p-6 space-y-4 max-w-5xl mx-auto h-full min-h-0">
-  <div class="flex items-center justify-between shrink-0">
-    <div class="flex items-center gap-2">
-      <i data-lucide="terminal" class="w-4 h-4 text-emerald-400"></i>
-      <span class="text-xs font-bold uppercase tracking-wider font-mono text-[var(--text-primary)]">Process Terminal Output</span>
-      <span id="log-count" class="text-[10px] font-mono text-[var(--text-muted)] bg-[var(--bg-elevated)] px-1.5 py-0.5 rounded border border-[var(--border)]">0 lines</span>
+<section id="tab-logs" class="tab-pane p-6 space-y-3.5 max-w-5xl mx-auto h-full min-h-0 flex flex-col">
+  <!-- Top Control Bar -->
+  <div class="flex flex-wrap items-center justify-between gap-3 shrink-0">
+    <!-- Left: Title & Source Tabs -->
+    <div class="flex items-center gap-3 flex-wrap">
+      <div class="flex items-center gap-2">
+        <div class="w-7 h-7 rounded-lg bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center shrink-0">
+          <i data-lucide="terminal" class="w-4 h-4 text-emerald-400"></i>
+        </div>
+        <div>
+          <div class="flex items-center gap-2">
+            <span class="text-xs font-bold uppercase tracking-wider font-mono text-[var(--text-primary)]">Process Terminal</span>
+            <span id="log-count" class="text-[10px] font-mono text-[var(--text-muted)] bg-[var(--bg-elevated)] px-1.5 py-0.5 rounded border border-[var(--border)]">0 lines</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Source Filter Pills -->
+      <div id="log-source-tabs" class="flex items-center gap-1 bg-[var(--bg-elevated)] p-1 rounded-xl border border-[var(--border)] select-none">
+        <button data-source="all" class="btn-log-source active px-2.5 py-1 rounded-lg text-xs font-medium transition-all flex items-center gap-1.5 cursor-pointer">
+          <i data-lucide="layers" class="w-3.5 h-3.5"></i>
+          <span>Show All</span>
+          <span id="count-all" class="text-[10px] font-mono px-1.5 py-0.2 rounded bg-black/40 text-[var(--text-muted)]">0</span>
+        </button>
+        <button data-source="llama" class="btn-log-source px-2.5 py-1 rounded-lg text-xs font-medium transition-all flex items-center gap-1.5 cursor-pointer text-[var(--text-secondary)] hover:text-[var(--text-primary)]">
+          <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
+          <span>Llama</span>
+          <span id="count-llama" class="text-[10px] font-mono px-1.5 py-0.2 rounded bg-black/40 text-[var(--text-muted)]">0</span>
+        </button>
+        <button data-source="swarm" class="btn-log-source px-2.5 py-1 rounded-lg text-xs font-medium transition-all flex items-center gap-1.5 cursor-pointer text-[var(--text-secondary)] hover:text-[var(--text-primary)]">
+          <span class="w-2 h-2 rounded-full bg-purple-400"></span>
+          <span>SwarmUI</span>
+          <span id="count-swarm" class="text-[10px] font-mono px-1.5 py-0.2 rounded bg-black/40 text-[var(--text-muted)]">0</span>
+        </button>
+        <button data-source="other" class="btn-log-source px-2.5 py-1 rounded-lg text-xs font-medium transition-all flex items-center gap-1.5 cursor-pointer text-[var(--text-secondary)] hover:text-[var(--text-primary)]">
+          <span class="w-2 h-2 rounded-full bg-sky-400"></span>
+          <span>Other</span>
+          <span id="count-other" class="text-[10px] font-mono px-1.5 py-0.2 rounded bg-black/40 text-[var(--text-muted)]">0</span>
+        </button>
+      </div>
     </div>
+
+    <!-- Right: Text Filter, Auto-scroll, Copy, Clear -->
     <div class="flex items-center gap-2">
-      <input id="input-log-filter" placeholder="Filter logs..." class="bg-[var(--bg-input)] border border-[var(--border)] rounded-lg px-2.5 py-1 text-xs text-[var(--text-primary)] outline-none w-40" />
-      <button id="btn-log-autoscroll" class="px-2.5 py-1 rounded-lg border border-emerald-500/30 bg-emerald-500/15 text-emerald-400 text-xs font-medium">Auto-scroll</button>
-      <button id="btn-clear-logs" class="p-1 rounded-lg hover:text-rose-400 text-[var(--text-muted)] transition-colors"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+      <div class="relative">
+        <i data-lucide="search" class="w-3.5 h-3.5 absolute left-2.5 top-1/2 -translate-y-1/2 text-[var(--text-muted)] pointer-events-none"></i>
+        <input id="input-log-filter" placeholder="Search logs..." class="bg-[var(--bg-input)] border border-[var(--border)] rounded-lg pl-8 pr-2.5 py-1 text-xs text-[var(--text-primary)] outline-none w-36 focus:w-48 transition-all focus:border-[var(--brand)]" />
+      </div>
+      <button id="btn-log-autoscroll" class="px-2.5 py-1 rounded-lg border border-emerald-500/30 bg-emerald-500/15 text-emerald-400 text-xs font-medium cursor-pointer transition-all flex items-center gap-1.5" title="Toggle Auto-Scroll">
+        <i data-lucide="arrow-down-to-line" class="w-3.5 h-3.5"></i>
+        <span>Auto-scroll</span>
+      </button>
+      <button id="btn-copy-logs" class="p-1.5 rounded-lg border border-[var(--border)] bg-[var(--bg-elevated)] hover:bg-[var(--bg-card)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors cursor-pointer" title="Copy visible logs">
+        <i data-lucide="copy" class="w-3.5 h-3.5"></i>
+      </button>
+      <button id="btn-clear-logs" class="p-1.5 rounded-lg border border-[var(--border)] bg-[var(--bg-elevated)] hover:bg-rose-500/20 hover:border-rose-500/40 text-[var(--text-secondary)] hover:text-rose-400 transition-colors cursor-pointer" title="Clear terminal">
+        <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+      </button>
     </div>
   </div>
 
-  <div id="terminal-box" class="flex-1 bg-[#02070c] border border-[var(--border)] rounded-2xl p-4 font-mono text-xs text-emerald-400 overflow-y-auto leading-relaxed select-text min-h-0 whitespace-pre-wrap"></div>
+  <!-- Terminal Output Box -->
+  <div id="terminal-box" class="flex-1 bg-[#02070c] border border-[var(--border)] rounded-2xl p-3 font-mono text-xs overflow-y-auto select-text min-h-0 flex flex-col gap-0.5"></div>
 </section>

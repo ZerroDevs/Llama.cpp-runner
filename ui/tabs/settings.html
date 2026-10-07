@@ -1,27 +1,105 @@
 <!-- ========================================== -->
 <!-- TAB 10: SETTINGS & ABOUT                   -->
 <!-- ========================================== -->
-<section id="tab-settings" class="tab-pane p-6 space-y-4 max-w-5xl mx-auto">
+<section id="tab-settings" class="tab-pane p-6 space-y-6 max-w-5xl mx-auto">
+  <!-- Top Header with Save Button -->
+  <div class="flex items-center justify-between pb-2 border-b border-[var(--border)]">
+    <div>
+      <h2 class="text-base font-bold text-[var(--text-primary)] flex items-center gap-2">
+        <i data-lucide="sliders" class="w-4 h-4 text-[var(--brand)]"></i>
+        System & Engine Settings
+      </h2>
+      <p class="text-xs text-[var(--text-muted)] mt-0.5">Manage engine lifecycle automation, on-demand wakeups, and desktop integrations.</p>
+    </div>
+    <button id="btn-save-settings" class="px-4 py-2 rounded-xl bg-[var(--brand)] text-black text-xs font-semibold hover:bg-[var(--brand-hover)] transition-all flex items-center gap-1.5 shadow-xs cursor-pointer">
+      <i data-lucide="save" class="w-3.5 h-3.5"></i>
+      <span>Save Settings</span>
+    </button>
+  </div>
+
+  <!-- Engine Automation & On-Demand Lifecycle -->
+  <div class="p-5 rounded-2xl bg-[var(--bg-card)] border border-[var(--border)] space-y-4">
+    <div class="border-b border-[var(--border)] pb-3 flex items-center justify-between">
+      <div>
+        <h3 class="text-xs font-bold uppercase tracking-wider font-mono text-[var(--text-primary)] flex items-center gap-1.5">
+          <i data-lucide="zap" class="w-3.5 h-3.5 text-emerald-400"></i>
+          Engine Automation & On-Demand Lifecycle
+        </h3>
+        <p class="text-xs text-[var(--text-muted)] mt-0.5">Configure zero-waste VRAM orchestration and automated engine boot sequences.</p>
+      </div>
+      <span class="text-[10px] font-mono px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-medium">Smart VRAM</span>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <!-- Auto Wake LLM -->
+      <label class="flex items-start gap-3 p-3.5 rounded-xl bg-[var(--bg-elevated)] border border-[var(--border)] hover:border-[var(--brand)]/50 transition-colors cursor-pointer group">
+        <input id="check-auto-wake-llm" type="checkbox" class="accent-[var(--brand)] mt-1 w-4 h-4 rounded cursor-pointer" />
+        <div class="space-y-1 select-none">
+          <div class="flex items-center gap-2">
+            <span class="text-xs font-semibold text-[var(--text-primary)] group-hover:text-[var(--brand)] transition-colors">Auto Wake LLM on Request</span>
+            <span class="text-[10px] font-mono px-1.5 py-0.2 rounded bg-emerald-500/15 text-emerald-400">LLM</span>
+          </div>
+          <p class="text-[11px] text-[var(--text-secondary)] leading-relaxed">
+            Automatically launches <code class="text-emerald-400">llama-server</code> and mounts the model into VRAM whenever a chat prompt, API completion, or slash command arrives while offline.
+          </p>
+        </div>
+      </label>
+
+      <!-- Auto Wake Swarm -->
+      <label class="flex items-start gap-3 p-3.5 rounded-xl bg-[var(--bg-elevated)] border border-[var(--border)] hover:border-cyan-500/50 transition-colors cursor-pointer group">
+        <input id="check-auto-wake-swarm" type="checkbox" class="accent-cyan-400 mt-1 w-4 h-4 rounded cursor-pointer" />
+        <div class="space-y-1 select-none">
+          <div class="flex items-center gap-2">
+            <span class="text-xs font-semibold text-[var(--text-primary)] group-hover:text-cyan-400 transition-colors">Auto Wake Swarm on Request</span>
+            <span class="text-[10px] font-mono px-1.5 py-0.2 rounded bg-cyan-500/15 text-cyan-400">Diffusion</span>
+          </div>
+          <p class="text-[11px] text-[var(--text-secondary)] leading-relaxed">
+            Automatically starts the <code class="text-cyan-400">SwarmUI</code> diffusion backend when <code class="text-cyan-400">/imagine</code>, <code class="text-cyan-400">/draw</code>, or image generation is requested while SwarmUI is offline.
+          </p>
+        </div>
+      </label>
+
+      <!-- Auto-Sleep LLM -->
+      <label class="flex items-start gap-3 p-3.5 rounded-xl bg-[var(--bg-elevated)] border border-[var(--border)] hover:border-amber-500/50 transition-colors cursor-pointer group md:col-span-2">
+        <input id="check-auto-sleep" type="checkbox" class="accent-amber-400 mt-1 w-4 h-4 rounded cursor-pointer" />
+        <div class="space-y-1 select-none">
+          <div class="flex items-center gap-2">
+            <span class="text-xs font-semibold text-[var(--text-primary)] group-hover:text-amber-400 transition-colors">Auto-Sleep LLM on Inactivity (10 min)</span>
+            <span class="text-[10px] font-mono px-1.5 py-0.2 rounded bg-amber-500/15 text-amber-400">Power Saver</span>
+          </div>
+          <p class="text-[11px] text-[var(--text-secondary)] leading-relaxed">
+            Unloads the model from GPU VRAM after 10 minutes of idle time. Combined with Auto Wake, your system stays responsive while consuming zero idle GPU memory.
+          </p>
+        </div>
+      </label>
+    </div>
+  </div>
+
+  <!-- System Integrations -->
   <div class="p-5 rounded-2xl bg-[var(--bg-card)] border border-[var(--border)] space-y-4">
     <div class="border-b border-[var(--border)] pb-3">
-      <h3 class="text-xs font-bold uppercase tracking-wider font-mono text-[var(--text-primary)]">System Integrations</h3>
-      <p class="text-xs text-[var(--text-muted)]">Configure Windows integration and notifications.</p>
+      <h3 class="text-xs font-bold uppercase tracking-wider font-mono text-[var(--text-primary)] flex items-center gap-1.5">
+        <i data-lucide="bell" class="w-3.5 h-3.5 text-sky-400"></i>
+        System Integrations & Desktop Behavior
+      </h3>
+      <p class="text-xs text-[var(--text-muted)] mt-0.5">Configure Windows system tray integration, startup behavior, and external webhooks.</p>
     </div>
 
     <div class="space-y-3 text-xs">
       <div class="space-y-1">
         <label for="input-discord-webhook" class="font-semibold text-[var(--text-primary)]">Discord Webhook URL</label>
-        <input id="input-discord-webhook" placeholder="https://discord.com/api/webhooks/..." class="w-full bg-[var(--bg-input)] border border-[var(--border)] rounded-xl px-3 py-2 text-xs font-mono outline-none" />
+        <input id="input-discord-webhook" placeholder="https://discord.com/api/webhooks/..." class="w-full bg-[var(--bg-input)] border border-[var(--border)] rounded-xl px-3 py-2 text-xs font-mono outline-none focus:border-[var(--brand)] transition-colors" />
+        <p class="text-[11px] text-[var(--text-muted)]">Automatically publishes newly generated images and prompt metadata to your Discord channel via <code class="text-sky-400">/hook</code>.</p>
       </div>
 
-      <div class="flex flex-col gap-2 pt-2">
-        <label class="flex items-center gap-2 text-xs text-[var(--text-primary)] cursor-pointer">
-          <input id="check-tray" type="checkbox" class="accent-[var(--brand)]" />
+      <div class="flex flex-col sm:flex-row gap-4 pt-2">
+        <label class="flex items-center gap-2 text-xs text-[var(--text-primary)] cursor-pointer select-none">
+          <input id="check-tray" type="checkbox" class="accent-[var(--brand)] w-4 h-4 rounded" />
           <span>Minimize to Windows System Tray on Close</span>
         </label>
 
-        <label class="flex items-center gap-2 text-xs text-[var(--text-primary)] cursor-pointer">
-          <input id="check-startup" type="checkbox" class="accent-[var(--brand)]" />
+        <label class="flex items-center gap-2 text-xs text-[var(--text-primary)] cursor-pointer select-none">
+          <input id="check-startup" type="checkbox" class="accent-[var(--brand)] w-4 h-4 rounded" />
           <span>Launch on Windows Startup</span>
         </label>
       </div>

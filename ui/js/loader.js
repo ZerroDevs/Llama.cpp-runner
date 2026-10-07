@@ -7,6 +7,7 @@ export async function loadPartials() {
   const tabs = [
     'dashboard',
     'chat',
+    'llama-web',
     'models',
     'hub',
     'hardware',

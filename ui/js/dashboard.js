@@ -5,6 +5,7 @@
 import { api } from './api.js';
 import { state } from './state.js';
 import { showToast } from './toast.js';
+import { syncLlamaWebState } from './llama-web.js';
 
 export function setupDashboard() {
   // Save Config Button
@@ -14,6 +15,37 @@ export function setupDashboard() {
     await api.invoke('save_config', newCfg);
     showToast('Settings Saved', 'Engine configuration updated successfully.', 'success');
     updateMissingBinaryBanner();
+  });
+
+  // Settings Tab Save Button
+  document.getElementById('btn-save-settings')?.addEventListener('click', async () => {
+    const newCfg = collectConfigFromForm();
+    state.config = newCfg;
+    await api.invoke('save_config', newCfg);
+    showToast('Settings Saved', 'Lifecycle automation and system settings saved.', 'success');
+  });
+
+  // Auto-save toggle switches in Settings tab
+  const hookToggleAutoSave = (id, label) => {
+    document.getElementById(id)?.addEventListener('change', async (e) => {
+      const newCfg = collectConfigFromForm();
+      state.config = newCfg;
+      await api.invoke('save_config', newCfg);
+      showToast('Setting Updated', `${label}: ${e.target.checked ? 'Enabled' : 'Disabled'}`, 'info', 1600);
+    });
+  };
+
+  hookToggleAutoSave('check-auto-wake-llm', 'Auto Wake LLM');
+  hookToggleAutoSave('check-auto-wake-swarm', 'Auto Wake Swarm');
+  hookToggleAutoSave('check-auto-sleep', 'Auto-Sleep LLM');
+  hookToggleAutoSave('check-tray', 'System Tray');
+  hookToggleAutoSave('check-startup', 'Startup Launch');
+
+  document.getElementById('input-discord-webhook')?.addEventListener('change', async () => {
+    const newCfg = collectConfigFromForm();
+    state.config = newCfg;
+    await api.invoke('save_config', newCfg);
+    showToast('Webhook Saved', 'Discord webhook URL updated.', 'info', 1600);
   });
 
   // Browse Binary Button
@@ -182,6 +214,9 @@ export function applyConfigToForm(cfg) {
   if (document.getElementById('input-discord-webhook')) document.getElementById('input-discord-webhook').value = cfg.discord_webhook || '';
   if (document.getElementById('check-tray')) document.getElementById('check-tray').checked = !!cfg.minimize_to_tray;
   if (document.getElementById('check-startup')) document.getElementById('check-startup').checked = !!cfg.run_on_startup;
+  if (document.getElementById('check-auto-wake-llm')) document.getElementById('check-auto-wake-llm').checked = cfg.auto_wake_llm !== false;
+  if (document.getElementById('check-auto-wake-swarm')) document.getElementById('check-auto-wake-swarm').checked = cfg.auto_wake_swarm !== false;
+  if (document.getElementById('check-auto-sleep')) document.getElementById('check-auto-sleep').checked = !!cfg.auto_sleep;
 
   // Vision Model
   const visionPath = cfg.mmproj_path || cfg.vision_projector || cfg.vision_model || '';
@@ -253,7 +288,10 @@ export function collectConfigFromForm() {
     swarm_port: parseInt(document.getElementById('input-swarm-port')?.value || 7801),
     discord_webhook: document.getElementById('input-discord-webhook')?.value.trim() || '',
     minimize_to_tray: document.getElementById('check-tray')?.checked || false,
-    run_on_startup: document.getElementById('check-startup')?.checked || false
+    run_on_startup: document.getElementById('check-startup')?.checked || false,
+    auto_wake_llm: document.getElementById('check-auto-wake-llm') ? document.getElementById('check-auto-wake-llm').checked : (state.config.auto_wake_llm ?? true),
+    auto_wake_swarm: document.getElementById('check-auto-wake-swarm') ? document.getElementById('check-auto-wake-swarm').checked : (state.config.auto_wake_swarm ?? true),
+    auto_sleep: document.getElementById('check-auto-sleep') ? document.getElementById('check-auto-sleep').checked : (state.config.auto_sleep ?? false)
   };
 }
 
@@ -359,6 +397,10 @@ export function updateServerUI() {
     if (swarmBtn) window.lucide.createIcons({ root: swarmBtn });
     if (railSwarmBtn) window.lucide.createIcons({ root: railSwarmBtn });
     if (railBtn) window.lucide.createIcons({ root: railBtn });
+  }
+
+  if (state.activeTab === 'tab-llama-web') {
+    syncLlamaWebState();
   }
 }
 

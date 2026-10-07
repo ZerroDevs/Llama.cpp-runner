@@ -122,10 +122,30 @@
           <span>Dashboard & Engine</span>
         </button>
 
-        <button class="nav-tab-btn" data-target="tab-chat">
-          <i data-lucide="message-square" class="w-4 h-4 text-cyan-400"></i>
-          <span>AI Chat</span>
-        </button>
+        <!-- AI Chat Section with expandable sub-options -->
+        <div class="nav-group space-y-1" id="nav-group-chat">
+          <div class="flex items-center gap-1">
+            <button class="nav-tab-btn flex-1 flex items-center justify-between" data-target="tab-chat" id="btn-nav-chat">
+              <div class="flex items-center gap-2">
+                <i data-lucide="message-square" class="w-4 h-4 text-cyan-400"></i>
+                <span>AI Chat</span>
+              </div>
+            </button>
+            <button id="btn-toggle-chat-sub" type="button" class="p-2 rounded-xl text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-elevated)] transition-all cursor-pointer shrink-0" title="Toggle Chat Options">
+              <i data-lucide="chevron-down" id="chat-sub-chevron" class="w-3.5 h-3.5 transition-transform duration-200"></i>
+            </button>
+          </div>
+          <div id="chat-sub-menu" class="hidden ml-3 pl-2.5 border-l border-[var(--border)] space-y-1 py-0.5 animate-in fade-in slide-in-from-top-1 duration-150">
+            <button class="nav-sub-btn active" data-target="tab-chat" data-sub="studio">
+              <i data-lucide="sparkles" class="w-3.5 h-3.5 text-[var(--brand)]"></i>
+              <span>Studio Chat</span>
+            </button>
+            <button class="nav-sub-btn" data-target="tab-llama-web" data-sub="web">
+              <i data-lucide="globe" class="w-3.5 h-3.5 text-cyan-400"></i>
+              <span>Llama Web UI</span>
+            </button>
+          </div>
+        </div>
 
         <button class="nav-tab-btn" data-target="tab-models">
           <i data-lucide="hard-drive" class="w-4 h-4 text-indigo-400"></i>

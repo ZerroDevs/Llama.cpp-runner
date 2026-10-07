@@ -54,6 +54,19 @@
   font-weight: 600;
   color: var(--text-secondary);
   font-size: 0.8125rem;
+  list-style: none;
+}
+
+.prose-chat summary::-webkit-details-marker {
+  display: none;
+}
+
+.prose-chat details .details-chevron {
+  transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.prose-chat details[open] > summary .details-chevron {
+  transform: rotate(90deg);
 }
 
 .prose-chat summary:hover {
