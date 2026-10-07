@@ -14,6 +14,11 @@ Llama Server Control is a high-performance, native Windows desktop application a
 
 Our vision is to build the absolute lightest, most performant, zero-waste local AI manager in existence. Hardware headroom is precious. Every megabyte of RAM saved by the control panel is a megabyte given back to your models or your games. We enforce aggressive thread hygiene, zero-copy binary streaming, and strict UI DOM virtualization. Whether you are daily-driving a massive LLM or generating hundreds of high-res images, Llama Server Control is designed to stay completely out of your hardware's way.
 
+## Quick Download (Windows 64-bit)
+
+Download the latest pre-built Windows installer from our **[Releases Page](https://github.com/ZerroDevs/Llama.cpp-runner/releases/latest)**:
+- Run `LlamaServerControl_Setup.exe` and follow the installation wizard.
+
 ---
 
 ## Current Features
@@ -135,8 +140,6 @@ Our vision is to build the absolute lightest, most performant, zero-waste local 
 - **Expanded Hub Integrations:** Allow direct 1-click installation of LoRAs and Vision Projectors from HuggingFace to matching local directories.
 
 ---
-
-## Requirements
 
 ## Requirements
 
