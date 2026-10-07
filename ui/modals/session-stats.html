@@ -1,0 +1,162 @@
+<!-- ========================================== -->
+<!-- MODAL: SESSION & TOKEN TELEMETRY INSPECTOR  -->
+<!-- ========================================== -->
+<div id="modal-session-stats" class="hidden fixed inset-0 bg-black/80 backdrop-blur-xs z-50 flex items-center justify-center p-4 animate-in fade-in duration-150">
+  <div class="bg-[var(--bg-card)] border border-[var(--border)] rounded-2xl shadow-2xl w-full max-w-2xl overflow-hidden flex flex-col max-h-[92vh] select-none" onclick="event.stopPropagation()">
+    
+    <!-- Header -->
+    <div class="px-5 py-3.5 border-b border-[var(--border)] bg-[var(--bg-elevated)] flex items-center justify-between gap-3 shrink-0">
+      <div class="flex items-center gap-2">
+        <div class="w-7 h-7 rounded-lg bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400">
+          <i data-lucide="gauge" class="w-4 h-4"></i>
+        </div>
+        <div>
+          <h3 class="text-xs font-bold uppercase tracking-wider font-mono text-[var(--text-primary)]">Session & Context Inspector</h3>
+          <p class="text-[10px] text-[var(--text-muted)]">Live token distribution and KV cache telemetry</p>
+        </div>
+      </div>
+
+      <div class="flex items-center gap-2">
+        <div id="stats-server-status-badge" class="flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10px] font-mono font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+          <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+          <span id="stats-server-status-text">LLM Engine Online</span>
+        </div>
+        <button id="btn-close-session-stats" class="p-1.5 rounded-xl hover:bg-[var(--bg-base)] text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors cursor-pointer" title="Close">
+          <i data-lucide="x" class="w-4 h-4"></i>
+        </button>
+      </div>
+    </div>
+
+    <!-- Usage Progress Bar Banner -->
+    <div class="px-6 pt-4 pb-2 bg-[var(--bg-base)]/50 border-b border-[var(--border)] shrink-0">
+      <div class="flex items-center justify-between text-xs mb-1.5">
+        <span class="text-[var(--text-secondary)] font-medium">Context Window Utilization</span>
+        <div class="flex items-center gap-2">
+          <span id="stats-usage-tokens-summary" class="font-mono text-[11px] text-[var(--text-muted)]">0 / 65,536 tokens</span>
+          <span id="stats-usage-percentage" class="font-mono font-bold text-cyan-400">0%</span>
+        </div>
+      </div>
+      <div class="w-full bg-[var(--bg-elevated)] h-2 rounded-full overflow-hidden border border-[var(--border)]">
+        <div id="stats-usage-bar" class="h-full bg-gradient-to-r from-emerald-500 via-cyan-500 to-indigo-500 transition-all duration-300 rounded-full" style="width: 0%"></div>
+      </div>
+    </div>
+
+    <!-- Telemetry 2-Column Matrix (matching exact structure) -->
+    <div class="p-6 overflow-y-auto flex-1 grid grid-cols-1 sm:grid-cols-2 gap-y-4 gap-x-8 text-xs">
+      
+      <!-- Row 1: Session | Messages -->
+      <div class="flex flex-col">
+        <span class="text-[var(--text-muted)] font-medium mb-1">Session</span>
+        <span id="stats-session-title" class="text-sm font-semibold text-[var(--text-primary)] truncate" title="Active Chat">New Conversation</span>
+      </div>
+      <div class="flex flex-col">
+        <span class="text-[var(--text-muted)] font-medium mb-1">Messages</span>
+        <span id="stats-messages-count" class="text-sm font-bold text-[var(--text-primary)] font-mono">0</span>
+      </div>
+
+      <!-- Row 2: Provider | Model -->
+      <div class="flex flex-col">
+        <span class="text-[var(--text-muted)] font-medium mb-1">Provider</span>
+        <span id="stats-provider" class="text-sm font-semibold text-[var(--text-primary)]">Llama.cpp (Local Engine)</span>
+      </div>
+      <div class="flex flex-col">
+        <span class="text-[var(--text-muted)] font-medium mb-1">Model</span>
+        <span id="stats-model-name" class="text-sm font-semibold text-[var(--text-primary)] truncate" title="Active Model">Active Model</span>
+      </div>
+
+      <!-- Row 3: Context Limit | Total Tokens -->
+      <div class="flex flex-col">
+        <span class="text-[var(--text-muted)] font-medium mb-1">Context Limit</span>
+        <span id="stats-context-limit" class="text-sm font-bold text-[var(--text-primary)] font-mono">65,536</span>
+      </div>
+      <div class="flex flex-col">
+        <span class="text-[var(--text-muted)] font-medium mb-1">Total Tokens</span>
+        <span id="stats-total-tokens" class="text-sm font-bold text-cyan-400 font-mono">0</span>
+      </div>
+
+      <!-- Row 4: Usage | Input Tokens -->
+      <div class="flex flex-col">
+        <span class="text-[var(--text-muted)] font-medium mb-1">Usage</span>
+        <span id="stats-usage-val" class="text-sm font-bold text-[var(--text-primary)] font-mono">0%</span>
+      </div>
+      <div class="flex flex-col">
+        <span class="text-[var(--text-muted)] font-medium mb-1">Input Tokens</span>
+        <span id="stats-input-tokens" class="text-sm font-bold text-[var(--text-primary)] font-mono">0</span>
+      </div>
+
+      <!-- Row 5: Output Tokens | Reasoning Tokens -->
+      <div class="flex flex-col">
+        <span class="text-[var(--text-muted)] font-medium mb-1">Output Tokens</span>
+        <span id="stats-output-tokens" class="text-sm font-bold text-[var(--text-primary)] font-mono">0</span>
+      </div>
+      <div class="flex flex-col">
+        <span class="text-[var(--text-muted)] font-medium mb-1">Reasoning Tokens</span>
+        <span id="stats-reasoning-tokens" class="text-sm font-bold text-indigo-400 font-mono">0</span>
+      </div>
+
+      <!-- Row 6: Cache Tokens (read/write) | User Messages -->
+      <div class="flex flex-col">
+        <span class="text-[var(--text-muted)] font-medium mb-1">Cache Tokens (read/write)</span>
+        <span id="stats-cache-tokens" class="text-sm font-bold text-emerald-400 font-mono">0 / 0</span>
+      </div>
+      <div class="flex flex-col">
+        <span class="text-[var(--text-muted)] font-medium mb-1">User Messages</span>
+        <span id="stats-user-messages" class="text-sm font-bold text-[var(--text-primary)] font-mono">0</span>
+      </div>
+
+      <!-- Row 7: Assistant Messages | Total Cost -->
+      <div class="flex flex-col">
+        <span class="text-[var(--text-muted)] font-medium mb-1">Assistant Messages</span>
+        <span id="stats-assistant-messages" class="text-sm font-bold text-[var(--text-primary)] font-mono">0</span>
+      </div>
+      <div class="flex flex-col">
+        <span class="text-[var(--text-muted)] font-medium mb-1">Total Cost</span>
+        <div class="flex items-center gap-1.5">
+          <span id="stats-total-cost" class="text-sm font-bold text-emerald-400 font-mono">$0.00</span>
+          <span class="text-[10px] text-[var(--text-muted)] font-mono">(Local Engine)</span>
+        </div>
+      </div>
+
+      <!-- Row 8: Avg Speed (T/s) | Total Generation Time -->
+      <div class="flex flex-col">
+        <span class="text-[var(--text-muted)] font-medium mb-1">Avg Speed (T/s)</span>
+        <div class="flex items-center gap-1.5">
+          <span id="stats-avg-tps" class="text-sm font-bold text-emerald-400 font-mono">--</span>
+          <span class="text-[10px] text-[var(--text-muted)] font-mono">avg tokens/sec</span>
+        </div>
+      </div>
+      <div class="flex flex-col">
+        <span class="text-[var(--text-muted)] font-medium mb-1">Total Generation Time</span>
+        <span id="stats-generation-time" class="text-sm font-bold text-[var(--text-primary)] font-mono">--</span>
+      </div>
+
+      <!-- Row 9: Session Created | Last Activity -->
+      <div class="flex flex-col">
+        <span class="text-[var(--text-muted)] font-medium mb-1">Session Created</span>
+        <span id="stats-session-created" class="text-xs font-medium text-[var(--text-secondary)]">--</span>
+      </div>
+      <div class="flex flex-col">
+        <span class="text-[var(--text-muted)] font-medium mb-1">Last Activity</span>
+        <span id="stats-last-activity" class="text-xs font-medium text-[var(--text-secondary)]">--</span>
+      </div>
+    </div>
+
+    <!-- Footer Action Bar -->
+    <div class="px-5 py-3 border-t border-[var(--border)] bg-[var(--bg-elevated)] flex items-center justify-between gap-3 shrink-0">
+      <button id="btn-stats-flush-cache" class="flex items-center gap-1.5 py-1.5 px-3 rounded-xl bg-[var(--bg-base)] border border-[var(--border)] hover:border-emerald-500/50 text-xs font-semibold text-[var(--text-secondary)] hover:text-emerald-400 transition-all cursor-pointer shadow-xs">
+        <i data-lucide="eraser" class="w-3.5 h-3.5 text-emerald-400"></i>
+        <span>Flush KV Cache</span>
+      </button>
+
+      <div class="flex items-center gap-2">
+        <button id="btn-stats-copy-summary" class="flex items-center gap-1.5 py-1.5 px-3 rounded-xl bg-[var(--bg-base)] border border-[var(--border)] hover:border-cyan-500/50 text-xs font-medium text-[var(--text-secondary)] hover:text-cyan-400 transition-all cursor-pointer">
+          <i data-lucide="copy" class="w-3.5 h-3.5 text-cyan-400"></i>
+          <span>Copy Stats</span>
+        </button>
+        <button id="btn-stats-close" class="py-1.5 px-4 rounded-xl bg-[var(--brand)] hover:bg-[var(--brand-hover)] text-black text-xs font-bold transition-all cursor-pointer shadow-xs">
+          Close
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

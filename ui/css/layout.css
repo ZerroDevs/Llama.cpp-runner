@@ -80,6 +80,14 @@
   flex-direction: column;
 }
 
+#tab-chat.tab-pane.active {
+  display: flex !important;
+  flex-direction: row !important;
+  overflow: hidden !important;
+  padding: 0 !important;
+  max-width: 100% !important;
+}
+
 /* Main Content Wrapper */
 #main-content {
   flex: 1;

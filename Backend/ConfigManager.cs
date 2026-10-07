@@ -17,6 +17,8 @@ namespace LlamaServerControl.Backend
             _cachedConfig = LoadFromFile();
         }
 
+        public string ConfigPath => _configPath;
+
         private Dictionary<string, object> GetDefaultConfig()
         {
             return new Dictionary<string, object>

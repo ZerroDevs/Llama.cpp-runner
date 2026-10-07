@@ -6,6 +6,7 @@ import { state } from './state.js';
 import { scanLocalModels } from './models.js';
 import { refreshGallery, scanSwarmModels } from './swarm.js';
 import { syncLlamaWebState } from './llama-web.js';
+import { onChatTabActivated } from './chat.js';
 
 export function setupNavigation() {
   const buttons = document.querySelectorAll('.nav-tab-btn');
@@ -102,4 +103,5 @@ export function switchTab(targetId) {
     scanSwarmModels();
   }
   if (targetId === 'tab-llama-web') syncLlamaWebState();
+  if (targetId === 'tab-chat') onChatTabActivated();
 }

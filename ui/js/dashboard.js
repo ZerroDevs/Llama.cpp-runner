@@ -6,6 +6,7 @@ import { api } from './api.js';
 import { state } from './state.js';
 import { showToast } from './toast.js';
 import { syncLlamaWebState } from './llama-web.js';
+import { updateChatTokenBadge } from './chat.js';
 
 export function setupDashboard() {
   // Save Config Button
@@ -157,7 +158,8 @@ export function setupDashboard() {
     try {
       const res = await api.invoke('flush_kv_cache');
       if (res && res.status === 'success') {
-        showToast('Context Flushed', 'Active slots reset, KV cache cleared to 0 tokens.', 'success');
+        showToast('Context Flushed', res.message || 'Active slots reset, KV cache cleared to 0 tokens.', 'success');
+        updateChatTokenBadge();
       } else {
         showToast('Flush Warning', res?.message || 'Server did not acknowledge flush.', 'warning');
       }

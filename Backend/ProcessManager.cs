@@ -244,25 +244,88 @@ namespace LlamaServerControl.Backend
 
         public async Task<Dictionary<string, object>> FlushKvCacheAsync(Dictionary<string, object> config)
         {
+            if (_process == null || _process.HasExited)
+            {
+                OnLog?.Invoke("[ACTION] Flush KV Cache: Server is offline, cache is already 0 tokens.");
+                return new Dictionary<string, object>
+                {
+                    { "status", "success" },
+                    { "message", "LLM Server is offline; no active KV cache in memory." }
+                };
+            }
+
             int internalPort = GetInternalPort(config);
-            string url = $"http://127.0.0.1:{internalPort}/slots?action=erase";
 
             try
             {
-                var response = await _http.PostAsync(url, null);
-                if (response.IsSuccessStatusCode)
+                int erasedCount = 0;
+                bool erasedAny = false;
+
+                // 1. Try to query /slots to find all active slots and erase each one
+                try
                 {
-                    OnLog?.Invoke("[ACTION] Flush KV Cache: Slots wiped to 0 tokens successfully.");
+                    using var getCts = new CancellationTokenSource(2000);
+                    var slotsResp = await _http.GetAsync($"http://127.0.0.1:{internalPort}/slots", getCts.Token);
+                    if (slotsResp.IsSuccessStatusCode)
+                    {
+                        var slotsJson = await slotsResp.Content.ReadAsStringAsync(getCts.Token);
+                        using var doc = JsonDocument.Parse(slotsJson);
+                        if (doc.RootElement.ValueKind == JsonValueKind.Array)
+                        {
+                            foreach (var slot in doc.RootElement.EnumerateArray())
+                            {
+                                int slotId = 0;
+                                if (slot.TryGetProperty("id", out var idProp))
+                                {
+                                    slotId = idProp.GetInt32();
+                                }
+                                var eraseSlotResp = await _http.PostAsync($"http://127.0.0.1:{internalPort}/slots/{slotId}?action=erase", null);
+                                if (eraseSlotResp.IsSuccessStatusCode)
+                                {
+                                    erasedAny = true;
+                                    erasedCount++;
+                                }
+                            }
+                        }
+                    }
+                }
+                catch { }
+
+                // 2. If slots enumeration didn't find/erase any, directly call slot 0 (standard single-slot mode)
+                if (!erasedAny)
+                {
+                    var slot0Resp = await _http.PostAsync($"http://127.0.0.1:{internalPort}/slots/0?action=erase", null);
+                    if (slot0Resp.IsSuccessStatusCode)
+                    {
+                        erasedAny = true;
+                        erasedCount = 1;
+                    }
+                    else
+                    {
+                        // Fallback attempt: older /slots?action=erase
+                        var generalResp = await _http.PostAsync($"http://127.0.0.1:{internalPort}/slots?action=erase", null);
+                        if (generalResp.IsSuccessStatusCode)
+                        {
+                            erasedAny = true;
+                            erasedCount = 1;
+                        }
+                    }
+                }
+
+                if (erasedAny)
+                {
+                    OnLog?.Invoke($"[ACTION] Flush KV Cache: {erasedCount} slot(s) wiped to 0 tokens successfully.");
                     return new Dictionary<string, object>
                     {
                         { "status", "success" },
-                        { "message", "KV Cache & active slots reset to 0 tokens." }
+                        { "message", $"KV Cache & active slots reset to 0 tokens ({erasedCount} slot{(erasedCount > 1 ? "s" : "")} cleared)." }
                     };
                 }
+
                 return new Dictionary<string, object>
                 {
-                    { "status", "error" },
-                    { "message", $"Server responded with code {(int)response.StatusCode}" }
+                    { "status", "warning" },
+                    { "message", "Server did not acknowledge slot reset. Active slot may already be empty." }
                 };
             }
             catch (Exception ex)
@@ -273,6 +336,61 @@ namespace LlamaServerControl.Backend
                     { "message", ex.Message }
                 };
             }
+        }
+
+        public async Task<Dictionary<string, object>> GetSlotTelemetryAsync(Dictionary<string, object> config)
+        {
+            if (_process == null || _process.HasExited)
+            {
+                return new Dictionary<string, object>
+                {
+                    { "online", false },
+                    { "cached_tokens", 0 },
+                    { "context_limit", 0 }
+                };
+            }
+
+            int internalPort = GetInternalPort(config);
+            try
+            {
+                using var cts = new CancellationTokenSource(1500);
+                var resp = await _http.GetAsync($"http://127.0.0.1:{internalPort}/slots", cts.Token);
+                if (resp.IsSuccessStatusCode)
+                {
+                    string json = await resp.Content.ReadAsStringAsync(cts.Token);
+                    using var doc = JsonDocument.Parse(json);
+                    int totalCached = 0;
+                    int nCtx = 0;
+                    if (doc.RootElement.ValueKind == JsonValueKind.Array)
+                    {
+                        foreach (var slot in doc.RootElement.EnumerateArray())
+                        {
+                            if (slot.TryGetProperty("n_past", out var nPastProp))
+                                totalCached += nPastProp.GetInt32();
+                            else if (slot.TryGetProperty("n_cache", out var nCacheProp))
+                                totalCached += nCacheProp.GetInt32();
+
+                            if (slot.TryGetProperty("n_ctx", out var ctxProp))
+                                nCtx = Math.Max(nCtx, ctxProp.GetInt32());
+                        }
+                    }
+
+                    return new Dictionary<string, object>
+                    {
+                        { "online", true },
+                        { "cached_tokens", totalCached },
+                        { "context_limit", nCtx }
+                    };
+                }
+            }
+            catch { }
+
+            return new Dictionary<string, object>
+            {
+                { "online", true },
+                { "cached_tokens", 0 },
+                { "context_limit", 0 }
+            };
         }
     }
 }

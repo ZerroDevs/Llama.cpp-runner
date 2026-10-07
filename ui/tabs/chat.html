@@ -1,71 +1,139 @@
 <!-- ========================================== -->
 <!-- TAB 2: AI CHAT WORKSPACE                   -->
 <!-- ========================================== -->
-<section id="tab-chat" class="tab-pane h-full min-h-0">
-  <!-- Persona Bar -->
-  <div class="px-5 py-2.5 bg-[var(--bg-card)] border-b border-[var(--border)] flex items-center justify-between shrink-0">
-    <div class="flex items-center gap-1.5 overflow-x-auto">
-      <span class="text-[10px] font-mono font-semibold uppercase text-[var(--text-muted)] mr-1">Persona:</span>
-      <button class="chat-preset-btn active px-2.5 py-1 rounded-lg text-xs font-semibold bg-[var(--brand)] text-black" data-preset="general">General</button>
-      <button class="chat-preset-btn px-2.5 py-1 rounded-lg text-xs font-medium bg-[var(--bg-elevated)] text-[var(--text-secondary)] hover:text-[var(--text-primary)]" data-preset="coder">Coder</button>
-      <button class="chat-preset-btn px-2.5 py-1 rounded-lg text-xs font-medium bg-[var(--bg-elevated)] text-[var(--text-secondary)] hover:text-[var(--text-primary)]" data-preset="vision">Vision</button>
-      <button class="chat-preset-btn px-2.5 py-1 rounded-lg text-xs font-medium bg-[var(--bg-elevated)] text-[var(--text-secondary)] hover:text-[var(--text-primary)]" data-preset="creative">Creative</button>
-      <button class="chat-preset-btn px-2.5 py-1 rounded-lg text-xs font-medium bg-[var(--bg-elevated)] text-[var(--text-secondary)] hover:text-[var(--text-primary)]" data-preset="uncensored">Uncensored</button>
+<section id="tab-chat" class="tab-pane h-full min-h-0 flex flex-row overflow-hidden relative">
+
+  <!-- Collapsible Left Conversation Drawer -->
+  <aside id="chat-history-sidebar" class="w-64 bg-[var(--bg-card)] border-r border-[var(--border)] flex flex-col shrink-0 h-full transition-all duration-200 z-10 select-none">
+    <!-- Drawer Header -->
+    <div class="p-3 border-b border-[var(--border)] flex items-center justify-between shrink-0 gap-2">
+      <button id="btn-new-chat" class="flex-1 flex items-center justify-center gap-1.5 py-1.5 px-3 rounded-xl bg-[var(--brand)] hover:bg-[var(--brand-hover)] text-black text-xs font-bold transition-all shadow-xs cursor-pointer">
+        <i data-lucide="plus" class="w-3.5 h-3.5"></i>
+        <span>New Chat</span>
+      </button>
+      <button id="btn-collapse-chat-sidebar" class="p-1.5 rounded-lg text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-elevated)] transition-colors cursor-pointer" title="Collapse history sidebar">
+        <i data-lucide="panel-left-close" class="w-4 h-4"></i>
+      </button>
     </div>
 
-    <div class="flex items-center gap-2">
-      <!-- Switch to Default Llama Web UI -->
-      <button id="btn-chat-to-llama-web" class="flex items-center gap-1.5 px-2.5 py-1 rounded-lg border border-[var(--border)] bg-[var(--bg-elevated)] hover:bg-[var(--border)] text-xs text-[var(--text-secondary)] hover:text-cyan-400 transition-all cursor-pointer shadow-xs" title="Open Default Llama Browser Chat">
-        <i data-lucide="globe" class="w-3.5 h-3.5 text-cyan-400"></i>
-        <span class="hidden sm:inline">Llama Web UI</span>
-      </button>
-
-      <div id="chat-tps-badge" class="hidden items-center gap-1 px-2 py-0.5 rounded bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 font-mono text-[11px] font-bold">
-        <i data-lucide="zap" class="w-3 h-3 fill-current"></i>
-        <span id="chat-tps-text">0.0 T/s</span>
+    <!-- Search / Filter Chats -->
+    <div class="px-3 pt-2.5 pb-1 shrink-0">
+      <div class="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-[var(--bg-elevated)] border border-[var(--border)] text-xs text-[var(--text-secondary)] focus-within:border-[var(--brand)]">
+        <i data-lucide="search" class="w-3.5 h-3.5 text-[var(--text-muted)] shrink-0"></i>
+        <input id="chat-search-input" type="text" placeholder="Search chats..." class="w-full bg-transparent outline-none text-xs text-[var(--text-primary)] placeholder-[var(--text-muted)]" />
       </div>
-      <button id="btn-clear-chat" class="p-1.5 rounded-lg hover:bg-[var(--bg-elevated)] text-[var(--text-muted)] hover:text-rose-400 transition-colors" title="Clear conversation">
-        <i data-lucide="trash-2" class="w-4 h-4"></i>
-      </button>
     </div>
-  </div>
 
-  <!-- Chat Stream -->
-  <div id="chat-messages" class="flex-1 overflow-y-auto p-5 space-y-4 select-text min-h-0">
-    <div class="flex flex-col items-center justify-center text-center p-12 text-[var(--text-muted)] select-none">
-      <div class="w-12 h-12 rounded-2xl bg-[var(--bg-elevated)] border border-[var(--border)] flex items-center justify-center mb-3">
-        <i data-lucide="sparkles" class="w-6 h-6 text-[var(--brand)]"></i>
+    <!-- Saved Conversations List -->
+    <div id="chat-sessions-list" class="flex-1 overflow-y-auto px-2 py-2 space-y-1 min-h-0">
+      <!-- Session cards rendered dynamically here -->
+    </div>
+
+    <!-- Drawer Footer / Export Actions -->
+    <div class="p-2.5 border-t border-[var(--border)] bg-[var(--bg-card)] shrink-0 flex items-center justify-between gap-1 text-[11px]">
+      <span class="text-[var(--text-muted)] font-mono text-[10px]" id="chat-session-count">0 Chats</span>
+      <div class="flex items-center gap-1">
+        <button id="btn-export-chat-md" class="px-2 py-1 rounded hover:bg-[var(--bg-elevated)] text-[var(--text-secondary)] hover:text-cyan-400 transition-colors cursor-pointer" title="Export active conversation as Markdown (.md)">
+          <i data-lucide="file-text" class="w-3.5 h-3.5"></i>
+        </button>
+        <button id="btn-export-chat-json" class="px-2 py-1 rounded hover:bg-[var(--bg-elevated)] text-[var(--text-secondary)] hover:text-emerald-400 transition-colors cursor-pointer" title="Export active conversation as JSON (.json)">
+          <i data-lucide="download" class="w-3.5 h-3.5"></i>
+        </button>
       </div>
-      <h3 class="text-sm font-semibold text-[var(--text-primary)]">Ready for Conversation</h3>
-      <p class="text-xs text-[var(--text-secondary)] mt-1 max-w-sm">Type your prompt below, use slash commands like <code class="text-emerald-400">/imagine</code> for diffusion rendering, or attach images for vision.</p>
     </div>
-  </div>
+  </aside>
 
-  <!-- Slash Command Menu Overlay -->
-  <div id="slash-menu" class="hidden mx-5 mb-2 p-1.5 bg-[var(--bg-card)] border border-[var(--border)] rounded-xl shadow-2xl flex flex-col gap-1 max-h-48 overflow-y-auto z-20"></div>
+  <!-- Main Chat Workspace -->
+  <div id="chat-main-area" class="flex-1 flex flex-col min-w-0 h-full overflow-hidden bg-[var(--bg-base)] relative">
+    <!-- Top Bar (Persona & Quick Switcher) -->
+    <div id="chat-top-bar" class="px-3 py-2 bg-[var(--bg-card)] border-b border-[var(--border)] flex items-center justify-between gap-2 shrink-0 flex-wrap">
+      <div class="flex items-center gap-1.5 overflow-x-auto min-w-0">
+        <!-- Always accessible Toggle/Reopen Drawer Button -->
+        <button id="btn-toggle-chat-sidebar" class="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border border-[var(--border)] bg-[var(--bg-elevated)] hover:bg-[var(--border)] text-xs text-[var(--brand)] transition-all cursor-pointer shadow-xs shrink-0 mr-1" title="Toggle Saved Chats Drawer">
+          <i data-lucide="panel-left" class="w-3.5 h-3.5 text-[var(--brand)]"></i>
+          <span class="font-medium hidden sm:inline">Chats</span>
+        </button>
+        <button id="btn-expand-chat-sidebar" class="hidden p-1.5 rounded-lg border border-[var(--border)] bg-[var(--bg-elevated)] hover:bg-[var(--border)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors cursor-pointer mr-1" title="Show conversation history">
+          <i data-lucide="panel-left-open" class="w-3.5 h-3.5"></i>
+        </button>
 
-  <!-- Attached Images Preview -->
-  <div id="chat-attachment-preview" class="hidden px-5 py-2 bg-[var(--bg-card)] border-t border-[var(--border)] flex items-center gap-2 overflow-x-auto"></div>
+        <span class="text-[10px] font-mono font-semibold uppercase text-[var(--text-muted)] mr-1 shrink-0">Persona:</span>
+        <button class="chat-preset-btn active px-2.5 py-1 rounded-lg text-xs font-semibold bg-[var(--brand)] text-black cursor-pointer shrink-0" data-preset="general">General</button>
+        <button class="chat-preset-btn px-2.5 py-1 rounded-lg text-xs font-medium bg-[var(--bg-elevated)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] cursor-pointer shrink-0" data-preset="coder">Coder</button>
+        <button class="chat-preset-btn px-2.5 py-1 rounded-lg text-xs font-medium bg-[var(--bg-elevated)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] cursor-pointer shrink-0" data-preset="vision">Vision</button>
+        <button class="chat-preset-btn px-2.5 py-1 rounded-lg text-xs font-medium bg-[var(--bg-elevated)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] cursor-pointer shrink-0" data-preset="creative">Creative</button>
+        <button class="chat-preset-btn px-2.5 py-1 rounded-lg text-xs font-medium bg-[var(--bg-elevated)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] cursor-pointer shrink-0" data-preset="uncensored">Uncensored</button>
+      </div>
 
-  <!-- Floating Stop Button -->
-  <div id="chat-stop-container" class="hidden flex justify-center -mb-2 pb-1 z-10">
-    <button id="btn-floating-stop" class="flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[var(--bg-elevated)] border border-rose-500/30 text-rose-400 hover:bg-rose-500/10 text-xs font-semibold shadow-xl transition-all cursor-pointer">
-      <span class="w-2.5 h-2.5 bg-rose-500 rounded-xs"></span>
-      <span>Stop Generating</span>
-    </button>
-  </div>
+      <div class="flex items-center gap-2 shrink-0">
+        <!-- In-Chat Model Quick-Switcher -->
+        <div class="flex items-center gap-1 px-2 py-1 rounded-lg bg-[var(--bg-elevated)] border border-[var(--border)] transition-colors focus-within:border-[var(--brand)]" title="Quick-switch active GGUF model">
+          <span class="text-xs">🧠</span>
+          <select id="chat-model-quick-select" class="bg-transparent text-xs text-[var(--text-primary)] font-medium outline-none cursor-pointer max-w-[130px] sm:max-w-[170px] truncate">
+            <option value="" disabled selected>No model loaded</option>
+          </select>
+        </div>
 
-  <!-- Chat Input Bar -->
-  <div class="p-3 bg-[var(--bg-card)] border-t border-[var(--border)] shrink-0">
-    <div class="flex items-end gap-2 bg-[var(--bg-elevated)] border border-[var(--border)] focus-within:border-[var(--brand)] rounded-2xl p-2 transition-colors">
-      <label class="p-2 text-[var(--text-secondary)] hover:text-cyan-400 cursor-pointer rounded-xl hover:bg-[var(--bg-base)] transition-colors shrink-0" title="Attach image for vision">
-        <i data-lucide="paperclip" class="w-4 h-4"></i>
-        <input id="input-file-vision" type="file" accept="image/*" class="hidden" />
-      </label>
-      <textarea id="chat-input" rows="1" placeholder="Type a message or '/' for commands..." class="flex-1 bg-transparent text-xs text-[var(--text-primary)] placeholder-[var(--text-muted)] resize-none outline-none max-h-32 py-1.5 leading-relaxed"></textarea>
-      <button id="btn-chat-send" class="p-2 bg-[var(--brand)] hover:bg-[var(--brand-hover)] text-black rounded-xl font-bold transition-all shrink-0">
-        <i data-lucide="send" class="w-4 h-4"></i>
+        <!-- Switch to Default Llama Web UI -->
+        <button id="btn-chat-to-llama-web" class="flex items-center gap-1.5 px-2.5 py-1 rounded-lg border border-[var(--border)] bg-[var(--bg-elevated)] hover:bg-[var(--border)] text-xs text-[var(--text-secondary)] hover:text-cyan-400 transition-all cursor-pointer shadow-xs" title="Open Default Llama Browser Chat">
+          <i data-lucide="globe" class="w-3.5 h-3.5 text-cyan-400"></i>
+          <span class="hidden md:inline">Llama Web UI</span>
+        </button>
+
+        <!-- Context Window Size & Cache Tokens Telemetry Badge -->
+        <button id="btn-chat-session-stats" class="flex items-center gap-1.5 px-2.5 py-1 rounded-lg border border-[var(--border)] bg-[var(--bg-elevated)] hover:border-cyan-500/50 hover:bg-[var(--border)] text-xs text-[var(--text-secondary)] hover:text-cyan-400 transition-all cursor-pointer shadow-xs font-mono" title="Click to view Context Window & Token Inspector">
+          <i data-lucide="gauge" class="w-3.5 h-3.5 text-cyan-400 shrink-0"></i>
+          <span id="chat-token-badge-ctx" class="font-semibold text-[var(--text-primary)]">0 / 65k ctx</span>
+          <span id="chat-token-badge-cache" class="text-[10px] text-[var(--text-muted)] hidden sm:inline">• 0 cache</span>
+        </button>
+
+        <div id="chat-tps-badge" class="hidden items-center gap-1 px-2 py-0.5 rounded bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 font-mono text-[11px] font-bold">
+          <i data-lucide="zap" class="w-3 h-3 fill-current"></i>
+          <span id="chat-tps-text">0.0 T/s</span>
+        </div>
+        <button id="btn-clear-chat" class="p-1.5 rounded-lg hover:bg-[var(--bg-elevated)] text-[var(--text-muted)] hover:text-rose-400 transition-colors cursor-pointer" title="Clear messages in this chat">
+          <i data-lucide="trash-2" class="w-4 h-4"></i>
+        </button>
+      </div>
+    </div>
+
+    <!-- Chat Stream -->
+    <div id="chat-messages" class="flex-1 overflow-y-auto p-5 space-y-4 select-text min-h-0">
+      <div class="flex flex-col items-center justify-center text-center p-12 text-[var(--text-muted)] select-none">
+        <div class="w-12 h-12 rounded-2xl bg-[var(--bg-elevated)] border border-[var(--border)] flex items-center justify-center mb-3">
+          <i data-lucide="sparkles" class="w-6 h-6 text-[var(--brand)]"></i>
+        </div>
+        <h3 class="text-sm font-semibold text-[var(--text-primary)]">Ready for Conversation</h3>
+        <p class="text-xs text-[var(--text-secondary)] mt-1 max-w-sm">Type your prompt below, use slash commands like <code class="text-emerald-400">/imagine</code> for diffusion rendering, or attach images for vision.</p>
+      </div>
+    </div>
+
+    <!-- Slash Command Menu Overlay -->
+    <div id="slash-menu" class="hidden mx-5 mb-2 p-1.5 bg-[var(--bg-card)] border border-[var(--border)] rounded-xl shadow-2xl flex flex-col gap-1 max-h-48 overflow-y-auto z-20"></div>
+
+    <!-- Attached Images Preview -->
+    <div id="chat-attachment-preview" class="hidden px-5 py-2 bg-[var(--bg-card)] border-t border-[var(--border)] flex items-center gap-2 overflow-x-auto"></div>
+
+    <!-- Floating Stop Button -->
+    <div id="chat-stop-container" class="hidden flex justify-center -mb-2 pb-1 z-10">
+      <button id="btn-floating-stop" class="flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[var(--bg-elevated)] border border-rose-500/30 text-rose-400 hover:bg-rose-500/10 text-xs font-semibold shadow-xl transition-all cursor-pointer">
+        <span class="w-2.5 h-2.5 bg-rose-500 rounded-xs"></span>
+        <span>Stop Generating</span>
       </button>
+    </div>
+
+    <!-- Chat Input Bar -->
+    <div id="chat-input-bar" class="p-3 bg-[var(--bg-card)] border-t border-[var(--border)] shrink-0">
+      <div class="chat-input-container flex items-end gap-2 bg-[var(--bg-elevated)] border border-[var(--border)] focus-within:border-[var(--brand)] rounded-2xl p-2 transition-colors">
+        <label class="p-2 text-[var(--text-secondary)] hover:text-cyan-400 cursor-pointer rounded-xl hover:bg-[var(--bg-base)] transition-colors shrink-0" title="Attach image for vision">
+          <i data-lucide="paperclip" class="w-4 h-4"></i>
+          <input id="input-file-vision" type="file" accept="image/*" multiple class="hidden" />
+        </label>
+        <textarea id="chat-input" rows="1" placeholder="Type a message or '/' for commands..." class="flex-1 bg-transparent text-xs text-[var(--text-primary)] placeholder-[var(--text-muted)] resize-none outline-none max-h-32 py-1.5 leading-relaxed"></textarea>
+        <button id="btn-chat-send" class="p-2 bg-[var(--brand)] hover:bg-[var(--brand-hover)] text-black rounded-xl font-bold transition-all shrink-0">
+          <i data-lucide="send" class="w-4 h-4"></i>
+        </button>
+      </div>
     </div>
   </div>
 </section>

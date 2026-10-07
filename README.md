@@ -40,9 +40,23 @@ Our vision is to build the absolute lightest, most performant, zero-waste local 
 
 - **Dual Chat Interfaces (Studio Chat & Embedded Llama.cpp Web UI):**
   - **Expandable AI Chat Navigation:** The sidebar "AI Chat" section features an interactive toggle accordion allowing instant navigation between **Studio Chat** (rich markdown, code blocks, vision attachments, edit/regenerate) and the official **Llama Web UI** (`http://127.0.0.1:8080/`).
+  - **Live Reasoning & Thinking Elapsed Timer:** During generation, the collapsible reasoning accordion dynamically counts thinking duration in real time (e.g. `Thinking for 4s...`). Upon completion, it automatically folds and displays the exact duration (e.g. `Thought for 4.2s` or `Thought for 1m 12s`), fully preserved across sessions.
+  - **Auto-Scroll to Latest Message & Viewport Anchoring:** Opening Studio Chat or switching between conversation sessions automatically anchors and scrolls the message viewport directly to the most recent message (combining immediate layout scrolls, `requestAnimationFrame`, and post-render passes) rather than stranding the viewport at the initial prompt.
+  - **Persistent Saved Chats Drawer Memory:** Remembers your preference when collapsing or expanding the conversation history drawer. If you close the saved chats drawer, it remains collapsed when switching tabs or restarting the application until you choose to reopen it.
+  - **Enhanced Markdown Tables & RTL Normalization:** High-contrast, responsive table styling featuring elevated headers, subtle cell gridlines, alternating row zebra striping, hover highlights, and smooth horizontal scrolling. Automatically sanitizes and normalizes LLM-generated tables (removing accidental blank lines between rows, auto-repairing missing delimiter lines, and preserving fenced code blocks), with native right-to-left (RTL) Arabic column alignment and direction.
+  - **Studio Chat Context Window & Cache Token Telemetry:** A live, clickable telemetry badge in the Studio Chat header bar displays active session token usage, context window limits (e.g., `2.4k / 65k ctx`), and KV prompt cache tokens.
+  - **Session & Token Inspector Modal:** Clicking the context badge opens a comprehensive 2-column telemetry matrix displaying:
+    - **Session & Message Breakdown:** Active Topic Title, Total Message Count, User Messages, Assistant Messages.
+    - **Engine Specs:** Local Provider (`Llama.cpp`), Active GGUF Model Name.
+    - **Context Utilization:** Total Tokens, Context Window Limit, Usage Percentage with dynamic gradient progress meter.
+    - **Granular Token Distribution:** Input (Prompt) Tokens, Output (Completion) Tokens, and Reasoning Tokens (extracted from `<think>` thinking streams).
+    - **Performance & Speed Metrics:** Average Generation Speed (`Avg Speed (T/s)` computed across session outputs and reasoning tokens) and Total Generation Time.
+    - **KV Cache Telemetry:** Slot Prompt Cache Tokens (`read / write`), Total Cost (`$0.00 / Local Engine`), Session Created & Last Activity timestamps.
+    - **Direct Actions:** Instant in-modal **Flush KV Cache** button and 1-click **Copy Stats** summary to clipboard.
   - **Embedded Default Llama Web UI (`tab-llama-web`):** Run and interact with llama.cpp's built-in web client directly inside the desktop application with zero external browser tabs required.
   - **Integrated Web Controls:** Header toolbar with active port/URL display, 1-click clipboard URL copying, iframe reload, quick-jump to Studio Chat, and direct "Open in Browser" button.
   - **Smart Offline Detection & 1-Click Launch:** Automatically detects when the server is offline and displays an interactive overlay with a 1-click "Start LLM Server" button.
+  - **Multi-Slot KV Cache Flush Engine:** Iterates across all allocated slots (`GET /slots` -> `POST /slots/{id}?action=erase` & `/slots/0?action=erase`) for bulletproof cache clearing with zero 404 errors, with graceful offline detection.
 - **Proxy Slash Commands:** The backend proxy features an internal interception engine that allows you to type slash commands directly into your chat window (or external clients like Cline/Hermes) for instant control:
   - `/imagine <prompt> | <negative>`: Directly dispatches your exact positive and negative prompts to SwarmUI for GPU rendering without any LLM alteration. If negative is omitted, a robust default negative prompt is used.
   - `/draw <prompt> | <negative>`: Auto-ejects the LLM, fires up SwarmUI to generate an image natively on the GPU, pipes it back into the chat, and wakes the LLM. The LLM enhances your positive prompt but takes your negative prompt exactly as-is. (Auto-generates negative tags if omitted).
@@ -159,9 +173,16 @@ The **Llama Server Control Native Engine** is engineered in **C# / .NET 10** wit
     - **STEPS** and **CFG SCALE** badges.
   - **Interactive Fullscreen Zoom & Pan:** View high-res images in Fullscreen mode with mouse wheel zoom (1x–7x), smooth drag-to-pan navigation, double-click reset, and a prominent floating top-right "Exit Fullscreen" button.
 - **Conversational Chat & Productivity Controls:**
+  - **Multiple Chat Conversations & History Drawer:** Sleek, collapsible left sidebar drawer displaying all past conversations with real-time title search, "+ New Chat" action, inline topic renaming, conversation deletion, and 1-click Export to Markdown (`.md`) or JSON (`.json`). Persisted efficiently to `chats.json` with synchronous fallback cache.
+  - **Permanent Drawer Toggle & Re-Open Button:** An always-accessible header button (`Chats`) and drawer collapse button allow seamless opening and collapsing of saved chats at any time without ever getting stuck.
+  - **Robust Vanilla CSS Split-Layout:** Fully independent layout rules for `#chat-main-area`, `#chat-top-bar`, `#chat-messages`, and `#chat-input-bar`, guaranteeing zero layout collisions, reliable scroll streams, and persistent visibility across offline and local environments.
+  - **In-Chat Model Quick-Switcher:** Compact dropdown directly in the Studio Chat header bar displaying discovered local GGUF models. Selecting a new model hot-swaps the active engine in the background without clearing your active conversation.
+  - **Message Version Branching (`< 1/3 >`):** Fully preserves prior versions when editing a prompt or regenerating an assistant answer. Displays interactive pagination buttons (`< 1/2 >`) on message cards, allowing you to freely explore alternative response trees without losing earlier turns.
   - **Live Stop Generation Button:** Instant abort of streaming LLM responses via both the transformed send button (red stop square icon) and a floating action pill.
-  - **Inline User Message Editing:** Edit prior user prompts in-place with "Save & Submit" and "Cancel", dynamically truncating subsequent messages and automatically re-streaming fresh responses.
-  - **1-Click Assistant Regeneration:** Re-roll responses from any assistant turn directly using the message action toolbar.
+  - **Inline User Message Editing:** Edit prior user prompts in-place with "Save & Submit" and "Cancel", dynamically storing branch history and automatically re-streaming fresh responses.
+  - **1-Click Assistant Regeneration:** Re-roll responses from any assistant turn directly using the message action toolbar with version branching.
+  - **Live Reasoning Stream & Auto-Collapsing Accordion (`💡 Reasoning`):** Real-time streaming extraction of reasoning tokens (`reasoning_content` / `<think>`) into an interactive disclosure box. Displays live `💡 Thinking...` in an open view while generating thoughts, then automatically collapses when thinking completes to showcase the answer cleanly. Users can click to expand or collapse the reasoning at any time with animated 180° chevron transitions.
+  - **Seamless Clipboard Paste & Drag-and-Drop Image Attachments:** Instant image attachment for vision models by pressing `Ctrl+V`, right-clicking `Paste` from the context menu, or dragging & dropping image files directly onto the chat workspace, complete with thumbnail previews and 1-click removal.
   - **Message Clipboard Copy:** 1-click clipboard export on all chat cards.
 - **Multi-Source Live Logs Terminal:**
   - **Categorized Source Tabs & Live Counters:** Filter real-time terminal streams seamlessly by **Show All**, **Llama** (llama.cpp engine), **SwarmUI** (diffusion pipeline), and **Other** (reverse proxy, auto-sleep, and system actions) with dynamic counter badges.

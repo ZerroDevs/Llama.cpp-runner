@@ -21,7 +21,8 @@ export async function loadPartials() {
   const modals = [
     'image-inspector',
     'cmd-palette',
-    'quick-model'
+    'quick-model',
+    'session-stats'
   ];
 
   const main = document.getElementById('main-content');

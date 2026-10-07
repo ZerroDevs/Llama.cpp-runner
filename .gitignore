@@ -18,6 +18,7 @@ build/LlamaServerControl/*
 # Application Data & Configs
 config.json
 censored.json
+chats.json
 exitcodes.json
 
 # Logs

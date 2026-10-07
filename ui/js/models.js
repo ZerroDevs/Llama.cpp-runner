@@ -6,6 +6,7 @@ import { api } from './api.js';
 import { state } from './state.js';
 import { showToast } from './toast.js';
 import { updateServerUI } from './dashboard.js';
+import { populateChatModelSelector } from './chat.js';
 
 export function setupModels() {
   document.getElementById('btn-rescan-models')?.addEventListener('click', () => scanLocalModels());
@@ -68,6 +69,7 @@ export async function scanLocalModels(folderPath = null) {
       populateVisionDropdown(models);
       populateDraftDropdown(models);
       renderModelsLibrary(models);
+      populateChatModelSelector();
     }
   } catch (err) {
     console.error('Model scan error:', err);

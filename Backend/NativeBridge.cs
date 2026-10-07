@@ -120,6 +120,10 @@ namespace LlamaServerControl.Backend
                         result = await _process.FlushKvCacheAsync(_config.GetConfig());
                         break;
 
+                    case "get_slot_telemetry":
+                        result = await _process.GetSlotTelemetryAsync(_config.GetConfig());
+                        break;
+
                     case "get_hardware_data":
                         result = _hardware.GetHardwareData();
                         break;
@@ -244,6 +248,26 @@ namespace LlamaServerControl.Backend
                         {
                             result = new { status = "error", message = "Invalid URL" };
                         }
+                        break;
+
+                    case "load_chats":
+                        string chatsPath = Path.Combine(Path.GetDirectoryName(_config.ConfigPath) ?? AppDomain.CurrentDomain.BaseDirectory, "chats.json");
+                        if (File.Exists(chatsPath))
+                        {
+                            string chatsJson = await File.ReadAllTextAsync(chatsPath);
+                            result = new { status = "success", data = chatsJson };
+                        }
+                        else
+                        {
+                            result = new { status = "success", data = "[]" };
+                        }
+                        break;
+
+                    case "save_chats":
+                        string saveChatsTarget = Path.Combine(Path.GetDirectoryName(_config.ConfigPath) ?? AppDomain.CurrentDomain.BaseDirectory, "chats.json");
+                        string saveContent = args.ValueKind == JsonValueKind.String ? args.GetString() ?? "[]" : args.GetRawText();
+                        await File.WriteAllTextAsync(saveChatsTarget, saveContent);
+                        result = new { status = "success" };
                         break;
 
                     case "search_hub":

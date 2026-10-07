@@ -34,6 +34,7 @@ export function closeAllModals() {
   document.getElementById('modal-image-inspector')?.classList.add('hidden');
   document.getElementById('modal-cmd-palette')?.classList.add('hidden');
   document.getElementById('modal-quick-model')?.classList.add('hidden');
+  document.getElementById('modal-session-stats')?.classList.add('hidden');
 }
 
 // ==========================================

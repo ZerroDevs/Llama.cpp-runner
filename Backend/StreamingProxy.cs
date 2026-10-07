@@ -130,6 +130,9 @@ namespace LlamaServerControl.Backend
                     app.MapGet("/local_image", HandleLocalImage);
                     app.MapGet("/generated_cache/{fileName}", HandleGeneratedCache);
                     app.MapPost("/slots", HandleSlots);
+                    app.MapPost("/slots/{id}", HandleSlots);
+                    app.MapGet("/slots", ForwardUpstream);
+                    app.MapGet("/slots/{id}", ForwardUpstream);
                     app.MapPost("/v1/chat/completions", ctx => HandleChatCompletions(ctx, false));
                     app.MapPost("/completion", ctx => HandleChatCompletions(ctx, true));
 
@@ -268,12 +271,12 @@ namespace LlamaServerControl.Backend
 
         private async Task HandleSlots(HttpContext context)
         {
-            if (context.Request.Query["action"] == "erase")
+            if (context.Request.Query["action"] == "erase" || context.Request.Query.ContainsKey("erase"))
             {
                 var cfg = _configManager.GetConfig();
-                await _processManager.FlushKvCacheAsync(cfg);
+                var flushRes = await _processManager.FlushKvCacheAsync(cfg);
                 context.Response.ContentType = "application/json";
-                await context.Response.WriteAsync("{\"status\":\"success\"}");
+                await context.Response.WriteAsync(JsonSerializer.Serialize(flushRes));
                 return;
             }
             await ForwardUpstream(context);
