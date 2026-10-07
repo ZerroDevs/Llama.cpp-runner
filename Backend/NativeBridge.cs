@@ -156,7 +156,18 @@ namespace LlamaServerControl.Backend
                         break;
 
                     case "agent_set_workspace":
-                        string wsPath = args.ValueKind == JsonValueKind.String ? args.GetString() ?? "" : "";
+                        string wsPath = "";
+                        if (args.ValueKind == JsonValueKind.String)
+                        {
+                            wsPath = args.GetString() ?? "";
+                        }
+                        else if (args.ValueKind == JsonValueKind.Object)
+                        {
+                            if (args.TryGetProperty("path", out var pProp) || args.TryGetProperty("workspace_path", out pProp))
+                            {
+                                wsPath = pProp.GetString() ?? "";
+                            }
+                        }
                         result = _agentWorkspace.SetWorkspace(wsPath);
                         break;
 

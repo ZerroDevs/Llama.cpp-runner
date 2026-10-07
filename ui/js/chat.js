@@ -26,7 +26,9 @@ import {
   executeAgentTool, 
   buildToolCardHtml, 
   renderToolCardsInText, 
-  selectWorkspaceFolder 
+  selectWorkspaceFolder,
+  syncAgentModeForActiveSession,
+  registerAgentSessionCallback
 } from './agent.js';
 
 export function setupChat() {
@@ -39,6 +41,12 @@ export function setupChat() {
       });
     } catch {}
   }
+
+  // Register Agent Mode session updates
+  registerAgentSessionCallback(() => {
+    saveCurrentChatSession();
+    renderChatSessionsList();
+  });
 
   // 1. Presets / Personas
   document.querySelectorAll('.chat-preset-btn').forEach(btn => {
@@ -345,6 +353,45 @@ export function setupChat() {
   document.getElementById('btn-chat-input-snippets')?.addEventListener('click', () => {
     openPromptLibraryModal();
   });
+
+  // 13. Smart Auto-Scroll Observer & Scroll-To-Bottom Floating Button
+  const chatMessagesEl = document.getElementById('chat-messages');
+  if (chatMessagesEl) {
+    const SCROLL_THRESHOLD = 80;
+
+    const evaluateScrollPosition = () => {
+      const distFromBottom = chatMessagesEl.scrollHeight - chatMessagesEl.scrollTop - chatMessagesEl.clientHeight;
+      if (distFromBottom > SCROLL_THRESHOLD) {
+        if (!isUserScrolledUp) {
+          isUserScrolledUp = true;
+          updateScrollBottomButtonVisibility();
+        }
+      } else {
+        if (isUserScrolledUp) {
+          isUserScrolledUp = false;
+          updateScrollBottomButtonVisibility();
+        }
+      }
+    };
+
+    chatMessagesEl.addEventListener('scroll', evaluateScrollPosition, { passive: true });
+
+    chatMessagesEl.addEventListener('wheel', (e) => {
+      if (e.deltaY < 0) {
+        // User actively scrolled up with wheel
+        isUserScrolledUp = true;
+        updateScrollBottomButtonVisibility();
+      } else if (e.deltaY > 0) {
+        requestAnimationFrame(evaluateScrollPosition);
+      }
+    }, { passive: true });
+
+    chatMessagesEl.addEventListener('touchmove', evaluateScrollPosition, { passive: true });
+  }
+
+  document.getElementById('btn-floating-scroll-bottom')?.addEventListener('click', () => {
+    scrollChatToBottom(true);
+  });
 }
 
 // ==========================================
@@ -378,9 +425,22 @@ export async function loadChatSessions() {
     }];
   }
 
+  loaded = loaded.filter(s => s && typeof s === 'object').map((s, idx) => ({
+    id: s.id || ('session_' + (Date.now() - idx * 1000)),
+    title: s.title || (s.messages && s.messages.length ? 'Previous Chat' : 'New Conversation'),
+    createdAt: s.createdAt || Date.now(),
+    updatedAt: s.updatedAt || Date.now(),
+    isAgentMode: s.isAgentMode === true,
+    agentWorkspace: s.agentWorkspace || null,
+    messages: Array.isArray(s.messages) ? s.messages : []
+  }));
+
   state.chatSessions = loaded;
   state.activeSessionId = loaded[0].id;
   state.chatMessages = loaded[0].messages || [];
+
+  // Restore Agent Mode & project workspace configured specifically for this chat
+  syncAgentModeForActiveSession(loaded[0]);
 
   renderChatSessionsList();
   renderAllMessages();
@@ -395,6 +455,8 @@ export function saveCurrentChatSession() {
   if (current) {
     current.messages = state.chatMessages;
     current.updatedAt = Date.now();
+    current.isAgentMode = state.isAgentMode === true;
+    current.agentWorkspace = state.activeWorkspace || null;
   }
 
   // Create lightweight sanitized copy for disk persistence (strip bulky base64 dataUrl)
@@ -443,6 +505,8 @@ export function createNewChatSession() {
     title: 'New Conversation',
     createdAt: Date.now(),
     updatedAt: Date.now(),
+    isAgentMode: false,
+    agentWorkspace: null,
     messages: []
   };
 
@@ -462,6 +526,9 @@ export function switchChatSession(sessionId) {
 
   state.activeSessionId = sessionId;
   state.chatMessages = target.messages || [];
+
+  // Restore Agent Mode & project workspace configured specifically for this chat
+  syncAgentModeForActiveSession(target);
 
   renderChatSessionsList();
   renderAllMessages();
@@ -563,11 +630,18 @@ export function renderChatSessionsList(filterText = '') {
 
   container.innerHTML = sessions.map(s => {
     const isActive = s.id === state.activeSessionId;
+    const isAgent = s.isAgentMode === true;
     return `
       <div class="chat-session-item ${isActive ? 'active' : ''} group" data-session-id="${s.id}">
         <div class="flex items-center gap-2 min-w-0 flex-1">
-          <i data-lucide="message-square" class="w-3.5 h-3.5 shrink-0 ${isActive ? 'text-[var(--brand)]' : 'text-[var(--text-muted)]'}"></i>
+          <i data-lucide="${isAgent ? 'bot' : 'message-square'}" class="w-3.5 h-3.5 shrink-0 ${isAgent ? 'text-cyan-400' : (isActive ? 'text-[var(--brand)]' : 'text-[var(--text-muted)]')}"></i>
           <span class="session-title truncate text-xs flex-1">${escapeHtml(s.title || 'Untitled Chat')}</span>
+          ${isAgent ? `
+            <span class="chat-agent-badge inline-flex items-center gap-1 px-1.5 py-0.5 text-[9px] font-semibold rounded bg-cyan-500/15 text-cyan-400 border border-cyan-500/30 shrink-0 select-none" title="Autonomous Coding Agent Active">
+              <i data-lucide="bot" class="w-2.5 h-2.5"></i>
+              <span>Agent</span>
+            </span>
+          ` : ''}
         </div>
         <div class="chat-session-actions">
           <button class="chat-session-action-btn edit-title-btn" title="Rename" data-session-id="${s.id}">
@@ -581,7 +655,9 @@ export function renderChatSessionsList(filterText = '') {
     `;
   }).join('');
 
-  if (window.lucide) window.lucide.createIcons({ root: container });
+  try {
+    if (window.lucide) window.lucide.createIcons({ root: container });
+  } catch {}
 
   // Attach session selection listener
   container.querySelectorAll('.chat-session-item').forEach(item => {
@@ -701,7 +777,26 @@ export function restoreChatSidebarState() {
   } catch {}
 }
 
+let isUserScrolledUp = false;
+
+export function updateScrollBottomButtonVisibility() {
+  const container = document.getElementById('chat-scroll-bottom-container');
+  if (!container) return;
+
+  if (isUserScrolledUp) {
+    container.classList.remove('hidden');
+    if (window.lucide) {
+      try { window.lucide.createIcons({ root: container }); } catch {}
+    }
+  } else {
+    container.classList.add('hidden');
+  }
+}
+
 export function scrollChatToBottom(smooth = false) {
+  isUserScrolledUp = false;
+  updateScrollBottomButtonVisibility();
+
   const container = document.getElementById('chat-messages');
   if (!container) return;
 
@@ -1216,6 +1311,8 @@ async function triggerChatStream(existingAssistantMsg = null) {
   // Add Empty Assistant Message Container
   const assistantIdx = state.chatMessages.length;
   const assistantBubble = appendMessage('assistant', '', [], assistantIdx);
+  isUserScrolledUp = false;
+  updateScrollBottomButtonVisibility();
   container.scrollTop = container.scrollHeight;
 
   // Build Payload from current active conversation thread
@@ -1535,13 +1632,19 @@ async function triggerChatStream(existingAssistantMsg = null) {
             const res = await executeAgentTool(call.name, call.arguments);
             turnObservations.push({ call, res });
 
-            // Attach <tool_result> right after the corresponding <tool_call>
+            // Attach <tool_result> right after the corresponding tool call
             const escapedName = String(call.name).replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-            const pattern = new RegExp(`(<tool_call>[\\s\\S]*?"name"\\s*:\\s*"${escapedName}"[\\s\\S]*?<\\/tool_call>)(?!\\s*<tool_result>)`, 'i');
-            if (pattern.test(modifiedTurn)) {
-              modifiedTurn = modifiedTurn.replace(pattern, `$1\n<tool_result>${JSON.stringify(res)}</tool_result>`);
+            const tagPattern = new RegExp(`(<tool_call>[\\s\\S]*?"(?:name|tool)"\\s*:\\s*"${escapedName}"[\\s\\S]*?<\\/tool_call>)(?!\\s*<tool_result>)`, 'i');
+            if (tagPattern.test(modifiedTurn)) {
+              modifiedTurn = modifiedTurn.replace(tagPattern, `$1\n<tool_result>${JSON.stringify(res)}</tool_result>`);
             } else {
-              modifiedTurn += `\n<tool_result>${JSON.stringify(res)}</tool_result>`;
+              // Also check if raw JSON call is present in text without tags
+              const rawPattern = new RegExp(`(\\{[\\s\\S]*?"(?:name|tool)"\\s*:\\s*"${escapedName}"[\\s\\S]*?\\})(?!\\s*<tool_result>)`, 'i');
+              if (rawPattern.test(modifiedTurn)) {
+                modifiedTurn = modifiedTurn.replace(rawPattern, `<tool_call>$1</tool_call>\n<tool_result>${JSON.stringify(res)}</tool_result>`);
+              } else {
+                modifiedTurn += `\n<tool_result>${JSON.stringify(res)}</tool_result>`;
+              }
             }
 
             // Immediately update assistant bubble to show completed tool card
@@ -1555,9 +1658,32 @@ async function triggerChatStream(existingAssistantMsg = null) {
 
           cumulativeResponse += (cumulativeResponse ? '\n\n' : '') + modifiedTurn;
 
-          // Prepare observation payload for the next turn
+          // Prepare clean system notification observation payload for the next turn
           const obsPrompt = turnObservations.map(o => {
-            return `<tool_result>\nTool: ${o.call.name}\nArgs: ${JSON.stringify(o.call.arguments)}\nStatus: ${o.res?.status}\nOutput: ${JSON.stringify(o.res)}\n</tool_result>`;
+            const r = o.res || {};
+            let actionSummary = '';
+            if (r.status === 'success') {
+              if (o.call.name === 'write_file') {
+                actionSummary = `Successfully wrote ${r.lines || 0} lines (${r.size_kb || 0} KB) to "${o.call.arguments?.path}".`;
+              } else if (o.call.name === 'edit_file') {
+                actionSummary = `Successfully edited "${o.call.arguments?.path}" (${r.lines_delta || 0} lines delta).`;
+              } else if (o.call.name === 'read_file') {
+                actionSummary = `Read ${r.lines || 0} lines from "${o.call.arguments?.path}". Content:\n\`\`\`\n${r.content || ''}\n\`\`\``;
+              } else if (o.call.name === 'run_command') {
+                actionSummary = `Command executed with exit code ${r.exit_code}. Output:\n${r.stdout || '(none)'}${r.stderr ? '\nStderr:\n' + r.stderr : ''}`;
+              } else if (o.call.name === 'create_directory') {
+                actionSummary = `Created directory "${o.call.arguments?.path}".`;
+              } else if (o.call.name === 'delete_file') {
+                actionSummary = `Deleted "${o.call.arguments?.path}".`;
+              } else if (o.call.name === 'list_directory') {
+                actionSummary = `Listed ${(r.entries || []).length} items in "${o.call.arguments?.path || '.'}".`;
+              } else {
+                actionSummary = `Action completed successfully.`;
+              }
+            } else {
+              actionSummary = `Action failed: ${r.message || 'Unknown error'}`;
+            }
+            return `[System Notice: Tool "${o.call.name}" executed for "${o.call.arguments?.path || o.call.arguments?.command || ''}"]\nStatus: ${r.status}\n${actionSummary}`;
           }).join('\n\n');
 
           currentPayload.push({ role: 'assistant', content: turnText });
@@ -1694,8 +1820,8 @@ function updateAssistantMessage(msgDiv, markdownText, isComplete = false, msgInd
     });
   }
 
-  // Render icons inside tool execution cards & status boxes
-  if (window.lucide && (isComplete || markdownText.includes('agent-tool-card') || markdownText.includes('group-status'))) {
+  // Render icons inside tool execution cards, agent actions, and status boxes
+  if (window.lucide && (isComplete || bubble.querySelector('[data-lucide]'))) {
     try { window.lucide.createIcons({ root: bubble }); } catch {}
   }
 
@@ -1704,7 +1830,9 @@ function updateAssistantMessage(msgDiv, markdownText, isComplete = false, msgInd
   }
 
   const container = document.getElementById('chat-messages');
-  if (container) container.scrollTop = container.scrollHeight;
+  if (container && !isUserScrolledUp) {
+    container.scrollTop = container.scrollHeight;
+  }
 }
 
 /**
@@ -1847,42 +1975,67 @@ export function renderMarkdownWithThinking(text) {
   // Transform Agent Mode tool calls & results into interactive cards
   raw = renderToolCardsInText(raw);
 
-  // 1. Parse completed <status> ... </status> tags (Engine Lifecycle & Auto-Wake) - Collapsed by default when finished
-  let processed = raw.replace(/<status>([\s\S]*?)<\/status>/gi, (match, p1) => {
-    return `<details class="group-status mb-3 bg-[var(--bg-elevated)] border border-[var(--border)] rounded-xl p-3"><summary class="flex items-center justify-between cursor-pointer select-none text-xs font-semibold text-cyan-400 hover:text-cyan-300 transition-colors list-none"><div class="flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-cyan-400 shrink-0"></span><span>Engine Status</span></div><svg class="w-3.5 h-3.5 transition-transform duration-200 details-chevron text-[var(--text-muted)]" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"/></svg></summary><div class="text-xs text-[var(--text-secondary)] font-mono mt-2 pt-2 border-t border-[var(--border)] leading-relaxed whitespace-pre-wrap select-text">${escapeHtml(p1.trim())}</div></details>\n\n`;
+  // Isolate and protect all interactive HTML blocks (agent action cards, status, thinking)
+  // so that marked.parse never escapes tags or turns indented markup into code blocks
+  const protectedBlocks = [];
+  let blockSeq = 0;
+
+  // 1. Protect Agent Action accordion cards
+  raw = raw.replace(/<details class="group-agent-action[\s\S]*?<\/details>/gi, (match) => {
+    const token = `%%LLAMA_AGENT_ACTION_${blockSeq++}%%`;
+    protectedBlocks.push({ token, html: match });
+    return `\n\n${token}\n\n`;
   });
 
-  // 2. Handle active status (while waking or executing) - Open while active
-  if (processed.includes('<status>') && !processed.includes('</status>')) {
-    processed = processed.replace(/<status>([\s\S]*)$/gi, (match, p1) => {
-      return `<details open class="group-status mb-3 bg-[var(--bg-elevated)] border border-[var(--border)] rounded-xl p-3 is-status-active"><summary class="flex items-center justify-between cursor-pointer select-none text-xs font-semibold text-cyan-400 hover:text-cyan-300 transition-colors list-none"><div class="flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-cyan-400 animate-ping shrink-0"></span><span>Auto-Waking Engine...</span></div><svg class="w-3.5 h-3.5 transition-transform duration-200 details-chevron text-[var(--text-muted)]" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"/></svg></summary><div class="text-xs text-[var(--text-secondary)] font-mono mt-2 pt-2 border-t border-[var(--border)] leading-relaxed whitespace-pre-wrap select-text">${escapeHtml(p1.trim())}</div></details>\n\n`;
+  // 2. Protect completed <status> tags (Engine Status)
+  raw = raw.replace(/<status>([\s\S]*?)<\/status>/gi, (match, p1) => {
+    const html = `<details class="group-status mb-3 bg-[var(--bg-elevated)] border border-[var(--border)] rounded-xl p-3"><summary class="flex items-center justify-between cursor-pointer select-none text-xs font-semibold text-cyan-400 hover:text-cyan-300 transition-colors list-none"><div class="flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-cyan-400 shrink-0"></span><span>Engine Status</span></div><svg class="w-3.5 h-3.5 transition-transform duration-200 details-chevron text-[var(--text-muted)]" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"/></svg></summary><div class="text-xs text-[var(--text-secondary)] font-mono mt-2 pt-2 border-t border-[var(--border)] leading-relaxed whitespace-pre-wrap select-text">${escapeHtml(p1.trim())}</div></details>`;
+    const token = `%%LLAMA_STATUS_CARD_${blockSeq++}%%`;
+    protectedBlocks.push({ token, html });
+    return `\n\n${token}\n\n`;
+  });
+
+  // 3. Protect active status while waking or executing
+  if (raw.includes('<status>') && !raw.includes('</status>')) {
+    raw = raw.replace(/<status>([\s\S]*)$/gi, (match, p1) => {
+      const html = `<details open class="group-status mb-3 bg-[var(--bg-elevated)] border border-[var(--border)] rounded-xl p-3 is-status-active"><summary class="flex items-center justify-between cursor-pointer select-none text-xs font-semibold text-cyan-400 hover:text-cyan-300 transition-colors list-none"><div class="flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-cyan-400 animate-ping shrink-0"></span><span>Auto-Waking Engine...</span></div><svg class="w-3.5 h-3.5 transition-transform duration-200 details-chevron text-[var(--text-muted)]" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"/></svg></summary><div class="text-xs text-[var(--text-secondary)] font-mono mt-2 pt-2 border-t border-[var(--border)] leading-relaxed whitespace-pre-wrap select-text">${escapeHtml(p1.trim())}</div></details>`;
+      const token = `%%LLAMA_ACTIVE_STATUS_${blockSeq++}%%`;
+      protectedBlocks.push({ token, html });
+      return `\n\n${token}\n\n`;
     });
   }
 
-  // 3. Parse completed <think> ... </think> tags - Auto-closes once thinking finishes, user can click to open anytime
-  processed = processed.replace(/<think(?:\s+(?:time|duration)="([^"]+)")?>([\s\S]*?)<\/think>/gi, (match, durationAttr, p1) => {
+  // 4. Protect completed <think> tags (Thinking Process)
+  raw = raw.replace(/<think(?:\s+(?:time|duration)="([^"]+)")?>([\s\S]*?)<\/think>/gi, (match, durationAttr, p1) => {
     const thinkingText = p1.trim();
     if (!thinkingText) return '';
 
     let timeText = durationAttr;
     if (!timeText) {
-      // Fallback estimate based on characters/tokens for legacy messages
       const estTokens = Math.max(1, Math.ceil(thinkingText.length / 3.7));
       const estSec = Math.max(0.5, (estTokens / 28)).toFixed(1);
       timeText = `${estSec}s`;
     }
 
-    return `<details class="group-think mb-3 bg-[var(--bg-elevated)] border border-[var(--border)] rounded-xl p-3"><summary class="flex items-center justify-between cursor-pointer select-none text-xs font-semibold text-emerald-400 hover:text-emerald-300 transition-colors list-none"><div class="flex items-center gap-2"><span>💡</span><span class="think-label font-medium text-emerald-300/90">Thought for <span class="font-mono text-emerald-400 font-semibold">${escapeHtml(timeText)}</span></span></div><svg class="w-3.5 h-3.5 transition-transform duration-200 details-chevron text-[var(--text-muted)]" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"/></svg></summary><div class="think-content text-xs text-[var(--text-secondary)] mt-2 pt-2 border-t border-[var(--border)] leading-relaxed whitespace-pre-wrap select-text">${escapeHtml(thinkingText)}</div></details>\n\n`;
+    const html = `<details class="group-think mb-3 bg-[var(--bg-elevated)] border border-[var(--border)] rounded-xl p-3"><summary class="flex items-center justify-between cursor-pointer select-none text-xs font-semibold text-emerald-400 hover:text-emerald-300 transition-colors list-none"><div class="flex items-center gap-2"><span>💡</span><span class="think-label font-medium text-emerald-300/90">Thought for <span class="font-mono text-emerald-400 font-semibold">${escapeHtml(timeText)}</span></span></div><svg class="w-3.5 h-3.5 transition-transform duration-200 details-chevron text-[var(--text-muted)]" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"/></svg></summary><div class="think-content text-xs text-[var(--text-secondary)] mt-2 pt-2 border-t border-[var(--border)] leading-relaxed whitespace-pre-wrap select-text">${escapeHtml(thinkingText)}</div></details>`;
+    const token = `%%LLAMA_THINK_CARD_${blockSeq++}%%`;
+    protectedBlocks.push({ token, html });
+    return `\n\n${token}\n\n`;
   });
 
-  // 4. Handle active thinking (while unclosed) - Open while actively thinking so user sees thoughts in real time
-  if (processed.includes('<think') && !processed.includes('</think>')) {
-    processed = processed.replace(/<think(?:\s+(?:time|duration)="([^"]+)")?>([\s\S]*)$/gi, (match, durationAttr, p1) => {
+  // 5. Protect active thinking while unclosed
+  if (raw.includes('<think') && !raw.includes('</think>')) {
+    raw = raw.replace(/<think(?:\s+(?:time|duration)="([^"]+)")?>([\s\S]*)$/gi, (match, durationAttr, p1) => {
       const thinkingText = p1.trim();
       const timeText = durationAttr || '1s';
-      return `<details open class="group-think mb-3 bg-[var(--bg-elevated)] border border-[var(--border)] rounded-xl p-3 is-thinking"><summary class="flex items-center justify-between cursor-pointer select-none text-xs font-semibold text-emerald-400 hover:text-emerald-300 transition-colors list-none"><div class="flex items-center gap-2"><span>💡</span><span class="think-label font-medium"><span class="think-counter">Thinking for ${escapeHtml(timeText)}...</span></span><span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span></div><svg class="w-3.5 h-3.5 transition-transform duration-200 details-chevron text-[var(--text-muted)]" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"/></svg></summary><div class="think-content text-xs text-[var(--text-secondary)] mt-2 pt-2 border-t border-[var(--border)] leading-relaxed whitespace-pre-wrap select-text">${escapeHtml(thinkingText)}</div></details>\n\n`;
+      const html = `<details open class="group-think mb-3 bg-[var(--bg-elevated)] border border-[var(--border)] rounded-xl p-3 is-thinking"><summary class="flex items-center justify-between cursor-pointer select-none text-xs font-semibold text-emerald-400 hover:text-emerald-300 transition-colors list-none"><div class="flex items-center gap-2"><span>💡</span><span class="think-label font-medium"><span class="think-counter">Thinking for ${escapeHtml(timeText)}...</span></span><span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span></div><svg class="w-3.5 h-3.5 transition-transform duration-200 details-chevron text-[var(--text-muted)]" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"/></svg></summary><div class="think-content text-xs text-[var(--text-secondary)] mt-2 pt-2 border-t border-[var(--border)] leading-relaxed whitespace-pre-wrap select-text">${escapeHtml(thinkingText)}</div></details>`;
+      const token = `%%LLAMA_ACTIVE_THINK_${blockSeq++}%%`;
+      protectedBlocks.push({ token, html });
+      return `\n\n${token}\n\n`;
     });
   }
+
+  let processed = raw;
 
   if (window.marked) {
     // Sanitize and structure table blocks so marked reliably enters table parsing mode
@@ -1901,9 +2054,22 @@ export function renderMarkdownWithThinking(text) {
     // Unpack any accidental wrapping of table-containers inside <p>
     html = html.replace(/<p>\s*(<div class="table-container[\s\S]*?<\/div>)\s*<\/p>/gi, '$1');
 
+    // Restore all protected interactive blocks cleanly into place
+    for (const item of protectedBlocks) {
+      const pWrapRegex = new RegExp(`<p>\\s*${item.token}\\s*<\\/p>`, 'g');
+      html = html.replace(pWrapRegex, item.html);
+      html = html.replaceAll(item.token, item.html);
+    }
+
     return html;
   }
-  return escapeHtml(processed);
+
+  // Fallback if marked is unavailable
+  let fallback = escapeHtml(processed);
+  for (const item of protectedBlocks) {
+    fallback = fallback.replaceAll(item.token, item.html);
+  }
+  return fallback;
 }
 
 function attachAssistantToolbar(msgWrapper, msgIdx) {
