@@ -300,6 +300,13 @@ AVAILABLE TOOLS:
    {"name": "fetch_web", "arguments": {"url": "https://raw.githubusercontent.com/.../README.md"}}
    </tool_call>
 
+9. screenshot_web: Capture a high-resolution screenshot image of any public website or webpage.
+   Use whenever the user asks to see a screenshot or visual view of a website.
+   Syntax:
+   <tool_call>
+   {"name": "screenshot_web", "arguments": {"url": "https://example.com"}}
+   </tool_call>
+
 EXECUTION RULES:
 - When the user asks to edit, add, or create something, plan concisely and immediately execute the tool calls.
 - When editing or adding features to code, output write_file with the updated code.
@@ -354,16 +361,16 @@ export function safeParseJson(raw) {
     return JSON.parse(out);
   } catch {}
 
-  // 2. Aggressive regex-based fallback for write_file / edit_file / fetch_web
+  // 2. Aggressive regex-based fallback for write_file / edit_file / fetch_web / screenshot_web
   try {
     const nameMatch = /"(?:name|tool)"\s*:\s*"([^"]+)"/i.exec(trimmed);
     const pathMatch = /"path"\s*:\s*"([^"]+)"/i.exec(trimmed);
     const urlMatch = /"url"\s*:\s*"([^"]+)"/i.exec(trimmed);
     if (nameMatch) {
       const toolName = nameMatch[1].toLowerCase();
-      if (toolName === 'fetch_web' && urlMatch) {
+      if ((toolName === 'fetch_web' || toolName === 'screenshot_web') && urlMatch) {
         return {
-          name: 'fetch_web',
+          name: toolName,
           arguments: { url: urlMatch[1] }
         };
       }
@@ -441,7 +448,7 @@ export function extractBalancedJson(text, startIndex) {
 export function extractRawToolCalls(text) {
   if (!text) return [];
   const calls = [];
-  const toolNames = ['write_file', 'edit_file', 'read_file', 'run_command', 'create_directory', 'delete_file', 'list_directory', 'fetch_web'];
+  const toolNames = ['write_file', 'edit_file', 'read_file', 'run_command', 'create_directory', 'delete_file', 'list_directory', 'fetch_web', 'screenshot_web'];
 
   let i = 0;
   while (i < text.length) {
@@ -449,7 +456,7 @@ export function extractRawToolCalls(text) {
     if (nextBrace === -1) break;
 
     const snippet = text.slice(nextBrace, nextBrace + 120);
-    const hasToolKeyword = /"(?:name|tool)"\s*:\s*"(?:write_file|edit_file|read_file|run_command|create_directory|delete_file|list_directory|fetch_web)"/i.test(snippet);
+    const hasToolKeyword = /"(?:name|tool)"\s*:\s*"(?:write_file|edit_file|read_file|run_command|create_directory|delete_file|list_directory|fetch_web|screenshot_web)"/i.test(snippet);
 
     if (!hasToolKeyword) {
       i = nextBrace + 1;
@@ -561,6 +568,8 @@ export function getToolIconName(toolName) {
       return 'folder-tree';
     case 'fetch_web':
       return 'globe';
+    case 'screenshot_web':
+      return 'camera';
     default:
       return 'wrench';
   }
@@ -617,6 +626,9 @@ export function buildToolCardHtml(toolName, args, result) {
       const chars = result.chars ?? (result.content ? result.content.length : 0);
       const statusHttp = result.http_status ?? 200;
       metricsBadge = `<span class="px-1.5 py-0.5 rounded text-[10px] font-mono bg-cyan-500/10 text-cyan-300 border border-cyan-500/20">HTTP ${statusHttp} • ${chars} chars</span>`;
+    } else if (toolName === 'screenshot_web') {
+      const sizeKb = result.size_kb ?? (result.size_bytes ? (result.size_bytes / 1024).toFixed(1) : 0);
+      metricsBadge = `<span class="px-1.5 py-0.5 rounded text-[10px] font-mono bg-cyan-500/10 text-cyan-300 border border-cyan-500/20">PNG • ${sizeKb} KB</span>`;
     }
   }
 
@@ -653,6 +665,11 @@ export function buildToolCardHtml(toolName, args, result) {
     const title = result?.title || '';
     const chars = result?.chars || (result?.content ? result.content.length : 0);
     bodyHtml = `<div class="space-y-1.5"><div class="text-[11px] text-[var(--text-muted)] flex items-center justify-between"><span>Source: <a href="${escapeHtml(url)}" target="_blank" rel="noopener noreferrer" class="text-cyan-300 font-mono hover:underline break-all">${escapeHtml(url)}</a></span><span class="font-mono text-[10px] text-zinc-400 shrink-0 ml-2">${chars} chars</span></div>${title ? `<div class="text-[11px] text-zinc-300 font-semibold">${escapeHtml(title)}</div>` : ''}${result?.content ? `<pre class="bg-black/50 border border-white/5 rounded-lg p-2.5 text-[11px] text-zinc-300 font-mono overflow-x-auto max-h-56 whitespace-pre leading-relaxed select-text"><code>${escapeHtml(result.content)}</code></pre>` : '<div class="text-xs text-emerald-400">Content retrieved successfully.</div>'}</div>`;
+  } else if (toolName === 'screenshot_web') {
+    const url = args?.url || result?.url || '';
+    const imgUrl = result?.image_url || '';
+    const sizeKb = result?.size_kb || 0;
+    bodyHtml = `<div class="space-y-2"><div class="text-[11px] text-[var(--text-muted)] flex items-center justify-between"><span>Source: <a href="${escapeHtml(url)}" target="_blank" rel="noopener noreferrer" class="text-cyan-300 font-mono hover:underline break-all">${escapeHtml(url)}</a></span><span class="font-mono text-[10px] text-zinc-400 shrink-0 ml-2">${sizeKb} KB • 1280x800</span></div>${imgUrl ? `<div class="relative group/snap rounded-lg overflow-hidden border border-white/10 bg-black/40"><img src="${escapeHtml(imgUrl)}" alt="Screenshot of ${escapeHtml(url)}" class="w-full h-auto max-h-80 object-cover object-top cursor-pointer rounded-lg hover:opacity-95 transition-opacity" onclick="window.open('${escapeHtml(imgUrl)}', '_blank')" /><div class="absolute bottom-2 right-2 flex items-center gap-1.5 opacity-0 group-hover/snap:opacity-100 transition-opacity bg-black/80 backdrop-blur-xs px-2.5 py-1 rounded-md border border-white/10 text-[10px]"><a href="${escapeHtml(imgUrl)}" target="_blank" class="text-cyan-300 hover:text-cyan-200 flex items-center gap-1 font-mono"><i data-lucide="external-link" class="w-3 h-3"></i><span>Full Size</span></a></div></div>` : '<div class="text-xs text-emerald-400">Screenshot captured successfully.</div>'}</div>`;
   }
 
   return `<details class="group-agent-action mb-2.5 bg-[var(--bg-elevated)] border border-cyan-500/25 hover:border-cyan-500/40 rounded-xl p-3 transition-colors"${isPending ? ' open' : ''}><summary class="flex items-center justify-between cursor-pointer select-none text-xs font-semibold text-cyan-400 hover:text-cyan-300 transition-colors list-none"><div class="flex items-center gap-2 min-w-0 flex-1 mr-2"><span class="agent-action-icon flex items-center justify-center w-5 h-5 rounded-md bg-cyan-500/15 text-cyan-400 shrink-0"><i data-lucide="${iconName}" class="w-3.5 h-3.5"></i></span><span class="agent-action-name font-mono text-cyan-300 font-semibold shrink-0">${escapeHtml(toolName)}</span>${targetPath ? `<span class="agent-action-target font-mono text-[var(--text-secondary)] truncate max-w-[260px]" title="${escapeHtml(targetPath)}">${escapeHtml(targetPath)}</span>` : ''}${metricsBadge}</div><div class="flex items-center gap-2 shrink-0">${statusBadge}<svg class="w-3.5 h-3.5 transition-transform duration-200 details-chevron text-[var(--text-muted)]" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"/></svg></div></summary><div class="agent-action-body text-xs text-[var(--text-secondary)] mt-2 pt-2 border-t border-[var(--border)] leading-relaxed select-text font-mono">${bodyHtml}</div></details>`;
@@ -689,6 +706,9 @@ export function buildActionResultCardHtml(actionResult) {
   } else if (action === 'fetched_web') {
     toolName = 'fetch_web';
     iconName = 'globe';
+  } else if (action === 'screenshotted_web') {
+    toolName = 'screenshot_web';
+    iconName = 'camera';
   }
 
   const lines = actionResult.lines ?? 0;
@@ -756,9 +776,9 @@ export function renderToolCardsInText(text) {
     }
 
     const jsonStr = balanced.jsonStr;
-    const isToolCall = /"(?:name|tool)"\s*:\s*"(?:write_file|edit_file|read_file|run_command|create_directory|delete_file|list_directory|fetch_web)"/i.test(jsonStr);
-    const isActionResult = /"(?:action|status)"\s*:\s*"(?:created_or_updated|surgical_edit|fetched_web|success|error)"/i.test(jsonStr) &&
-      (jsonStr.includes('"lines"') || jsonStr.includes('"path"') || jsonStr.includes('"action"') || jsonStr.includes('"size_bytes"') || jsonStr.includes('"chars"') || jsonStr.includes('"url"'));
+    const isToolCall = /"(?:name|tool)"\s*:\s*"(?:write_file|edit_file|read_file|run_command|create_directory|delete_file|list_directory|fetch_web|screenshot_web)"/i.test(jsonStr);
+    const isActionResult = /"(?:action|status)"\s*:\s*"(?:created_or_updated|surgical_edit|fetched_web|screenshotted_web|success|error)"/i.test(jsonStr) &&
+      (jsonStr.includes('"lines"') || jsonStr.includes('"path"') || jsonStr.includes('"action"') || jsonStr.includes('"size_bytes"') || jsonStr.includes('"chars"') || jsonStr.includes('"url"') || jsonStr.includes('"image_url"') || jsonStr.includes('"image_path"'));
 
     if (isToolCall) {
       const parsedCall = safeParseJson(jsonStr);

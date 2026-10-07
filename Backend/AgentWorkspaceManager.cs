@@ -128,6 +128,11 @@ namespace LlamaServerControl.Backend
                 return await FetchWebAsync(args);
             }
 
+            if (toolName.Equals("screenshot_web", StringComparison.OrdinalIgnoreCase))
+            {
+                return await CaptureWebScreenshotAsync(args);
+            }
+
             if (string.IsNullOrEmpty(_workspaceRoot))
             {
                 return new { status = "error", message = "No workspace project folder is currently opened. Please select a folder first." };
@@ -160,6 +165,9 @@ namespace LlamaServerControl.Backend
 
                     case "fetch_web":
                         return await FetchWebAsync(args);
+
+                    case "screenshot_web":
+                        return await CaptureWebScreenshotAsync(args);
 
                     default:
                         return new { status = "error", message = $"Unknown tool: '{toolName}'" };
@@ -752,6 +760,136 @@ namespace LlamaServerControl.Backend
             clean = System.Text.RegularExpressions.Regex.Replace(clean, @"\n{3,}", "\n\n");
 
             return clean.Trim();
+        }
+
+        private async Task<object> CaptureWebScreenshotAsync(JsonElement args)
+        {
+            string url = args.TryGetProperty("url", out var u) ? u.GetString() ?? "" : "";
+            if (string.IsNullOrWhiteSpace(url))
+            {
+                return new { status = "error", message = "Missing 'url' parameter." };
+            }
+
+            if (!url.StartsWith("http://", StringComparison.OrdinalIgnoreCase) && !url.StartsWith("https://", StringComparison.OrdinalIgnoreCase))
+            {
+                url = "https://" + url;
+            }
+
+            if (!Uri.TryCreate(url, UriKind.Absolute, out var uri))
+            {
+                return new { status = "error", message = $"Invalid URL format: '{url}'" };
+            }
+
+            if (!IsSafePublicWebUrl(uri))
+            {
+                return new { status = "error", message = "Access to local or private network addresses is forbidden for security." };
+            }
+
+            string? browserExe = FindBrowserExecutable();
+            if (string.IsNullOrEmpty(browserExe))
+            {
+                return new { status = "error", message = "No compatible browser (Microsoft Edge or Google Chrome) found for headless screenshot capture." };
+            }
+
+            try
+            {
+                string baseDir = AppDomain.CurrentDomain.BaseDirectory;
+                string parentDir = Directory.GetParent(baseDir)?.Parent?.Parent?.Parent?.FullName ?? "";
+                string targetDir = !string.IsNullOrEmpty(parentDir) && Directory.Exists(Path.Combine(parentDir, "ui"))
+                    ? Path.Combine(parentDir, "ui", "generated_cache", "web_captures")
+                    : Path.Combine(baseDir, "ui", "generated_cache", "web_captures");
+
+                Directory.CreateDirectory(targetDir);
+
+                string fileName = $"snap_{DateTime.UtcNow:yyyyMMdd_HHmmss}_{Guid.NewGuid().ToString("N")[..6]}.png";
+                string fullPath = Path.Combine(targetDir, fileName);
+
+                var psi = new ProcessStartInfo
+                {
+                    FileName = browserExe,
+                    Arguments = $"--headless --disable-gpu --no-first-run --no-default-browser-check --hide-scrollbars --window-size=1280,800 --screenshot=\"{fullPath}\" \"{uri}\"",
+                    UseShellExecute = false,
+                    CreateNoWindow = true,
+                    RedirectStandardOutput = true,
+                    RedirectStandardError = true
+                };
+
+                using var proc = Process.Start(psi);
+                if (proc == null)
+                {
+                    return new { status = "error", message = "Failed to launch headless browser process." };
+                }
+
+                using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(20));
+                try
+                {
+                    await proc.WaitForExitAsync(cts.Token);
+                }
+                catch (OperationCanceledException)
+                {
+                    try { proc.Kill(true); } catch { }
+                    return new { status = "error", message = "Web screenshot capture timed out after 20 seconds." };
+                }
+
+                if (!File.Exists(fullPath))
+                {
+                    return new { status = "error", message = "Browser exited without generating screenshot output." };
+                }
+
+                var fileInfo = new FileInfo(fullPath);
+                double sizeKb = Math.Round(fileInfo.Length / 1024.0, 1);
+                string relUrl = $"generated_cache/web_captures/{fileName}";
+
+                return new
+                {
+                    status = "success",
+                    action = "screenshotted_web",
+                    url = uri.ToString(),
+                    image_path = fullPath,
+                    image_url = relUrl,
+                    file_name = fileName,
+                    size_kb = sizeKb,
+                    size_bytes = fileInfo.Length,
+                    width = 1280,
+                    height = 800
+                };
+            }
+            catch (Exception ex)
+            {
+                return new { status = "error", message = $"Screenshot error: {ex.Message}" };
+            }
+        }
+
+        private static string? FindBrowserExecutable()
+        {
+            string[] candidatePaths = new[]
+            {
+                Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ProgramFilesX86), @"Microsoft\Edge\Application\msedge.exe"),
+                Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles), @"Microsoft\Edge\Application\msedge.exe"),
+                Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), @"Microsoft\Edge\Application\msedge.exe"),
+                Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles), @"Google\Chrome\Application\chrome.exe"),
+                Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ProgramFilesX86), @"Google\Chrome\Application\chrome.exe"),
+                Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), @"Google\Chrome\Application\chrome.exe")
+            };
+
+            foreach (var path in candidatePaths)
+            {
+                if (File.Exists(path)) return path;
+            }
+            return null;
+        }
+
+        private static bool IsSafePublicWebUrl(Uri uri)
+        {
+            if (uri.Scheme != Uri.UriSchemeHttp && uri.Scheme != Uri.UriSchemeHttps) return false;
+            string host = uri.DnsSafeHost.ToLowerInvariant();
+            if (host == "localhost" || host == "127.0.0.1" || host == "0.0.0.0" || host == "::1" ||
+                host.StartsWith("192.168.") || host.StartsWith("10.") || host.StartsWith("172.16.") ||
+                host.EndsWith(".local") || host.EndsWith(".internal"))
+            {
+                return false;
+            }
+            return true;
         }
     }
 }

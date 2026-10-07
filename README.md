@@ -212,10 +212,16 @@ The **Llama Server Control Native Engine** is engineered in **C# / .NET 10** wit
       - `run_command`: Monospace terminal card displaying `$ <command>`, captured `stdout`, `stderr`, exit code, and execution duration in ms.
       - `list_directory`, `create_directory`, `delete_file`: Folder tree and file manipulation badges.
       - `fetch_web`: Sandboxed HTTP GET tool allowing the agent to fetch online docs, npm READMEs, and API specifications.
+      - `screenshot_web`: Zero-dependency headless browser screenshot tool capturing full website images.
     - **Real-Time Docs Fetcher (`fetch_web` Tool):**
       - Allows the coding agent to query external URLs in real time when implementing solutions for modern or unfamiliar frameworks.
       - **SSRF Loopback Defense:** Blocks requests targeting localhost (`127.0.0.1`, `::1`), internal subnets (`192.168.*`, `10.*`, `172.16.*`), and local port endpoints (`8080`, `7801`).
       - **Clean HTML-to-Markdown Scraper:** Automatically strips scripts, stylesheets, and HTML tags, delivering concise markdown text capped at 16,000 characters to conserve prompt tokens.
+    - **Native Headless Web Screenshot Capture (`screenshot_web` Tool):**
+      - Allows any text model (no vision model required) to snapshot live websites and deliver screenshots directly to the user in chat.
+      - **Zero-Bloat Architecture:** Uses native Microsoft Edge / Chrome headless CLI (`--headless`) with zero external automation packages, consuming 0 MB idle RAM.
+      - **SSRF Loopback Defense:** Actively rejects internal IP subnets, loopback ports, and local services.
+      - **Interactive Chat Image Card:** Automatically displays high-resolution 1280x800 PNG previews inside the chat message with click-to-zoom and full-screen view links.
     - **Collapsible Workspace File Explorer Drawer (Closeable / Openable):**
       - **Dual-Mode Drawer Navigation:** A lightweight left-hand secondary panel next to chat sessions featuring segmented `[Chats]` and `[Files]` tabs, allowing users to toggle between conversations and project files effortlessly.
       - **Visual Folder Tree:** Renders the workspace directory tree with folder expand/collapse state memory, item counts, file extension icons, file sizes, and instant filename filtering.

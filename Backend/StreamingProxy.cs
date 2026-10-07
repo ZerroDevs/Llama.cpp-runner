@@ -151,7 +151,7 @@ namespace LlamaServerControl.Backend
 
                     // Routes
                     app.MapGet("/local_image", HandleLocalImage);
-                    app.MapGet("/generated_cache/{fileName}", HandleGeneratedCache);
+                    app.MapGet("/generated_cache/{*filePath}", HandleGeneratedCache);
                     app.MapPost("/slots", HandleSlots);
                     app.MapPost("/slots/{id}", HandleSlots);
                     app.MapGet("/slots", ForwardUpstream);
@@ -260,16 +260,23 @@ namespace LlamaServerControl.Backend
             context.Response.StatusCode = 404;
         }
 
-        private async Task HandleGeneratedCache(HttpContext context, string fileName)
+        private async Task HandleGeneratedCache(HttpContext context, string filePath)
         {
+            if (string.IsNullOrWhiteSpace(filePath) || filePath.Contains(".."))
+            {
+                context.Response.StatusCode = 400;
+                return;
+            }
+
+            string cleanPath = filePath.TrimStart('/', '\\').Replace('/', Path.DirectorySeparatorChar);
             string baseAppDir = AppDomain.CurrentDomain.BaseDirectory;
-            string cachePath = Path.Combine(baseAppDir, "ui", "generated_cache", fileName);
+            string cachePath = Path.Combine(baseAppDir, "ui", "generated_cache", cleanPath);
             if (!File.Exists(cachePath))
             {
                 string devDir = Directory.GetParent(baseAppDir)?.Parent?.Parent?.Parent?.FullName ?? "";
                 if (!string.IsNullOrEmpty(devDir))
                 {
-                    cachePath = Path.Combine(devDir, "ui", "generated_cache", fileName);
+                    cachePath = Path.Combine(devDir, "ui", "generated_cache", cleanPath);
                 }
             }
 
