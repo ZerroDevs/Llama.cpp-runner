@@ -16,8 +16,11 @@ export function setupPlayground() {
     const t0 = performance.now();
     try {
       const port = state.config.port || 8080;
+      const endpoint = (window.chrome && window.chrome.webview)
+        ? `http://127.0.0.1:${port}/v1/chat/completions`
+        : `/v1/chat/completions`;
       const parsedBody = JSON.parse(bodyStr);
-      const res = await fetch(`http://127.0.0.1:${port}/v1/chat/completions`, {
+      const res = await fetch(endpoint, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(parsedBody)

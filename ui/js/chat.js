@@ -1433,7 +1433,10 @@ async function triggerChatStream(existingAssistantMsg = null) {
 
     // Helper to stream a single LLM completion turn
     const streamTurn = async (turnPayload, cumulativePrefix = '') => {
-      const response = await fetch(`http://127.0.0.1:${port}/v1/chat/completions`, {
+      const endpoint = (window.chrome && window.chrome.webview)
+        ? `http://127.0.0.1:${port}/v1/chat/completions`
+        : `/v1/chat/completions`;
+      const response = await fetch(endpoint, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -1779,7 +1782,7 @@ async function triggerChatStream(existingAssistantMsg = null) {
     if (err.name !== 'AbortError') {
       let msg = err.message || 'Unknown network error';
       if (msg === 'Failed to fetch' || msg.toLowerCase().includes('network')) {
-        msg = `Network connection to http://127.0.0.1:${state.config.port || 8080} failed. Please verify the server is running.`;
+        msg = `Connection to engine failed. Please verify the server is running (port ${state.config.port || 8080}).`;
       }
       const errMsg = `*Error: ${msg}*`;
       updateAssistantMessage(assistantBubble, errMsg, true, assistantIdx);

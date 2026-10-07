@@ -2,22 +2,49 @@
 <!-- TAB 1: DASHBOARD & SERVER ENGINE           -->
 <!-- ========================================== -->
 <section id="tab-dashboard" class="tab-pane active p-6 space-y-5 max-w-5xl mx-auto">
-  <!-- Network Access Card -->
-  <div class="p-4 rounded-2xl bg-[var(--bg-card)] border border-[var(--border)] flex items-center justify-between shadow-xs">
-    <div class="flex items-center gap-3">
-      <div class="w-10 h-10 rounded-xl bg-[var(--brand-muted)] border border-[var(--brand)]/20 flex items-center justify-center text-[var(--brand)]">
-        <i data-lucide="network" class="w-5 h-5"></i>
+  <!-- Network Access Cards: Web App Host & OpenAI API -->
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+    <!-- Web App Host Card -->
+    <div class="p-4 rounded-2xl bg-[var(--bg-card)] border border-[var(--border)] flex flex-col justify-between shadow-xs gap-3">
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-xl bg-cyan-500/15 border border-cyan-500/30 flex items-center justify-center text-cyan-400 shrink-0">
+          <i data-lucide="globe" class="w-5 h-5"></i>
+        </div>
+        <div>
+          <div class="text-xs font-bold text-cyan-400 uppercase tracking-wider font-mono">Web App Host (Port 9095)</div>
+          <div class="text-[11px] text-[var(--text-muted)]">Full UI running on host & network for phones, laptops, and remote browsers</div>
+        </div>
       </div>
-      <div>
-        <div class="text-xs font-bold text-[var(--brand)] uppercase tracking-wider font-mono">Local Network Endpoint</div>
-        <div class="text-xs text-[var(--text-muted)]">OpenAI-compatible chat & completions endpoint for external agents (Cline, Cursor, etc.)</div>
+      <div class="flex items-center justify-between gap-2 pt-2 border-t border-[var(--border)]">
+        <code id="lbl-web-host-endpoint" class="font-mono text-xs px-2.5 py-1 rounded-lg bg-[var(--bg-base)] border border-[var(--border)] text-cyan-300 font-semibold select-all truncate">http://localhost:9095</code>
+        <div class="flex items-center gap-1.5 shrink-0">
+          <button id="btn-copy-web-host" class="p-1.5 rounded-lg border border-[var(--border)] hover:bg-[var(--bg-elevated)] text-[var(--text-secondary)] hover:text-cyan-300 transition-colors" title="Copy Web App URL">
+            <i data-lucide="copy" class="w-3.5 h-3.5"></i>
+          </button>
+          <button id="btn-open-web-host" class="p-1.5 rounded-lg border border-[var(--border)] hover:bg-[var(--bg-elevated)] text-[var(--text-secondary)] hover:text-cyan-300 transition-colors" title="Open Web App in Default Browser">
+            <i data-lucide="external-link" class="w-3.5 h-3.5"></i>
+          </button>
+        </div>
       </div>
     </div>
-    <div class="flex items-center gap-2">
-      <code id="lbl-network-endpoint" class="font-mono text-xs px-3 py-1.5 rounded-lg bg-[var(--bg-base)] border border-[var(--border)] text-emerald-400 font-semibold select-all">http://127.0.0.1:8080/v1</code>
-      <button id="btn-copy-network" class="p-1.5 rounded-lg border border-[var(--border)] hover:bg-[var(--bg-elevated)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors" title="Copy URL">
-        <i data-lucide="copy" class="w-4 h-4"></i>
-      </button>
+
+    <!-- API Endpoint Card -->
+    <div class="p-4 rounded-2xl bg-[var(--bg-card)] border border-[var(--border)] flex flex-col justify-between shadow-xs gap-3">
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-xl bg-[var(--brand-muted)] border border-[var(--brand)]/20 flex items-center justify-center text-[var(--brand)] shrink-0">
+          <i data-lucide="network" class="w-5 h-5"></i>
+        </div>
+        <div>
+          <div class="text-xs font-bold text-[var(--brand)] uppercase tracking-wider font-mono">OpenAI API Endpoint (Port 8080)</div>
+          <div class="text-[11px] text-[var(--text-muted)]">Compatible API endpoint for external coding agents (Cline, Cursor, etc.)</div>
+        </div>
+      </div>
+      <div class="flex items-center justify-between gap-2 pt-2 border-t border-[var(--border)]">
+        <code id="lbl-network-endpoint" class="font-mono text-xs px-2.5 py-1 rounded-lg bg-[var(--bg-base)] border border-[var(--border)] text-emerald-400 font-semibold select-all truncate">http://127.0.0.1:8080/v1</code>
+        <button id="btn-copy-network" class="p-1.5 rounded-lg border border-[var(--border)] hover:bg-[var(--bg-elevated)] text-[var(--text-secondary)] hover:text-emerald-400 transition-colors shrink-0" title="Copy API URL">
+          <i data-lucide="copy" class="w-3.5 h-3.5"></i>
+        </button>
+      </div>
     </div>
   </div>
 

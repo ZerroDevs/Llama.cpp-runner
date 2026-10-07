@@ -137,6 +137,20 @@ export function setupDashboard() {
     await api.invoke('save_config', state.config);
   });
 
+  // Copy Web App Host Endpoint Button
+  document.getElementById('btn-copy-web-host')?.addEventListener('click', () => {
+    const ep = document.getElementById('lbl-web-host-endpoint')?.textContent || 'http://localhost:9095';
+    navigator.clipboard.writeText(ep);
+    showToast('Copied to Clipboard', ep, 'info', 2000);
+  });
+
+  // Open Web App Host in Default Browser Button
+  document.getElementById('btn-open-web-host')?.addEventListener('click', async () => {
+    const ep = document.getElementById('lbl-web-host-endpoint')?.textContent || 'http://localhost:9095';
+    await api.invoke('open_url', ep);
+    showToast('Opening in Browser', ep, 'info', 1800);
+  });
+
   // Copy Endpoint Button
   document.getElementById('btn-copy-network')?.addEventListener('click', () => {
     const ep = document.getElementById('lbl-network-endpoint')?.textContent || 'http://127.0.0.1:8080/v1';
@@ -254,6 +268,24 @@ export function applyConfigToForm(cfg) {
   if (loraInp) loraInp.value = loraPath;
 
   updateMissingBinaryBanner();
+  updateNetworkEndpoints();
+}
+
+export async function updateNetworkEndpoints() {
+  try {
+    const netInfo = await api.invoke('get_network_info');
+    if (netInfo) {
+      const lblWeb = document.getElementById('lbl-web-host-endpoint');
+      const lblApi = document.getElementById('lbl-network-endpoint');
+      if (lblWeb) {
+        lblWeb.textContent = netInfo.network_url || netInfo.local_url || 'http://localhost:9095';
+        lblWeb.title = `Local: ${netInfo.local_url} | Network: ${netInfo.network_url}`;
+      }
+      if (lblApi) {
+        lblApi.textContent = netInfo.api_url || `http://127.0.0.1:${netInfo.api_port || 8080}/v1`;
+      }
+    }
+  } catch {}
 }
 
 export function collectConfigFromForm() {

@@ -16,6 +16,7 @@ namespace LlamaServerControl
         private HubManager _hubManager = null!;
         private NativeBridge _nativeBridge = null!;
         private StreamingProxy _streamingProxy = null!;
+        private WebHostServer _webHostServer = null!;
 
         public MainWindow()
         {
@@ -48,6 +49,10 @@ namespace LlamaServerControl
             // Locate UI directory (prioritize source dev directory for instant live updates)
             string devUiDir = Path.Combine(parentDir, "ui");
             string uiDir = Directory.Exists(devUiDir) ? devUiDir : Path.Combine(appDir, "ui");
+
+            // Start WebHostServer on port 9095 (Local & Network Host)
+            _webHostServer = new WebHostServer(_nativeBridge, _configManager, _processManager, _streamingProxy, uiDir);
+            _webHostServer.Start();
 
             // Initialize WebView2 with security flags permitting local loopback HTTP assets & mixed content
             var envOptions = new CoreWebView2EnvironmentOptions(
@@ -99,6 +104,7 @@ namespace LlamaServerControl
                     _processManager.StopServer();
                     _swarmManager.StopSwarm();
                     _streamingProxy.Stop();
+                    _webHostServer.Stop();
                 }
                 catch { }
                 finally

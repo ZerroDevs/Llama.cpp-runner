@@ -45,6 +45,8 @@ namespace LlamaServerControl.Backend
             _process.OnExited += () => EmitEvent("server_exited", new { running = false });
         }
 
+        public event Action<string>? OnEventBroadcast;
+
         public void SetWebView(CoreWebView2 webView)
         {
             _coreWebView = webView;
@@ -52,23 +54,27 @@ namespace LlamaServerControl.Backend
 
         private void EmitEvent(string eventName, object data)
         {
-            if (_coreWebView == null) return;
             try
             {
                 var payload = new { @event = eventName, data };
                 string json = JsonSerializer.Serialize(payload);
 
-                var app = System.Windows.Application.Current;
-                if (app != null && app.Dispatcher != null && !app.Dispatcher.CheckAccess())
+                OnEventBroadcast?.Invoke(json);
+
+                if (_coreWebView != null)
                 {
-                    app.Dispatcher.InvokeAsync(() =>
+                    var app = System.Windows.Application.Current;
+                    if (app != null && app.Dispatcher != null && !app.Dispatcher.CheckAccess())
                     {
-                        try { _coreWebView.PostWebMessageAsJson(json); } catch { }
-                    });
-                }
-                else
-                {
-                    _coreWebView.PostWebMessageAsJson(json);
+                        app.Dispatcher.InvokeAsync(() =>
+                        {
+                            try { _coreWebView.PostWebMessageAsJson(json); } catch { }
+                        });
+                    }
+                    else
+                    {
+                        _coreWebView.PostWebMessageAsJson(json);
+                    }
                 }
             }
             catch { }
@@ -90,6 +96,12 @@ namespace LlamaServerControl.Backend
                 {
                     case "get_config":
                         result = _config.GetConfig();
+                        break;
+
+                    case "get_network_info":
+                        int curProxyPort = _proxy?.ActivePort ?? 8080;
+                        int curWebPort = int.TryParse(_config.GetConfig().GetValueOrDefault("web_port", 9095)?.ToString(), out int wp) ? wp : 9095;
+                        result = WebHostServer.GetNetworkInfo(_config.GetConfig(), curProxyPort, curWebPort);
                         break;
 
                     case "save_config":
@@ -370,6 +382,12 @@ namespace LlamaServerControl.Backend
 
         private static string? SelectFileNative(string filter)
         {
+            var app = System.Windows.Application.Current;
+            if (app != null && app.Dispatcher != null && !app.Dispatcher.CheckAccess())
+            {
+                return app.Dispatcher.Invoke(() => SelectFileNative(filter));
+            }
+
             var dlg = new Microsoft.Win32.OpenFileDialog();
             if (filter == "model")
             {
@@ -384,6 +402,12 @@ namespace LlamaServerControl.Backend
 
         private static string? SelectDirectoryNative()
         {
+            var app = System.Windows.Application.Current;
+            if (app != null && app.Dispatcher != null && !app.Dispatcher.CheckAccess())
+            {
+                return app.Dispatcher.Invoke(() => SelectDirectoryNative());
+            }
+
             var dlg = new Microsoft.Win32.OpenFolderDialog();
             return dlg.ShowDialog() == true ? dlg.FolderName : null;
         }
