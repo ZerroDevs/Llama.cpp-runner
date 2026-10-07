@@ -20,6 +20,14 @@ import {
   deleteCustomPromptSnippet,
   DEFAULT_SNIPPETS
 } from './modals.js';
+import { 
+  getAgentSystemInstructions, 
+  parseToolCalls, 
+  executeAgentTool, 
+  buildToolCardHtml, 
+  renderToolCardsInText, 
+  selectWorkspaceFolder 
+} from './agent.js';
 
 export function setupChat() {
   // Configure marked for GFM tables and clean line breaks
@@ -1120,6 +1128,13 @@ export async function sendChatMessage() {
   const hasDocs = state.attachedDocuments && state.attachedDocuments.length > 0;
   if (!prompt && !hasImages && !hasDocs) return;
 
+  // If Agent Mode is active but no workspace is open, prompt user to select folder
+  if (state.isAgentMode && !state.activeWorkspace) {
+    showToast('Workspace Required', 'Please select a workspace project folder for Agent Mode.', 'warning', 3000);
+    await selectWorkspaceFolder();
+    if (!state.activeWorkspace) return;
+  }
+
   // Intercept /snippets or /macro command entered in chat input
   if (prompt === '/snippets' || prompt === '/macro') {
     input.value = '';
@@ -1227,6 +1242,16 @@ async function triggerChatStream(existingAssistantMsg = null) {
     }
   }
 
+  // Agent Mode: Prepend workspace context & tool-use instructions
+  if (state.isAgentMode) {
+    const agentInstructions = getAgentSystemInstructions();
+    if (messagesPayload.length > 0 && messagesPayload[0].role === 'system') {
+      messagesPayload[0].content = `${agentInstructions}\n\n${messagesPayload[0].content}`;
+    } else {
+      messagesPayload.unshift({ role: 'system', content: agentInstructions });
+    }
+  }
+
   // Include up to last 20 messages for context
   const contextSlice = state.chatMessages.slice(-20);
   for (const m of contextSlice) {
@@ -1266,6 +1291,7 @@ async function triggerChatStream(existingAssistantMsg = null) {
 
   setStreamingState(true);
   state.abortController = new AbortController();
+  state.isAgentRunning = state.isAgentMode;
 
   let fullResponse = '';
   let receivedTokens = 0;
@@ -1277,186 +1303,280 @@ async function triggerChatStream(existingAssistantMsg = null) {
 
   try {
     const port = state.config.port || 8080;
-    const response = await fetch(`http://127.0.0.1:${port}/v1/chat/completions`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        messages: messagesPayload,
-        stream: true,
-        temperature: 0.7,
-        max_tokens: 4096
-      }),
-      signal: state.abortController.signal
-    });
 
-    if (!response.ok) {
-      let errText = `HTTP ${response.status}: ${response.statusText}`;
-      try {
-        const errJson = await response.json();
-        if (errJson?.error?.message) errText = errJson.error.message;
-      } catch {}
-      throw new Error(errText);
-    }
+    // Helper to stream a single LLM completion turn
+    const streamTurn = async (turnPayload, cumulativePrefix = '') => {
+      const response = await fetch(`http://127.0.0.1:${port}/v1/chat/completions`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          messages: turnPayload,
+          stream: true,
+          temperature: 0.7,
+          max_tokens: 4096
+        }),
+        signal: state.abortController.signal
+      });
 
-    const reader = response.body.getReader();
-    const decoder = new TextDecoder('utf-8');
-    let buffer = '';
-    let hasOpenedThinkTag = false;
-    let hasClosedThinkTag = false;
-    let thinkStartTime = null;
-    let thinkDurationSec = null;
-    let thinkTicker = null;
-    let inSuppressedThinkBlock = false;
+      if (!response.ok) {
+        let errText = `HTTP ${response.status}: ${response.statusText}`;
+        try {
+          const errJson = await response.json();
+          if (errJson?.error?.message) errText = errJson.error.message;
+        } catch {}
+        throw new Error(errText);
+      }
 
-    const startThinkingTimer = () => {
-      if (!thinkStartTime) {
-        thinkStartTime = Date.now();
-        thinkTicker = setInterval(() => {
-          if (hasOpenedThinkTag && !hasClosedThinkTag && thinkStartTime) {
-            const elapsed = Math.max(1, Math.round((Date.now() - thinkStartTime) / 1000));
-            const counterEl = assistantBubble?.querySelector('.group-think.is-thinking .think-counter');
-            if (counterEl) {
-              counterEl.textContent = `Thinking for ${formatDurationDisplay(elapsed)}...`;
+      const reader = response.body.getReader();
+      const decoder = new TextDecoder('utf-8');
+      let buffer = '';
+      let hasOpenedThinkTag = false;
+      let hasClosedThinkTag = false;
+      let thinkStartTime = null;
+      let thinkDurationSec = null;
+      let thinkTicker = null;
+      let inSuppressedThinkBlock = false;
+      let turnResponse = '';
+
+      const startThinkingTimer = () => {
+        if (!thinkStartTime) {
+          thinkStartTime = Date.now();
+          thinkTicker = setInterval(() => {
+            if (hasOpenedThinkTag && !hasClosedThinkTag && thinkStartTime) {
+              const elapsed = Math.max(1, Math.round((Date.now() - thinkStartTime) / 1000));
+              const counterEl = assistantBubble?.querySelector('.group-think.is-thinking .think-counter');
+              if (counterEl) {
+                counterEl.textContent = `Thinking for ${formatDurationDisplay(elapsed)}...`;
+              }
             }
+          }, 150);
+        }
+      };
+
+      const stopThinkingTimer = () => {
+        if (thinkTicker) {
+          clearInterval(thinkTicker);
+          thinkTicker = null;
+        }
+        if (thinkStartTime && thinkDurationSec === null) {
+          thinkDurationSec = ((Date.now() - thinkStartTime) / 1000).toFixed(1);
+          const timeLabel = formatDurationDisplay(thinkDurationSec);
+          turnResponse = turnResponse.replace(/<think(?:\s+(?:time|duration)="[^"]*")?>/, `<think time="${timeLabel}">`);
+        }
+      };
+
+      let lastRenderTime = 0;
+      let renderTimer = null;
+      let pendingPayload = null;
+
+      const flushRender = (force = false) => {
+        const now = Date.now();
+        if (force || now - lastRenderTime >= 50) {
+          lastRenderTime = now;
+          if (renderTimer) {
+            cancelAnimationFrame(renderTimer);
+            renderTimer = null;
           }
-        }, 150);
-      }
-    };
-
-    const stopThinkingTimer = () => {
-      if (thinkTicker) {
-        clearInterval(thinkTicker);
-        thinkTicker = null;
-      }
-      if (thinkStartTime && thinkDurationSec === null) {
-        thinkDurationSec = ((Date.now() - thinkStartTime) / 1000).toFixed(1);
-        const timeLabel = formatDurationDisplay(thinkDurationSec);
-        fullResponse = fullResponse.replace(/<think(?:\s+(?:time|duration)="[^"]*")?>/, `<think time="${timeLabel}">`);
-      }
-    };
-
-    while (true) {
-      const { done, value } = await reader.read();
-      if (done) break;
-
-      buffer += decoder.decode(value, { stream: true });
-      const lines = buffer.split('\n');
-      buffer = lines.pop();
-
-      for (const line of lines) {
-        const trimmed = line.trim();
-        if (!trimmed || trimmed === 'data: [DONE]') continue;
-        if (trimmed.startsWith('data: ')) {
-          try {
-            const parsed = JSON.parse(trimmed.substring(6));
-            const choice = parsed.choices?.[0];
-            const deltaObj = choice?.delta;
-
-            // Extract reasoning tokens (DeepSeek R1, Qwen reasoning, llama-server format)
-            const reasoningChunk = deltaObj?.reasoning_content ?? deltaObj?.reasoning ?? parsed.reasoning_content ?? parsed.reasoning ?? '';
-            // Extract standard text content tokens
-            const contentChunk = deltaObj?.content ?? parsed.content ?? '';
-
-            let chunkRendered = false;
-
-            // 1. Process reasoning stream
-            if (reasoningChunk) {
-              if (state.enableReasoning !== false) {
-                if (!hasOpenedThinkTag) {
-                  startThinkingTimer();
-                  fullResponse += '<think>';
-                  hasOpenedThinkTag = true;
-                }
-                fullResponse += reasoningChunk;
-                receivedTokens++;
-                chunkRendered = true;
-              }
+          if (pendingPayload !== null) {
+            updateAssistantMessage(assistantBubble, pendingPayload, false);
+            pendingPayload = null;
+          }
+        } else if (!renderTimer) {
+          renderTimer = requestAnimationFrame(() => {
+            renderTimer = null;
+            lastRenderTime = Date.now();
+            if (pendingPayload !== null) {
+              updateAssistantMessage(assistantBubble, pendingPayload, false);
+              pendingPayload = null;
             }
+          });
+        }
+      };
 
-            // 2. Process content stream
-            if (contentChunk) {
-              if (state.enableReasoning !== false) {
-                // If reasoning was previously streaming via reasoning_content and not yet closed, close it now
-                if (hasOpenedThinkTag && !hasClosedThinkTag) {
-                  stopThinkingTimer();
-                  fullResponse += '</think>\n\n';
-                  hasClosedThinkTag = true;
-                }
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
 
-                // Detect raw <think> / </think> tags inside contentChunk
-                if (contentChunk.includes('<think>')) {
-                  hasOpenedThinkTag = true;
-                  startThinkingTimer();
-                }
-                if (contentChunk.includes('</think>')) {
-                  hasClosedThinkTag = true;
-                  stopThinkingTimer();
-                }
+        buffer += decoder.decode(value, { stream: true });
+        const lines = buffer.split('\n');
+        buffer = lines.pop();
 
-                fullResponse += contentChunk;
-                receivedTokens++;
-                chunkRendered = true;
-              } else {
-                // Fast Direct Mode: suppress reasoning tags and internal thought blocks
-                let cleanChunk = contentChunk;
-                if (cleanChunk.includes('<think>')) {
-                  inSuppressedThinkBlock = true;
-                }
-                if (inSuppressedThinkBlock) {
-                  if (cleanChunk.includes('</think>')) {
-                    cleanChunk = cleanChunk.substring(cleanChunk.indexOf('</think>') + 8);
-                    inSuppressedThinkBlock = false;
-                  } else {
-                    cleanChunk = '';
+        for (const line of lines) {
+          const trimmed = line.trim();
+          if (!trimmed || trimmed === 'data: [DONE]') continue;
+          if (trimmed.startsWith('data: ')) {
+            try {
+              const parsed = JSON.parse(trimmed.substring(6));
+              const choice = parsed.choices?.[0];
+              const deltaObj = choice?.delta;
+
+              const reasoningChunk = deltaObj?.reasoning_content ?? deltaObj?.reasoning ?? parsed.reasoning_content ?? parsed.reasoning ?? '';
+              const contentChunk = deltaObj?.content ?? parsed.content ?? '';
+
+              let chunkRendered = false;
+
+              if (reasoningChunk) {
+                if (state.enableReasoning !== false) {
+                  if (!hasOpenedThinkTag) {
+                    startThinkingTimer();
+                    turnResponse += '<think>';
+                    hasOpenedThinkTag = true;
                   }
+                  turnResponse += reasoningChunk;
+                  receivedTokens++;
+                  chunkRendered = true;
                 }
-                if (cleanChunk) {
-                  cleanChunk = cleanChunk.replace(/<think>[\s\S]*?<\/think>/gi, '').replace(/<\/?think>/gi, '');
+              }
+
+              if (contentChunk) {
+                if (state.enableReasoning !== false) {
+                  if (hasOpenedThinkTag && !hasClosedThinkTag) {
+                    stopThinkingTimer();
+                    turnResponse += '</think>\n\n';
+                    hasClosedThinkTag = true;
+                  }
+                  if (contentChunk.includes('<think>')) {
+                    hasOpenedThinkTag = true;
+                    startThinkingTimer();
+                  }
+                  if (contentChunk.includes('</think>')) {
+                    hasClosedThinkTag = true;
+                    stopThinkingTimer();
+                  }
+
+                  turnResponse += contentChunk;
+                  receivedTokens++;
+                  chunkRendered = true;
+                } else {
+                  let cleanChunk = contentChunk;
+                  if (cleanChunk.includes('<think>')) inSuppressedThinkBlock = true;
+                  if (inSuppressedThinkBlock) {
+                    if (cleanChunk.includes('</think>')) {
+                      cleanChunk = cleanChunk.substring(cleanChunk.indexOf('</think>') + 8);
+                      inSuppressedThinkBlock = false;
+                    } else {
+                      cleanChunk = '';
+                    }
+                  }
                   if (cleanChunk) {
-                    fullResponse += cleanChunk;
-                    receivedTokens++;
-                    chunkRendered = true;
+                    cleanChunk = cleanChunk.replace(/<think>[\s\S]*?<\/think>/gi, '').replace(/<\/?think>/gi, '');
+                    if (cleanChunk) {
+                      turnResponse += cleanChunk;
+                      receivedTokens++;
+                      chunkRendered = true;
+                    }
                   }
                 }
               }
-            }
 
-            if (chunkRendered) {
-              // While actively thinking, stamp current elapsed seconds into the unclosed think tag for live display
-              let renderPayload = fullResponse;
-              if (state.enableReasoning !== false && hasOpenedThinkTag && !hasClosedThinkTag && thinkStartTime) {
-                const liveSec = Math.max(1, Math.round((Date.now() - thinkStartTime) / 1000));
-                renderPayload = renderPayload.replace(/<think(?:\s+(?:time|duration)="[^"]*")?>/, `<think time="${formatDurationDisplay(liveSec)}">`);
+              if (chunkRendered) {
+                let renderPayload = cumulativePrefix + (cumulativePrefix ? '\n\n' : '') + turnResponse;
+                if (state.enableReasoning !== false && hasOpenedThinkTag && !hasClosedThinkTag && thinkStartTime) {
+                  const liveSec = Math.max(1, Math.round((Date.now() - thinkStartTime) / 1000));
+                  renderPayload = renderPayload.replace(/<think(?:\s+(?:time|duration)="[^"]*")?>/, `<think time="${formatDurationDisplay(liveSec)}">`);
+                }
+
+                pendingPayload = renderPayload;
+                flushRender(false);
+
+                const elapsedSec = (Date.now() - startTime) / 1000;
+                if (elapsedSec > 0.5 && tpsText) {
+                  const tps = (receivedTokens / elapsedSec).toFixed(1);
+                  tpsText.textContent = `${tps} T/s`;
+                }
               }
-
-              updateAssistantMessage(assistantBubble, renderPayload, false);
-
-              const elapsedSec = (Date.now() - startTime) / 1000;
-              if (elapsedSec > 0.5 && tpsText) {
-                const tps = (receivedTokens / elapsedSec).toFixed(1);
-                tpsText.textContent = `${tps} T/s`;
-              }
-            }
-          } catch {}
+            } catch {}
+          }
         }
       }
+
+      // Finalize any queued throttled frame immediately
+      flushRender(true);
+
+      if (state.enableReasoning !== false) {
+        if (hasOpenedThinkTag && !hasClosedThinkTag) {
+          stopThinkingTimer();
+          turnResponse += '</think>\n\n';
+          hasClosedThinkTag = true;
+        } else if (turnResponse.includes('<think>') && !turnResponse.includes('</think>')) {
+          stopThinkingTimer();
+          turnResponse += '</think>\n\n';
+        } else if (thinkStartTime && thinkDurationSec === null) {
+          stopThinkingTimer();
+        }
+      } else {
+        turnResponse = turnResponse.replace(/<think>[\s\S]*?<\/think>/gi, '').replace(/<\/?think>/gi, '').trimStart();
+      }
+
+      return turnResponse;
+    };
+
+    // Autonomous Multi-Turn ReAct Loop
+    let cumulativeResponse = '';
+    let currentPayload = [...messagesPayload];
+    let agentTurn = 0;
+    const MAX_AGENT_TURNS = 10;
+
+    while (true) {
+      const turnText = await streamTurn(currentPayload, cumulativeResponse);
+
+      // Check if Agent Mode is active and model requested tool calls
+      if (state.isAgentMode && state.isAgentRunning && !state.abortController?.signal.aborted) {
+        const toolCalls = parseToolCalls(turnText);
+        if (toolCalls.length > 0 && agentTurn < MAX_AGENT_TURNS) {
+          agentTurn++;
+          let modifiedTurn = turnText;
+          const turnObservations = [];
+
+          // Execute each requested tool in sequence
+          for (const call of toolCalls) {
+            if (!state.isAgentRunning || state.abortController?.signal.aborted) break;
+
+            const res = await executeAgentTool(call.name, call.arguments);
+            turnObservations.push({ call, res });
+
+            // Attach <tool_result> right after the corresponding <tool_call>
+            const escapedName = String(call.name).replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+            const pattern = new RegExp(`(<tool_call>[\\s\\S]*?"name"\\s*:\\s*"${escapedName}"[\\s\\S]*?<\\/tool_call>)(?!\\s*<tool_result>)`, 'i');
+            if (pattern.test(modifiedTurn)) {
+              modifiedTurn = modifiedTurn.replace(pattern, `$1\n<tool_result>${JSON.stringify(res)}</tool_result>`);
+            } else {
+              modifiedTurn += `\n<tool_result>${JSON.stringify(res)}</tool_result>`;
+            }
+
+            // Immediately update assistant bubble to show completed tool card
+            updateAssistantMessage(assistantBubble, cumulativeResponse + (cumulativeResponse ? '\n\n' : '') + modifiedTurn, false);
+          }
+
+          if (!state.isAgentRunning || state.abortController?.signal.aborted) {
+            cumulativeResponse += (cumulativeResponse ? '\n\n' : '') + modifiedTurn;
+            break;
+          }
+
+          cumulativeResponse += (cumulativeResponse ? '\n\n' : '') + modifiedTurn;
+
+          // Prepare observation payload for the next turn
+          const obsPrompt = turnObservations.map(o => {
+            return `<tool_result>\nTool: ${o.call.name}\nArgs: ${JSON.stringify(o.call.arguments)}\nStatus: ${o.res?.status}\nOutput: ${JSON.stringify(o.res)}\n</tool_result>`;
+          }).join('\n\n');
+
+          currentPayload.push({ role: 'assistant', content: turnText });
+          currentPayload.push({
+            role: 'user',
+            content: `${obsPrompt}\n\nTool execution completed. Inspect the results and proceed with any next steps, or summarize your work if finished.`
+          });
+
+          // Continue to next agent turn
+          continue;
+        }
+      }
+
+      // No tool calls or Agent Mode inactive or max turns reached
+      cumulativeResponse += (cumulativeResponse ? '\n\n' : '') + turnText;
+      break;
     }
 
-    // Ensure tags are finalized cleanly when stream ends
-    if (state.enableReasoning !== false) {
-      if (hasOpenedThinkTag && !hasClosedThinkTag) {
-        stopThinkingTimer();
-        fullResponse += '</think>\n\n';
-        hasClosedThinkTag = true;
-      } else if (fullResponse.includes('<think>') && !fullResponse.includes('</think>')) {
-        stopThinkingTimer();
-        fullResponse += '</think>\n\n';
-      } else if (thinkStartTime && thinkDurationSec === null) {
-        stopThinkingTimer();
-      }
-    } else {
-      fullResponse = fullResponse.replace(/<think>[\s\S]*?<\/think>/gi, '').replace(/<\/?think>/gi, '').trimStart();
-    }
+    fullResponse = cumulativeResponse;
 
     const elapsedSec = Math.max(0.01, (Date.now() - startTime) / 1000);
     const finalTps = (elapsedSec > 0.2 && receivedTokens > 0) ? Number((receivedTokens / elapsedSec).toFixed(1)) : 0;
@@ -1567,11 +1687,16 @@ function updateAssistantMessage(msgDiv, markdownText, isComplete = false, msgInd
     if (newThink) newThink.open = userManuallyOpened;
   }
 
-  // Syntax highlighting
-  if (window.hljs) {
+  // Syntax highlighting - deferred until completion to maintain zero-lag streaming on large code blocks
+  if (isComplete && window.hljs) {
     bubble.querySelectorAll('pre code').forEach(block => {
       window.hljs.highlightElement(block);
     });
+  }
+
+  // Render icons inside tool execution cards & status boxes
+  if (window.lucide && (isComplete || markdownText.includes('agent-tool-card') || markdownText.includes('group-status'))) {
+    try { window.lucide.createIcons({ root: bubble }); } catch {}
   }
 
   if (isComplete && msgIndex !== null) {
@@ -1719,6 +1844,9 @@ export function renderMarkdownWithThinking(text) {
     .replace(/<thinking>/gi, '<think>')
     .replace(/<\/thinking>/gi, '</think>');
 
+  // Transform Agent Mode tool calls & results into interactive cards
+  raw = renderToolCardsInText(raw);
+
   // 1. Parse completed <status> ... </status> tags (Engine Lifecycle & Auto-Wake) - Collapsed by default when finished
   let processed = raw.replace(/<status>([\s\S]*?)<\/status>/gi, (match, p1) => {
     return `<details class="group-status mb-3 bg-[var(--bg-elevated)] border border-[var(--border)] rounded-xl p-3"><summary class="flex items-center justify-between cursor-pointer select-none text-xs font-semibold text-cyan-400 hover:text-cyan-300 transition-colors list-none"><div class="flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-cyan-400 shrink-0"></span><span>Engine Status</span></div><svg class="w-3.5 h-3.5 transition-transform duration-200 details-chevron text-[var(--text-muted)]" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"/></svg></summary><div class="text-xs text-[var(--text-secondary)] font-mono mt-2 pt-2 border-t border-[var(--border)] leading-relaxed whitespace-pre-wrap select-text">${escapeHtml(p1.trim())}</div></details>\n\n`;
@@ -1824,6 +1952,7 @@ export function setStreamingState(isStreaming) {
 }
 
 export function stopGeneration() {
+  state.isAgentRunning = false;
   if (state.isStreaming) {
     if (state.abortController) {
       state.abortController.abort();

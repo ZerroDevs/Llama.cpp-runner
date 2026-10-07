@@ -197,6 +197,18 @@ The **Llama Server Control Native Engine** is engineered in **C# / .NET 10** wit
   - **Full-Text In-Chat Search (`Ctrl + F`):** Instant search bar overlay directly inside the active conversation. Fast substring search across user prompts, assistant answers, code snippets, and reasoning blocks with bidirectional match navigation (`< 3/12 >`, `Enter` for next, `Shift+Enter` for previous, `Esc` to close). Automatically unfolds collapsed reasoning blocks when queries match inside thinking text, smoothly centers matches in the viewport, and cleanly restores DOM nodes when dismissed.
   - **Prompt Library & Snippet Macros (`/snippets` / `/macro`):** Quick-access modal accessible from the chat header, input toolbar, or `/snippets` / `/macro` slash commands. Features curated preset macros across Coding (Code Review, Unit Tests, Refactoring), Writing (Executive Summary), Translation (Arabic, English), and Learning (Explain Simply), alongside an inline custom snippet builder with persistent `localStorage` storage and 1-click insertion into the composer.
   - **Message Clipboard Copy:** 1-click clipboard export on all chat cards.
+  - **Autonomous Coding Agent Mode & Sandboxed Workspace:**
+    - **Native Workspace Project Selector:** Select any project folder on your PC (e.g. `MyWebsite`, Node.js, Python, or .NET solution) using a native Windows folder picker. The active project name, path, detected frameworks, and discovered file counts are displayed in the chat header and banner.
+    - **ReAct Autonomous Tool Calling Loop:** When Agent Mode is toggled on (`Agent: ON`), models can autonomously plan, inspect, create, edit files, and run commands over multi-turn execution loops (up to 10 turns) until tasks are completed.
+    - **Interactive Live Tool Execution Cards:** Visual cards render directly in assistant chat bubbles during tool execution:
+      - `write_file`: Shows tool badge, target path, lines written badge (e.g., `142 lines written`), and file size in KB.
+      - `edit_file`: Surgical search-and-replace with delta lines replaced indicator.
+      - `read_file`: Displays lines read and byte counts.
+      - `run_command`: Monospace terminal card displaying `$ <command>`, captured `stdout`, `stderr`, exit code, and execution duration in ms.
+      - `list_directory`, `create_directory`, `delete_file`: Folder tree and file manipulation badges.
+    - **Strict Sandboxed Security:** All file system operations are strictly verified against the workspace root to block path traversal attacks outside the selected directory.
+    - **Automated Snapshots & Backups:** Overwritten and edited files are automatically backed up into `.llama_agent/backups/` with timestamped snapshots before modifications occur.
+    - **Real-Time Stop Control:** Click Stop Generation at any moment to cleanly abort running terminal processes and break the agent loop.
 - **Multi-Source Live Logs Terminal:**
   - **Categorized Source Tabs & Live Counters:** Filter real-time terminal streams seamlessly by **Show All**, **Llama** (llama.cpp engine), **SwarmUI** (diffusion pipeline), and **Other** (reverse proxy, auto-sleep, and system actions) with dynamic counter badges.
   - **Distinct Color Coding & Severity Badges:** Visual differentiation with emerald/mint for Llama, lavender/violet for SwarmUI, sky blue for Proxy/System, warm amber for warnings (`[Warning]`, `W `), and crimson red for errors (`[ERR]`, `E `).

@@ -19,6 +19,7 @@ import { setupPlayground } from './playground.js';
 import { setupSwarm } from './swarm.js';
 import { setupLogs } from './logs.js';
 import { setupModals } from './modals.js';
+import { initAgent } from './agent.js';
 
 // Application Bootstrap
 document.addEventListener('DOMContentLoaded', async () => {
@@ -32,6 +33,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     setupDashboard();
     setupModels();
     setupChat();
+    initAgent();
     setupLlamaWeb();
     setupHub();
     setupTelemetry();

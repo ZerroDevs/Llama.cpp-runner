@@ -16,9 +16,10 @@ namespace LlamaServerControl.Backend
         private readonly HardwareMonitor _hardware;
         private readonly HubManager _hub;
         private readonly StreamingProxy? _proxy;
+        private readonly AgentWorkspaceManager _agentWorkspace;
         private CoreWebView2? _coreWebView;
 
-        public NativeBridge(ConfigManager config, ProcessManager process, SwarmManager swarm, HardwareMonitor hardware, HubManager hub, StreamingProxy? proxy = null)
+        public NativeBridge(ConfigManager config, ProcessManager process, SwarmManager swarm, HardwareMonitor hardware, HubManager hub, StreamingProxy? proxy = null, AgentWorkspaceManager? agentWorkspace = null)
         {
             _config = config;
             _process = process;
@@ -26,6 +27,7 @@ namespace LlamaServerControl.Backend
             _hardware = hardware;
             _hub = hub;
             _proxy = proxy;
+            _agentWorkspace = agentWorkspace ?? new AgentWorkspaceManager();
 
             _process.OnLog += (line) =>
             {
@@ -139,6 +141,37 @@ namespace LlamaServerControl.Backend
 
                     case "select_directory":
                         result = SelectDirectoryNative();
+                        break;
+
+                    case "agent_select_workspace":
+                        string? pickedWs = SelectDirectoryNative();
+                        if (!string.IsNullOrEmpty(pickedWs))
+                        {
+                            result = _agentWorkspace.SetWorkspace(pickedWs);
+                        }
+                        else
+                        {
+                            result = new { status = "cancelled" };
+                        }
+                        break;
+
+                    case "agent_set_workspace":
+                        string wsPath = args.ValueKind == JsonValueKind.String ? args.GetString() ?? "" : "";
+                        result = _agentWorkspace.SetWorkspace(wsPath);
+                        break;
+
+                    case "agent_get_workspace":
+                        result = _agentWorkspace.GetWorkspaceSummary();
+                        break;
+
+                    case "agent_clear_workspace":
+                        result = _agentWorkspace.ClearWorkspace();
+                        break;
+
+                    case "agent_execute_tool":
+                        string toolName = args.TryGetProperty("tool", out var tProp) ? tProp.GetString() ?? "" : "";
+                        var toolArgs = args.TryGetProperty("args", out var aArg) ? aArg : default;
+                        result = await _agentWorkspace.ExecuteToolAsync(toolName, toolArgs);
                         break;
 
                     case "start_swarm":
