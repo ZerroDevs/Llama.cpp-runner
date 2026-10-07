@@ -1,0 +1,81 @@
+<!-- Modal: Prompt Library, Snippets & Slash Commands -->
+<div id="modal-prompt-library" class="hidden fixed inset-0 z-50 bg-black/75 backdrop-blur-sm flex items-center justify-center p-4">
+  <div class="bg-[var(--bg-card)] border border-[var(--border)] rounded-2xl w-full max-w-4xl max-h-[88vh] flex flex-col shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-150">
+    <!-- Modal Header -->
+    <div class="px-5 py-4 border-b border-[var(--border)] flex items-center justify-between shrink-0">
+      <div class="flex items-center gap-2.5">
+        <div class="w-8 h-8 rounded-xl bg-violet-500/15 border border-violet-500/30 flex items-center justify-center text-violet-400">
+          <i data-lucide="sparkles" class="w-4 h-4"></i>
+        </div>
+        <div>
+          <h3 class="text-sm font-bold text-[var(--text-primary)]">Prompt Library, Snippets & Slash Commands</h3>
+          <p class="text-[11px] text-[var(--text-muted)]">Browse all slash commands, macros, and prompt templates with tag filters</p>
+        </div>
+      </div>
+      <div class="flex items-center gap-2">
+        <button id="btn-create-snippet" type="button" class="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-[var(--brand)] hover:bg-[var(--brand-hover)] text-black text-xs font-semibold transition-all cursor-pointer shadow-xs">
+          <i data-lucide="plus" class="w-3.5 h-3.5"></i>
+          <span>New Snippet</span>
+        </button>
+        <button id="btn-close-prompt-library" type="button" class="p-1.5 rounded-lg hover:bg-[var(--bg-elevated)] text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors cursor-pointer">
+          <i data-lucide="x" class="w-4 h-4"></i>
+        </button>
+      </div>
+    </div>
+
+    <!-- Filter & Search Toolbar -->
+    <div class="px-5 py-3 border-b border-[var(--border)] bg-[var(--bg-elevated)] flex items-center justify-between gap-3 shrink-0 flex-wrap">
+      <!-- Category Filter Pills -->
+      <div class="flex items-center gap-1.5 overflow-x-auto min-w-0" id="snippet-category-filters">
+        <button class="snippet-cat-btn active px-2.5 py-1 rounded-lg text-xs font-semibold bg-[var(--brand)] text-black cursor-pointer shrink-0" data-cat="all">All</button>
+        <button class="snippet-cat-btn px-2.5 py-1 rounded-lg text-xs font-medium bg-[var(--bg-card)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] border border-[var(--border)] cursor-pointer shrink-0" data-cat="commands">Commands</button>
+        <button class="snippet-cat-btn px-2.5 py-1 rounded-lg text-xs font-medium bg-[var(--bg-card)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] border border-[var(--border)] cursor-pointer shrink-0" data-cat="image">Image & Art</button>
+        <button class="snippet-cat-btn px-2.5 py-1 rounded-lg text-xs font-medium bg-[var(--bg-card)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] border border-[var(--border)] cursor-pointer shrink-0" data-cat="coding">Coding</button>
+        <button class="snippet-cat-btn px-2.5 py-1 rounded-lg text-xs font-medium bg-[var(--bg-card)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] border border-[var(--border)] cursor-pointer shrink-0" data-cat="writing">Writing</button>
+        <button class="snippet-cat-btn px-2.5 py-1 rounded-lg text-xs font-medium bg-[var(--bg-card)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] border border-[var(--border)] cursor-pointer shrink-0" data-cat="translation">Translation</button>
+        <button class="snippet-cat-btn px-2.5 py-1 rounded-lg text-xs font-medium bg-[var(--bg-card)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] border border-[var(--border)] cursor-pointer shrink-0" data-cat="learning">Learning</button>
+        <button class="snippet-cat-btn px-2.5 py-1 rounded-lg text-xs font-medium bg-[var(--bg-card)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] border border-[var(--border)] cursor-pointer shrink-0" data-cat="system">System</button>
+        <button class="snippet-cat-btn px-2.5 py-1 rounded-lg text-xs font-medium bg-[var(--bg-card)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] border border-[var(--border)] cursor-pointer shrink-0" data-cat="custom">Custom</button>
+      </div>
+
+      <!-- Snippet Search -->
+      <div class="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-[var(--bg-card)] border border-[var(--border)] text-xs text-[var(--text-secondary)] focus-within:border-[var(--brand)] w-52 shrink-0">
+        <i data-lucide="search" class="w-3.5 h-3.5 text-[var(--text-muted)] shrink-0"></i>
+        <input id="input-snippet-search" type="text" placeholder="Search commands or #tags..." class="w-full bg-transparent outline-none text-xs text-[var(--text-primary)] placeholder-[var(--text-muted)]" />
+      </div>
+    </div>
+
+    <!-- Inline Snippet Creation Form (hidden by default) -->
+    <div id="form-new-snippet" class="hidden p-4 border-b border-[var(--border)] bg-[var(--bg-elevated)] space-y-3 shrink-0">
+      <div class="flex items-center justify-between">
+        <span class="text-xs font-bold text-[var(--text-primary)]">Create Custom Macro Snippet</span>
+        <button id="btn-cancel-new-snippet" type="button" class="text-xs text-[var(--text-muted)] hover:text-[var(--text-primary)] cursor-pointer">Cancel</button>
+      </div>
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
+        <input id="input-new-snippet-title" type="text" placeholder="Snippet Title (e.g. SQL Optimization)" class="px-3 py-1.5 rounded-lg bg-[var(--bg-card)] border border-[var(--border)] text-xs text-[var(--text-primary)] outline-none focus:border-[var(--brand)]" />
+        <select id="select-new-snippet-cat" class="px-3 py-1.5 rounded-lg bg-[var(--bg-card)] border border-[var(--border)] text-xs text-[var(--text-primary)] outline-none focus:border-[var(--brand)] cursor-pointer">
+          <option value="commands">Commands</option>
+          <option value="image">Image & Art</option>
+          <option value="coding">Coding</option>
+          <option value="writing">Writing</option>
+          <option value="translation">Translation</option>
+          <option value="learning">Learning</option>
+          <option value="system">System</option>
+          <option value="custom" selected>Custom</option>
+        </select>
+        <input id="input-new-snippet-tags" type="text" placeholder="Tags (e.g. #sql, #database)" class="px-3 py-1.5 rounded-lg bg-[var(--bg-card)] border border-[var(--border)] text-xs text-[var(--text-primary)] outline-none focus:border-[var(--brand)]" />
+      </div>
+      <textarea id="input-new-snippet-prompt" rows="3" placeholder="Enter prompt instructions template or command..." class="w-full px-3 py-2 rounded-lg bg-[var(--bg-card)] border border-[var(--border)] text-xs text-[var(--text-primary)] outline-none focus:border-[var(--brand)] resize-none"></textarea>
+      <div class="flex justify-end">
+        <button id="btn-save-custom-snippet" type="button" class="px-3 py-1.5 rounded-lg bg-emerald-500 hover:bg-emerald-600 text-black font-semibold text-xs transition-colors cursor-pointer shadow-xs">
+          Save Snippet
+        </button>
+      </div>
+    </div>
+
+    <!-- Snippets Cards Grid List -->
+    <div id="snippet-cards-list" class="flex-1 overflow-y-auto p-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 min-h-0">
+      <!-- Cards rendered dynamically -->
+    </div>
+  </div>
+</div>

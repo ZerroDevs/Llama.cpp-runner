@@ -58,6 +58,8 @@ Our vision is to build the absolute lightest, most performant, zero-waste local 
   - **Smart Offline Detection & 1-Click Launch:** Automatically detects when the server is offline and displays an interactive overlay with a 1-click "Start LLM Server" button.
   - **Multi-Slot KV Cache Flush Engine:** Iterates across all allocated slots (`GET /slots` -> `POST /slots/{id}?action=erase` & `/slots/0?action=erase`) for bulletproof cache clearing with zero 404 errors, with graceful offline detection.
 - **Proxy Slash Commands:** The backend proxy features an internal interception engine that allows you to type slash commands directly into your chat window (or external clients like Cline/Hermes) for instant control:
+  - `/think on|off`: Toggle the model thinking and reasoning process on or off. When disabled, models respond directly without internal reasoning blocks.
+  - `/fast <prompt>`: Send an immediate prompt in fast mode without reasoning, using assistant prefill and direct system prompt directives.
   - `/imagine <prompt> | <negative>`: Directly dispatches your exact positive and negative prompts to SwarmUI for GPU rendering without any LLM alteration. If negative is omitted, a robust default negative prompt is used.
   - `/draw <prompt> | <negative>`: Auto-ejects the LLM, fires up SwarmUI to generate an image natively on the GPU, pipes it back into the chat, and wakes the LLM. The LLM enhances your positive prompt but takes your negative prompt exactly as-is. (Auto-generates negative tags if omitted).
   - `/art <prompt> | <negative>`: Identical to `/draw`, but forces the LLM to creatively rewrite and enhance BOTH your positive and negative prompts.
@@ -74,13 +76,21 @@ Our vision is to build the absolute lightest, most performant, zero-waste local 
   - `/models`: Scans and lists all `.gguf` files available in your models directory.
   - `/clear`: Wipes the backend stateless memory cache.
   - `/compact`: Condenses massive chat payloads dynamically into a dense summary block, saving huge amounts of context space.
-  
-  - `Note: --`
-  - `/guess`: Attach up to multiple reference images alongside this command. The vision model analyzes their aesthetic, composition, and style, then strictly outputs optimized `Positive Prompt:` and `Negative Prompt:` tags without triggering generation.
-  - `/yes`: Confirms and executes. Instantly catches the engineered prompts from the preceding `/guess` or `/art` response, unloads the LLM to free 100% VRAM, and dispatches them directly to SwarmUI for rendering.
-  --
+  - `/snippets` (or `/macro`): Open the interactive Prompt Library and Snippet Macros modal, or output a markdown catalog table of available custom instruction templates.
+  - Snippet Shortcuts:
+    - `/review <code/query>`: Run thorough code review (bugs, edge cases, performance, security).
+    - `/summary <text>`: Extract key takeaways and structured executive summary.
+    - `/arabic <text>`: Translate text or code explanations to clear, natural Arabic (`العربية`).
+    - `/english <text>`: Translate text or code explanations to fluent, professional English.
+    - `/explain <concept>`: Explain concepts simply with analogies and progressive breakdown.
+    - `/tests <code/function>`: Generate comprehensive unit test suites covering edge cases.
+    - `/refactor <code/snippet>`: Refactor for clarity, speed, modularity, and modern conventions.
 - **Persona Generator & Presets:** Inject custom system prompts to change AI behavior. Save your favorite personas as persistent presets, delete unused ones, or give the AI a tiny hint (e.g. "Grumpy Pirate") to have it *generate its own rich system prompt* to adopt the persona!
-- **Real-Time Thinking & Reasoning:** Native live streaming of model thinking/reasoning processes (for DeepSeek-R1, QwQ, Qwen-distill models) rendered inside expandable `<details>` blocks with live brain indicators.
+- **Real-Time Thinking & Reasoning Control:**
+  - **Live Thinking Stream & Dynamic Accordions:** Native live streaming of model thinking/reasoning processes (for DeepSeek-R1, QwQ, Qwen-distill models) rendered inside expandable `<details>` blocks with live brain indicators and real-time elapsed duration counters (e.g. `Thinking for 4s...` -> `Thought for 4.2s`).
+  - **Thinking Toggle & Fast Direct Mode:** Dedicated toolbar toggle in Studio Chat (`Thinking: ON` vs `Direct: Fast`) with `localStorage` memory. When Fast Direct Mode is active, reasoning models respond immediately without generating hundreds of `<think>` tokens.
+  - **Dual-Layer Reasoning Suppression:** Injects direct system directives (`Respond directly and concisely...`) and appends an assistant prefill (`<think>\n</think>\n`) to close the reasoning envelope before token generation begins, cutting latency by 50% to 80% while saving compute.
+  - **Stray Tag Sanitization:** Automatically detects and strips any residual `<think>` blocks or reasoning chunks during streaming in Fast Direct Mode.
 - **External Agent & IDE Compatibility:** Seamlessly connect Cline, Cursor, Open-WebUI, or Continue using standard OpenAI endpoints (`http://127.0.0.1:8080/v1`) with full Private Network Access (PNA) and CORS compliance.
 
 ### 📊 System Monitoring
@@ -156,7 +166,7 @@ The **Llama Server Control Native Engine** is engineered in **C# / .NET 10** wit
   - **Instant 0ms Window Hide:** Closing the app window hides the UI instantly while performing clean background process teardown.
 - **Clean Modular UI Architecture (`ui/`):**
   - **Modular Tab Partials (`ui/tabs/*.html`):** 11 isolated HTML views loaded dynamically with zero latency.
-  - **Modular Modals (`ui/modals/*.html`):** Dedicated HTML components for Command Palette, Quick Model Switcher, and PNG Inspector.
+  - **Modular Modals (`ui/modals/*.html`):** Dedicated HTML components for Command Palette (`cmd-palette.html`), Quick Model Switcher (`quick-model.html`), Prompt Library & Snippets (`snippets.html`), Session Stats (`session-stats.html`), and PNG Inspector (`image-inspector.html`).
   - **Modular CSS System (`ui/css/*.css`):** 8 focused stylesheets (`base.css`, `layout.css`, `components.css`, `chat.css`, `gallery.css`, `terminal.css`, `modals.css`, `styles.css`) with strict `.tab-pane` visibility (`display: none !important;`) preventing overlapping or stacked views.
   - **Modular ES Modules (`ui/js/*.js`):** 18 decoupled JavaScript controllers covering IPC, global state, telemetry, chat streaming, and media manipulation.
 - **SwarmUI Studio & Gallery Enhancements:**
@@ -183,6 +193,9 @@ The **Llama Server Control Native Engine** is engineered in **C# / .NET 10** wit
   - **1-Click Assistant Regeneration:** Re-roll responses from any assistant turn directly using the message action toolbar with version branching.
   - **Live Reasoning Stream & Auto-Collapsing Accordion (`💡 Reasoning`):** Real-time streaming extraction of reasoning tokens (`reasoning_content` / `<think>`) into an interactive disclosure box. Displays live `💡 Thinking...` in an open view while generating thoughts, then automatically collapses when thinking completes to showcase the answer cleanly. Users can click to expand or collapse the reasoning at any time with animated 180° chevron transitions.
   - **Seamless Clipboard Paste & Drag-and-Drop Image Attachments:** Instant image attachment for vision models by pressing `Ctrl+V`, right-clicking `Paste` from the context menu, or dragging & dropping image files directly onto the chat workspace, complete with thumbnail previews and 1-click removal.
+  - **Direct Document & Code Drop (Chat with Files):** Drag-and-drop or file picker attachment for `.txt`, `.md`, `.cs`, `.py`, `.js`, `.ts`, `.json`, `.pdf`, and diverse source code files directly into the chat input rail. Powered by a zero-footprint client-side text extractor that reads file streams in the browser and injects formatted, syntax-highlighted code blocks into the prompt. For `.pdf` files, an integrated zero-dependency Flate decompression engine extracts text streams on-the-fly without external Python libraries or native binary baggage.
+  - **Full-Text In-Chat Search (`Ctrl + F`):** Instant search bar overlay directly inside the active conversation. Fast substring search across user prompts, assistant answers, code snippets, and reasoning blocks with bidirectional match navigation (`< 3/12 >`, `Enter` for next, `Shift+Enter` for previous, `Esc` to close). Automatically unfolds collapsed reasoning blocks when queries match inside thinking text, smoothly centers matches in the viewport, and cleanly restores DOM nodes when dismissed.
+  - **Prompt Library & Snippet Macros (`/snippets` / `/macro`):** Quick-access modal accessible from the chat header, input toolbar, or `/snippets` / `/macro` slash commands. Features curated preset macros across Coding (Code Review, Unit Tests, Refactoring), Writing (Executive Summary), Translation (Arabic, English), and Learning (Explain Simply), alongside an inline custom snippet builder with persistent `localStorage` storage and 1-click insertion into the composer.
   - **Message Clipboard Copy:** 1-click clipboard export on all chat cards.
 - **Multi-Source Live Logs Terminal:**
   - **Categorized Source Tabs & Live Counters:** Filter real-time terminal streams seamlessly by **Show All**, **Llama** (llama.cpp engine), **SwarmUI** (diffusion pipeline), and **Other** (reverse proxy, auto-sleep, and system actions) with dynamic counter badges.
@@ -206,7 +219,7 @@ The **Llama Server Control Native Engine** is engineered in **C# / .NET 10** wit
   - **Full Static Asset & SPA Routing (`{*path}`):** Configures ASP.NET Core catch-all endpoint fallback (`{*path}`) and automated 404 upstream fallback middleware, correctly proxying all nested Svelte/Vue bundles, chunks, and CSS assets (`/_app/immutable/bundle.*.js`) rather than returning 404.
   - **COEP / COOP Security Header Sanitization:** Suppresses `Cross-Origin-Embedder-Policy` (`require-corp`), `Cross-Origin-Opener-Policy` (`same-origin`), `X-Frame-Options`, and `Content-Security-Policy` from upstream responses, allowing seamless WebView2 iframe embedding and unrestricted LAN browser rendering (`http://192.168.1.100:8080/`).
   - **Zero-Copy Local Image Endpoint (`/local_image`):** Dynamically resolves SwarmUI gallery assets across Unicode/Arabic paths with automatic query unescaping and CORS compliance, resolving both thumbnail grids and deep metadata inspector views.
-  - **Universal Slash Command Interception:** Intercepts slash commands (`/imagine`, `/draw`, `/art`, `/guess`, `/yes`, `/cfg`, `/step`, `/res`, `/sys`, `/hw`, `/eject`, `/unload`, `/models`, `/clear`, `/compact`, `/hook`, `/api`, `/help`) across all clients (including the desktop chat tab, the browser web UI, external agents like Cline and Cursor, and mobile devices).
+  - **Universal Slash Command Interception:** Intercepts slash commands (`/think`, `/fast`, `/imagine`, `/draw`, `/art`, `/guess`, `/yes`, `/cfg`, `/step`, `/res`, `/sys`, `/hw`, `/eject`, `/unload`, `/models`, `/clear`, `/compact`, `/hook`, `/api`, `/help`) across all clients (including the desktop chat tab, the browser web UI, external agents like Cline and Cursor, and mobile devices).
   - **Dual-Engine Auto-VRAM Orchestration & Hot-Reload:** Seamlessly orchestrates LLM and Diffusion workloads without VRAM collisions or CUDA OOM:
     1. **Prompt Engineering:** Llama enhances positive prompt and formats generation directives on the internal port.
     2. **Hardware-Verified VRAM Drain:** Automatically stops `llama-server` and actively verifies GPU driver deallocation so SwarmUI has 100% VRAM headroom.

@@ -10,6 +10,16 @@
 import { api } from './api.js';
 import { state } from './state.js';
 import { showToast } from './toast.js';
+import { 
+  openPromptLibraryModal, 
+  closePromptLibraryModal, 
+  renderPromptSnippets, 
+  applyPromptSnippet, 
+  getAllPromptSnippets, 
+  saveCustomPromptSnippet, 
+  deleteCustomPromptSnippet,
+  DEFAULT_SNIPPETS
+} from './modals.js';
 
 export function setupChat() {
   // Configure marked for GFM tables and clean line breaks
@@ -70,11 +80,38 @@ export function setupChat() {
   document.getElementById('btn-clear-chat')?.addEventListener('click', () => {
     if (state.isStreaming) stopGeneration();
     state.chatMessages = [];
+    state.attachedImages = [];
+    state.attachedDocuments = [];
+    renderAttachmentPreviews();
+    closeChatSearch();
     saveCurrentChatSession();
     renderPlaceholder();
     updateChatTokenBadge();
     showToast('Chat Cleared', 'Active conversation messages cleared.', 'info', 1500);
   });
+
+  // 3b. Reasoning / Fast Direct Mode Toggle
+  const reasoningToggle = document.getElementById('btn-toggle-reasoning');
+  if (reasoningToggle) {
+    const savedReasoning = localStorage.getItem('llama_enable_reasoning');
+    if (savedReasoning !== null) {
+      state.enableReasoning = savedReasoning === 'true';
+    }
+    updateReasoningToggleUI();
+
+    reasoningToggle.addEventListener('click', () => {
+      state.enableReasoning = !state.enableReasoning;
+      try {
+        localStorage.setItem('llama_enable_reasoning', String(state.enableReasoning));
+      } catch {}
+      updateReasoningToggleUI();
+      if (state.enableReasoning) {
+        showToast('Reasoning Active', 'Thinking process enabled for deep problem solving.', 'info', 1800);
+      } else {
+        showToast('Fast Direct Mode', 'Thinking suppressed for rapid direct responses.', 'success', 1800);
+      }
+    });
+  }
 
   // 4. In-Chat Model Quick-Switcher
   const modelQuickSelect = document.getElementById('chat-model-quick-select');
@@ -137,13 +174,13 @@ export function setupChat() {
     stopGeneration();
   });
 
-  // 8. Vision File Attachment & Clipboard / Drag-Drop Support
+  // 8. Vision & Document File Attachment & Clipboard / Drag-Drop Support
   const fileInput = document.getElementById('input-file-vision');
   if (fileInput) {
     fileInput.addEventListener('change', (e) => {
       const files = Array.from(e.target.files || []);
       if (files.length > 0) {
-        handleIncomingImageFiles(files, 'attached');
+        handleIncomingChatFiles(files, 'attached');
       }
       fileInput.value = '';
     });
@@ -162,7 +199,7 @@ export function setupChat() {
     }
   });
 
-  // Drag & Drop Image directly onto Chat Workspace
+  // Drag & Drop Image or Code/Document files directly onto Chat Workspace
   const chatArea = document.getElementById('chat-main-area');
   if (chatArea) {
     chatArea.addEventListener('dragover', (e) => {
@@ -175,11 +212,8 @@ export function setupChat() {
     chatArea.addEventListener('drop', (e) => {
       const files = e.dataTransfer?.files;
       if (!files || files.length === 0) return;
-      const imageFiles = Array.from(files).filter(isImageFile);
-      if (imageFiles.length > 0) {
-        e.preventDefault();
-        handleIncomingImageFiles(imageFiles, 'dropped');
-      }
+      e.preventDefault();
+      handleIncomingChatFiles(Array.from(files), 'dropped');
     });
   }
 
@@ -249,6 +283,59 @@ export function setupChat() {
     ];
     navigator.clipboard.writeText(lines.join('\n'));
     showToast('Copied to Clipboard', 'Session stats summary copied.', 'success', 2000);
+  });
+
+  // 11. In-Chat Full-Text Search (Ctrl+F)
+  document.getElementById('btn-open-chat-search')?.addEventListener('click', () => {
+    openChatSearch();
+  });
+
+  document.getElementById('btn-chat-search-close')?.addEventListener('click', () => {
+    closeChatSearch();
+  });
+
+  document.getElementById('btn-chat-search-next')?.addEventListener('click', () => {
+    navigateChatSearch(1);
+  });
+
+  document.getElementById('btn-chat-search-prev')?.addEventListener('click', () => {
+    navigateChatSearch(-1);
+  });
+
+  const searchInputEl = document.getElementById('input-chat-search');
+  if (searchInputEl) {
+    searchInputEl.addEventListener('input', (e) => {
+      performChatSearch(e.target.value);
+    });
+
+    searchInputEl.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        navigateChatSearch(e.shiftKey ? -1 : 1);
+      } else if (e.key === 'Escape') {
+        e.preventDefault();
+        closeChatSearch();
+      }
+    });
+  }
+
+  // Global Ctrl+F / Cmd+F handler for Studio Chat tab
+  window.addEventListener('keydown', (e) => {
+    if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'f') {
+      if (state.activeTab === 'tab-chat') {
+        e.preventDefault();
+        openChatSearch();
+      }
+    }
+  });
+
+  // 12. Prompt Library & Snippets Modal Triggers
+  document.getElementById('btn-chat-snippets')?.addEventListener('click', () => {
+    openPromptLibraryModal();
+  });
+
+  document.getElementById('btn-chat-input-snippets')?.addEventListener('click', () => {
+    openPromptLibraryModal();
   });
 }
 
@@ -527,6 +614,26 @@ function updateSessionCountBadge() {
   }
 }
 
+export function updateReasoningToggleUI() {
+  const btn = document.getElementById('btn-toggle-reasoning');
+  if (!btn) return;
+
+  const isEnabled = state.enableReasoning !== false;
+  if (isEnabled) {
+    btn.className = 'flex items-center gap-1.5 px-2.5 py-1 rounded-lg border border-amber-500/30 bg-amber-500/10 text-amber-300 hover:bg-amber-500/20 text-xs font-semibold transition-all cursor-pointer shadow-xs select-none';
+    btn.title = 'Thinking: ON (Click to switch to direct fast response mode)';
+    btn.innerHTML = '<i data-lucide="brain" id="icon-reasoning" class="w-3.5 h-3.5 text-amber-400"></i><span id="text-reasoning" class="hidden sm:inline">Thinking: ON</span>';
+  } else {
+    btn.className = 'flex items-center gap-1.5 px-2.5 py-1 rounded-lg border border-emerald-500/30 bg-emerald-500/10 text-emerald-300 hover:bg-emerald-500/20 text-xs font-semibold transition-all cursor-pointer shadow-xs select-none';
+    btn.title = 'Direct Fast Mode (Click to enable reasoning and thinking tokens)';
+    btn.innerHTML = '<i data-lucide="zap" id="icon-reasoning" class="w-3.5 h-3.5 text-emerald-400"></i><span id="text-reasoning" class="hidden sm:inline">Direct: Fast</span>';
+  }
+
+  if (window.lucide) {
+    window.lucide.createIcons({ root: btn });
+  }
+}
+
 export function toggleChatSidebar(show, savePreference = true) {
   const sidebar = document.getElementById('chat-history-sidebar');
   const toggleBtn = document.getElementById('btn-toggle-chat-sidebar');
@@ -791,10 +898,23 @@ function appendMessage(role, text, attachments = [], idx = 0, msgObj = null) {
       attachHtml = `<div class="flex gap-2 mb-2 flex-wrap">${attachments.map(a => `<img src="${a.url || a.dataUrl}" class="w-20 h-20 object-cover rounded-xl border border-white/20" />`).join('')}</div>`;
     }
 
+    let docHtml = '';
+    const docs = msg.attachedDocuments || [];
+    if (docs.length > 0) {
+      docHtml = `<div class="flex gap-1.5 mb-2 flex-wrap">${docs.map(d => `
+        <div class="chat-message-doc-badge bg-black/20 text-black border border-black/15 font-semibold text-[11px] px-2 py-1 rounded-lg flex items-center gap-1.5">
+          <i data-lucide="${d.type === 'pdf' ? 'book-open' : 'file-code'}" class="w-3.5 h-3.5"></i>
+          <span class="truncate max-w-[150px]">${escapeHtml(d.name)}</span>
+          <span class="text-[9px] opacity-75">(${d.lines}L)</span>
+        </div>
+      `).join('')}</div>`;
+    }
+
     msgWrapper.innerHTML = `
       <div class="flex flex-col items-end gap-1 max-w-xl group">
         <div class="user-bubble-box bg-[var(--brand)] text-black font-medium rounded-2xl rounded-tr-xs p-3.5 text-xs shadow-md select-text leading-relaxed">
           ${attachHtml}
+          ${docHtml}
           <div class="msg-text-content whitespace-pre-wrap">${escapeHtml(text)}</div>
         </div>
         <div class="chat-msg-actions flex items-center gap-1.5 mt-0.5">
@@ -996,29 +1116,69 @@ export async function sendChatMessage() {
   const input = document.getElementById('chat-input');
   if (!input) return;
   const prompt = input.value.trim();
-  if (!prompt && state.attachedImages.length === 0) return;
+  const hasImages = state.attachedImages && state.attachedImages.length > 0;
+  const hasDocs = state.attachedDocuments && state.attachedDocuments.length > 0;
+  if (!prompt && !hasImages && !hasDocs) return;
+
+  // Intercept /snippets or /macro command entered in chat input
+  if (prompt === '/snippets' || prompt === '/macro') {
+    input.value = '';
+    input.style.height = 'auto';
+    openPromptLibraryModal();
+    return;
+  }
 
   input.value = '';
   input.style.height = 'auto';
   document.getElementById('slash-menu')?.classList.add('hidden');
 
-  const currentAttachments = [...state.attachedImages];
+  const currentAttachments = [...(state.attachedImages || [])];
   state.attachedImages = [];
+
+  const currentDocs = [...(state.attachedDocuments || [])];
+  state.attachedDocuments = [];
   renderAttachmentPreviews();
+
+  // Sync reasoning toggle state if user typed a /think command
+  if (prompt === '/think off' || prompt === '/think 0' || prompt === '/think false') {
+    state.enableReasoning = false;
+    try { localStorage.setItem('llama_enable_reasoning', 'false'); } catch {}
+    updateReasoningToggleUI();
+  } else if (prompt === '/think on' || prompt === '/think 1' || prompt === '/think true') {
+    state.enableReasoning = true;
+    try { localStorage.setItem('llama_enable_reasoning', 'true'); } catch {}
+    updateReasoningToggleUI();
+  }
+
+  // Build final prompt including attached documents if present
+  let finalPrompt = prompt;
+  if (currentDocs.length > 0) {
+    const docBlocks = currentDocs.map(d => {
+      const lang = d.lang || '';
+      return `\`\`\`${lang}\n// File: ${d.name} (${d.lines} lines, ${formatFileSize(d.size)})\n${d.content}\n\`\`\``;
+    }).join('\n\n');
+
+    if (finalPrompt) {
+      finalPrompt = `${docBlocks}\n\n${finalPrompt}`;
+    } else {
+      finalPrompt = `${docBlocks}\n\nPlease review and explain the attached file(s).`;
+    }
+  }
 
   // Add User Message to History with branching version container
   const userMsg = {
     role: 'user',
-    content: prompt,
+    content: finalPrompt,
     attachments: currentAttachments,
+    attachedDocuments: currentDocs,
     versions: [
-      { content: prompt, attachments: currentAttachments, subsequent: [] }
+      { content: finalPrompt, attachments: currentAttachments, attachedDocuments: currentDocs, subsequent: [] }
     ],
     currentVersion: 0
   };
   state.chatMessages.push(userMsg);
 
-  updateActiveSessionTitleFromPrompt(prompt);
+  updateActiveSessionTitleFromPrompt(prompt || (currentDocs.length > 0 ? currentDocs[0].name : 'Document'));
   saveCurrentChatSession();
   renderAllMessages();
   await triggerChatStream();
@@ -1057,6 +1217,16 @@ async function triggerChatStream(existingAssistantMsg = null) {
     }
   }
 
+  // Fast Direct Mode: inject system directive to suppress reasoning
+  if (state.enableReasoning === false) {
+    const directDirective = 'Respond directly and concisely to the user. Do not use <think> tags or output internal thoughts. Output only the final response.';
+    if (messagesPayload.length > 0 && messagesPayload[0].role === 'system') {
+      messagesPayload[0].content += `\n\n${directDirective}`;
+    } else {
+      messagesPayload.push({ role: 'system', content: directDirective });
+    }
+  }
+
   // Include up to last 20 messages for context
   const contextSlice = state.chatMessages.slice(-20);
   for (const m of contextSlice) {
@@ -1087,6 +1257,11 @@ async function triggerChatStream(existingAssistantMsg = null) {
     } else {
       messagesPayload.push({ role: m.role, content: m.content });
     }
+  }
+
+  // Fast Direct Mode Prefill: Add assistant prefill to close thinking token envelope
+  if (state.enableReasoning === false) {
+    messagesPayload.push({ role: 'assistant', content: '<think>\n</think>\n' });
   }
 
   setStreamingState(true);
@@ -1131,6 +1306,7 @@ async function triggerChatStream(existingAssistantMsg = null) {
     let thinkStartTime = null;
     let thinkDurationSec = null;
     let thinkTicker = null;
+    let inSuppressedThinkBlock = false;
 
     const startThinkingTimer = () => {
       if (!thinkStartTime) {
@@ -1185,44 +1361,70 @@ async function triggerChatStream(existingAssistantMsg = null) {
 
             // 1. Process reasoning stream
             if (reasoningChunk) {
-              if (!hasOpenedThinkTag) {
-                startThinkingTimer();
-                fullResponse += '<think>';
-                hasOpenedThinkTag = true;
+              if (state.enableReasoning !== false) {
+                if (!hasOpenedThinkTag) {
+                  startThinkingTimer();
+                  fullResponse += '<think>';
+                  hasOpenedThinkTag = true;
+                }
+                fullResponse += reasoningChunk;
+                receivedTokens++;
+                chunkRendered = true;
               }
-              fullResponse += reasoningChunk;
-              receivedTokens++;
-              chunkRendered = true;
             }
 
             // 2. Process content stream
             if (contentChunk) {
-              // If reasoning was previously streaming via reasoning_content and not yet closed, close it now
-              if (hasOpenedThinkTag && !hasClosedThinkTag) {
-                stopThinkingTimer();
-                fullResponse += '</think>\n\n';
-                hasClosedThinkTag = true;
-              }
+              if (state.enableReasoning !== false) {
+                // If reasoning was previously streaming via reasoning_content and not yet closed, close it now
+                if (hasOpenedThinkTag && !hasClosedThinkTag) {
+                  stopThinkingTimer();
+                  fullResponse += '</think>\n\n';
+                  hasClosedThinkTag = true;
+                }
 
-              // Detect raw <think> / </think> tags inside contentChunk
-              if (contentChunk.includes('<think>')) {
-                hasOpenedThinkTag = true;
-                startThinkingTimer();
-              }
-              if (contentChunk.includes('</think>')) {
-                hasClosedThinkTag = true;
-                stopThinkingTimer();
-              }
+                // Detect raw <think> / </think> tags inside contentChunk
+                if (contentChunk.includes('<think>')) {
+                  hasOpenedThinkTag = true;
+                  startThinkingTimer();
+                }
+                if (contentChunk.includes('</think>')) {
+                  hasClosedThinkTag = true;
+                  stopThinkingTimer();
+                }
 
-              fullResponse += contentChunk;
-              receivedTokens++;
-              chunkRendered = true;
+                fullResponse += contentChunk;
+                receivedTokens++;
+                chunkRendered = true;
+              } else {
+                // Fast Direct Mode: suppress reasoning tags and internal thought blocks
+                let cleanChunk = contentChunk;
+                if (cleanChunk.includes('<think>')) {
+                  inSuppressedThinkBlock = true;
+                }
+                if (inSuppressedThinkBlock) {
+                  if (cleanChunk.includes('</think>')) {
+                    cleanChunk = cleanChunk.substring(cleanChunk.indexOf('</think>') + 8);
+                    inSuppressedThinkBlock = false;
+                  } else {
+                    cleanChunk = '';
+                  }
+                }
+                if (cleanChunk) {
+                  cleanChunk = cleanChunk.replace(/<think>[\s\S]*?<\/think>/gi, '').replace(/<\/?think>/gi, '');
+                  if (cleanChunk) {
+                    fullResponse += cleanChunk;
+                    receivedTokens++;
+                    chunkRendered = true;
+                  }
+                }
+              }
             }
 
             if (chunkRendered) {
               // While actively thinking, stamp current elapsed seconds into the unclosed think tag for live display
               let renderPayload = fullResponse;
-              if (hasOpenedThinkTag && !hasClosedThinkTag && thinkStartTime) {
+              if (state.enableReasoning !== false && hasOpenedThinkTag && !hasClosedThinkTag && thinkStartTime) {
                 const liveSec = Math.max(1, Math.round((Date.now() - thinkStartTime) / 1000));
                 renderPayload = renderPayload.replace(/<think(?:\s+(?:time|duration)="[^"]*")?>/, `<think time="${formatDurationDisplay(liveSec)}">`);
               }
@@ -1240,16 +1442,20 @@ async function triggerChatStream(existingAssistantMsg = null) {
       }
     }
 
-    // Ensure any trailing opened <think> tag is closed cleanly when stream ends
-    if (hasOpenedThinkTag && !hasClosedThinkTag) {
-      stopThinkingTimer();
-      fullResponse += '</think>\n\n';
-      hasClosedThinkTag = true;
-    } else if (fullResponse.includes('<think>') && !fullResponse.includes('</think>')) {
-      stopThinkingTimer();
-      fullResponse += '</think>\n\n';
-    } else if (thinkStartTime && thinkDurationSec === null) {
-      stopThinkingTimer();
+    // Ensure tags are finalized cleanly when stream ends
+    if (state.enableReasoning !== false) {
+      if (hasOpenedThinkTag && !hasClosedThinkTag) {
+        stopThinkingTimer();
+        fullResponse += '</think>\n\n';
+        hasClosedThinkTag = true;
+      } else if (fullResponse.includes('<think>') && !fullResponse.includes('</think>')) {
+        stopThinkingTimer();
+        fullResponse += '</think>\n\n';
+      } else if (thinkStartTime && thinkDurationSec === null) {
+        stopThinkingTimer();
+      }
+    } else {
+      fullResponse = fullResponse.replace(/<think>[\s\S]*?<\/think>/gi, '').replace(/<\/?think>/gi, '').trimStart();
     }
 
     const elapsedSec = Math.max(0.01, (Date.now() - startTime) / 1000);
@@ -1653,6 +1859,16 @@ function handleSlashMenu(text) {
   if (text.startsWith('/')) {
     const filter = text.substring(1).toLowerCase();
     const commands = [
+      { cmd: '/snippets', desc: 'Open Prompt Library & Macro snippets' },
+      { cmd: '/review <code/text>', desc: 'Senior code review (bugs, security)' },
+      { cmd: '/refactor <code>', desc: 'Clean architecture & performance' },
+      { cmd: '/tests <code>', desc: 'Generate edge-case unit tests' },
+      { cmd: '/summary <text>', desc: 'Executive summary + key points' },
+      { cmd: '/arabic <text>', desc: 'Translate to Modern Standard Arabic' },
+      { cmd: '/english <text>', desc: 'Translate to fluent English' },
+      { cmd: '/explain <concept>', desc: 'ELI5 plain language explanation' },
+      { cmd: '/think <on|off>', desc: 'Toggle reasoning thinking tokens' },
+      { cmd: '/fast <prompt>', desc: 'Direct response without reasoning' },
       { cmd: '/imagine <prompt>', desc: 'Direct SwarmUI generation' },
       { cmd: '/draw <prompt>', desc: 'LLM positive prompt enhancement + render' },
       { cmd: '/art <prompt>', desc: 'LLM rewrite positive & negative + render' },
@@ -1682,11 +1898,16 @@ function handleSlashMenu(text) {
 
       menu.querySelectorAll('[data-cmd]').forEach(item => {
         item.addEventListener('click', () => {
+          const cmd = item.getAttribute('data-cmd');
+          menu.classList.add('hidden');
+          if (cmd === '/snippets' || cmd === '/macro') {
+            openPromptLibraryModal();
+            return;
+          }
           const input = document.getElementById('chat-input');
           if (input) {
-            input.value = item.getAttribute('data-cmd') + ' ';
+            input.value = cmd + ' ';
             input.focus();
-            menu.classList.add('hidden');
           }
         });
       });
@@ -1700,19 +1921,48 @@ function renderAttachmentPreviews() {
   const container = document.getElementById('chat-attachment-preview');
   if (!container) return;
 
-  if (state.attachedImages.length === 0) {
+  const hasImages = (state.attachedImages || []).length > 0;
+  const hasDocs = (state.attachedDocuments || []).length > 0;
+
+  if (!hasImages && !hasDocs) {
     container.classList.add('hidden');
     container.innerHTML = '';
     return;
   }
 
   container.classList.remove('hidden');
-  container.innerHTML = state.attachedImages.map((img, idx) => `
-    <div class="relative group shrink-0">
-      <img src="${img.url || img.dataUrl}" alt="${escapeHtml(img.name)}" class="w-12 h-12 object-cover rounded-xl border border-[var(--border)]" />
-      <button class="btn-remove-attachment absolute -top-1.5 -right-1.5 w-4 h-4 rounded-full bg-rose-500 text-white flex items-center justify-center text-[10px] cursor-pointer" data-index="${idx}">×</button>
-    </div>
-  `).join('');
+  let html = '';
+
+  // Render images
+  if (hasImages) {
+    html += state.attachedImages.map((img, idx) => `
+      <div class="relative group shrink-0">
+        <img src="${img.url || img.dataUrl}" alt="${escapeHtml(img.name)}" class="w-12 h-12 object-cover rounded-xl border border-[var(--border)]" />
+        <button class="btn-remove-attachment absolute -top-1.5 -right-1.5 w-4 h-4 rounded-full bg-rose-500 text-white flex items-center justify-center text-[10px] cursor-pointer shadow-xs" data-index="${idx}">×</button>
+      </div>
+    `).join('');
+  }
+
+  // Render documents
+  if (hasDocs) {
+    html += state.attachedDocuments.map((doc, idx) => {
+      const docIcon = doc.type === 'pdf' ? 'book-open' : 'file-code';
+      return `
+        <div class="chat-doc-chip" data-doc-index="${idx}">
+          <i data-lucide="${docIcon}" class="w-4 h-4 text-cyan-400 shrink-0"></i>
+          <div class="flex flex-col min-w-0">
+            <span class="font-medium truncate max-w-[130px] sm:max-w-[170px] text-[11px]">${escapeHtml(doc.name)}</span>
+            <span class="text-[9px] text-[var(--text-muted)] font-mono">${doc.lines} lines • ${formatFileSize(doc.size)}</span>
+          </div>
+          <button class="btn-remove-doc p-0.5 rounded hover:bg-[var(--bg-card)] text-[var(--text-muted)] hover:text-rose-400 cursor-pointer ml-1" data-index="${idx}" title="Remove file">
+            <i data-lucide="x" class="w-3.5 h-3.5"></i>
+          </button>
+        </div>
+      `;
+    }).join('');
+  }
+
+  container.innerHTML = html;
 
   container.querySelectorAll('.btn-remove-attachment').forEach(btn => {
     btn.addEventListener('click', () => {
@@ -1721,6 +1971,268 @@ function renderAttachmentPreviews() {
       renderAttachmentPreviews();
     });
   });
+
+  container.querySelectorAll('.btn-remove-doc').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const idx = parseInt(btn.getAttribute('data-index'));
+      state.attachedDocuments.splice(idx, 1);
+      renderAttachmentPreviews();
+    });
+  });
+
+  if (window.lucide) {
+    window.lucide.createIcons({ root: container });
+  }
+}
+
+export function formatFileSize(bytes) {
+  if (!bytes || bytes <= 0) return '0 B';
+  const k = 1024;
+  const sizes = ['B', 'KB', 'MB', 'GB'];
+  const i = Math.floor(Math.log(bytes) / Math.log(k));
+  return `${(bytes / Math.pow(k, i)).toFixed(i === 0 ? 0 : 1)} ${sizes[i]}`;
+}
+
+export function detectFileLanguage(filename) {
+  if (!filename) return '';
+  const ext = filename.split('.').pop()?.toLowerCase() || '';
+  const langMap = {
+    cs: 'csharp',
+    py: 'python',
+    js: 'javascript',
+    mjs: 'javascript',
+    ts: 'typescript',
+    tsx: 'tsx',
+    jsx: 'jsx',
+    json: 'json',
+    html: 'html',
+    htm: 'html',
+    css: 'css',
+    scss: 'scss',
+    md: 'markdown',
+    markdown: 'markdown',
+    sql: 'sql',
+    sh: 'bash',
+    bash: 'bash',
+    bat: 'batch',
+    cmd: 'batch',
+    ps1: 'powershell',
+    rs: 'rust',
+    go: 'go',
+    cpp: 'cpp',
+    c: 'c',
+    h: 'c',
+    hpp: 'cpp',
+    java: 'java',
+    kt: 'kotlin',
+    xml: 'xml',
+    yaml: 'yaml',
+    yml: 'yaml',
+    pdf: 'markdown'
+  };
+  return langMap[ext] || ext;
+}
+
+export async function extractTextFromCodeOrTextFile(file) {
+  try {
+    return await file.text();
+  } catch {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = (e) => resolve(e.target.result || '');
+      reader.onerror = reject;
+      reader.readAsText(file, 'utf-8');
+    });
+  }
+}
+
+export async function extractTextFromPdf(file) {
+  try {
+    const arrayBuffer = await file.arrayBuffer();
+    const bytes = new Uint8Array(arrayBuffer);
+    let extractedText = '';
+
+    function parseTextOperators(contentStr) {
+      let result = '';
+      const btRegex = /BT([\s\S]*?)ET/g;
+      let btMatch;
+
+      while ((btMatch = btRegex.exec(contentStr)) !== null) {
+        const block = btMatch[1];
+        
+        // Match Tj: (Text) Tj
+        const tjRegex = /\(((?:\\\(|\\\)|[^)])*)\)\s*Tj/g;
+        let tjMatch;
+        while ((tjMatch = tjRegex.exec(block)) !== null) {
+          result += unescapePdfString(tjMatch[1]) + ' ';
+        }
+
+        // Match TJ: [(T1) 20 (T2)] TJ
+        const tjArrRegex = /\[([\s\S]*?)\]\s*TJ/g;
+        let arrMatch;
+        while ((arrMatch = tjArrRegex.exec(block)) !== null) {
+          const inner = arrMatch[1];
+          const innerRegex = /\(((?:\\\(|\\\)|[^)])*)\)/g;
+          let strMatch;
+          while ((strMatch = innerRegex.exec(inner)) !== null) {
+            result += unescapePdfString(strMatch[1]);
+          }
+          result += ' ';
+        }
+
+        // Match quote operators ' and "
+        const quoteRegex = /\(((?:\\\(|\\\)|[^)])*)\)\s*['"]/g;
+        let qMatch;
+        while ((qMatch = quoteRegex.exec(block)) !== null) {
+          result += '\n' + unescapePdfString(qMatch[1]);
+        }
+        result += '\n';
+      }
+      return result;
+    }
+
+    function unescapePdfString(str) {
+      if (!str) return '';
+      return str
+        .replace(/\\([\\()])/g, '$1')
+        .replace(/\\n/g, '\n')
+        .replace(/\\r/g, '\r')
+        .replace(/\\t/g, '\t')
+        .replace(/\\b/g, '\b')
+        .replace(/\\f/g, '\f')
+        .replace(/\\([0-7]{1,3})/g, (_, oct) => String.fromCharCode(parseInt(oct, 8)));
+    }
+
+    const latin1 = new TextDecoder('latin1');
+    const fullRaw = latin1.decode(bytes);
+    const streamTag = 'stream';
+    const endStreamTag = 'endstream';
+
+    const streamIndices = [];
+    let pos = 0;
+    while ((pos = fullRaw.indexOf(streamTag, pos)) !== -1) {
+      const dictStart = fullRaw.lastIndexOf('<<', pos);
+      let isFlate = false;
+      if (dictStart !== -1 && pos - dictStart < 2000) {
+        const dictContent = fullRaw.substring(dictStart, pos);
+        if (dictContent.includes('/FlateDecode')) {
+          isFlate = true;
+        }
+      }
+
+      let dataStart = pos + streamTag.length;
+      if (fullRaw.charCodeAt(dataStart) === 0x0d && fullRaw.charCodeAt(dataStart + 1) === 0x0a) {
+        dataStart += 2;
+      } else if (fullRaw.charCodeAt(dataStart) === 0x0a) {
+        dataStart += 1;
+      }
+
+      const dataEnd = fullRaw.indexOf(endStreamTag, dataStart);
+      if (dataEnd !== -1 && dataEnd > dataStart) {
+        streamIndices.push({ start: dataStart, end: dataEnd, isFlate });
+        pos = dataEnd + endStreamTag.length;
+      } else {
+        pos += streamTag.length;
+      }
+    }
+
+    for (const s of streamIndices) {
+      const streamBytes = bytes.subarray(s.start, s.end);
+      if (s.isFlate) {
+        let decompressed = null;
+        if (typeof DecompressionStream !== 'undefined') {
+          try {
+            const ds = new DecompressionStream('deflate');
+            const decompStream = new Response(streamBytes).body.pipeThrough(ds);
+            decompressed = await new Response(decompStream).arrayBuffer();
+          } catch {
+            try {
+              const rawBytes = streamBytes.subarray(2, Math.max(2, streamBytes.length - 4));
+              const dsRaw = new DecompressionStream('deflate-raw');
+              const decompStream = new Response(rawBytes).body.pipeThrough(dsRaw);
+              decompressed = await new Response(decompStream).arrayBuffer();
+            } catch {}
+          }
+        }
+
+        if (decompressed) {
+          const decoded = latin1.decode(new Uint8Array(decompressed));
+          const found = parseTextOperators(decoded);
+          if (found.trim()) extractedText += found + '\n';
+        }
+      } else {
+        const decoded = latin1.decode(streamBytes);
+        const found = parseTextOperators(decoded);
+        if (found.trim()) extractedText += found + '\n';
+      }
+    }
+
+    const directFound = parseTextOperators(fullRaw);
+    if (directFound.trim()) {
+      extractedText += directFound + '\n';
+    }
+
+    let cleaned = extractedText
+      .replace(/[ \t]+/g, ' ')
+      .replace(/\n\s*\n\s*\n/g, '\n\n')
+      .trim();
+
+    if (!cleaned) {
+      cleaned = `[Document: ${file.name} (PDF structure parsed, but no selectable text streams found.)]`;
+    }
+
+    return cleaned;
+  } catch (err) {
+    console.warn('[PDF Extractor Error]', err);
+    return `[PDF Document: ${file.name} - Extraction error: ${err.message}]`;
+  }
+}
+
+export async function handleIncomingChatFiles(files, source = 'attached') {
+  if (!files || files.length === 0) return;
+  if (!state.attachedDocuments) state.attachedDocuments = [];
+  if (!state.attachedImages) state.attachedImages = [];
+
+  const images = [];
+  const documents = [];
+
+  for (const f of files) {
+    if (isImageFile(f)) {
+      images.push(f);
+    } else {
+      documents.push(f);
+    }
+  }
+
+  // Handle images
+  if (images.length > 0) {
+    handleIncomingImageFiles(images, source);
+  }
+
+  // Handle documents
+  for (const docFile of documents) {
+    try {
+      const isPdf = docFile.name.toLowerCase().endsWith('.pdf') || docFile.type === 'application/pdf';
+      const text = isPdf ? await extractTextFromPdf(docFile) : await extractTextFromCodeOrTextFile(docFile);
+      const lines = text.split('\n').length;
+      const lang = detectFileLanguage(docFile.name);
+
+      state.attachedDocuments.push({
+        name: docFile.name,
+        size: docFile.size,
+        lines: lines,
+        chars: text.length,
+        lang: lang,
+        type: isPdf ? 'pdf' : 'code',
+        content: text
+      });
+
+      renderAttachmentPreviews();
+      showToast('Document Attached', `${docFile.name} (${lines} lines, ${formatFileSize(docFile.size)}) ready for prompt.`, 'success', 2000);
+    } catch (err) {
+      showToast('Read Error', `Could not extract text from ${docFile.name}: ${err.message}`, 'error', 3000);
+    }
+  }
 }
 
 function escapeHtml(str) {
@@ -1745,35 +2257,30 @@ function handlePasteImageEvent(e) {
   const clipboardData = e.clipboardData || window.clipboardData;
   if (!clipboardData) return;
 
-  const imageFiles = [];
+  const chatFiles = [];
 
-  // 1. Check items (Blobs / Files in clipboard)
+  // Check items in clipboard
   const items = clipboardData.items;
   if (items && items.length > 0) {
     for (let i = 0; i < items.length; i++) {
       const item = items[i];
-      if (item.kind === 'file' && (item.type.startsWith('image/') || item.type === '')) {
+      if (item.kind === 'file') {
         const file = item.getAsFile();
-        if (file && (file.type.startsWith('image/') || isImageFile(file))) {
-          imageFiles.push(file);
-        }
+        if (file) chatFiles.push(file);
       }
     }
   }
 
-  // 2. Fallback to files list if items was empty
-  if (imageFiles.length === 0 && clipboardData.files && clipboardData.files.length > 0) {
+  // Fallback to files list
+  if (chatFiles.length === 0 && clipboardData.files && clipboardData.files.length > 0) {
     for (let i = 0; i < clipboardData.files.length; i++) {
-      const file = clipboardData.files[i];
-      if (isImageFile(file)) {
-        imageFiles.push(file);
-      }
+      chatFiles.push(clipboardData.files[i]);
     }
   }
 
-  if (imageFiles.length > 0) {
+  if (chatFiles.length > 0) {
     e.preventDefault();
-    handleIncomingImageFiles(imageFiles, 'pasted');
+    handleIncomingChatFiles(chatFiles, 'pasted');
   }
 }
 
@@ -1818,6 +2325,171 @@ function handleIncomingImageFiles(files, source = 'pasted') {
     reader.readAsDataURL(file);
   });
 }
+
+// ==========================================
+// IN-CHAT FULL-TEXT SEARCH (CTRL+F)
+// ==========================================
+
+let searchMatches = [];
+let currentSearchIndex = -1;
+
+export function openChatSearch() {
+  const bar = document.getElementById('chat-search-bar');
+  if (!bar) return;
+  bar.classList.remove('hidden');
+  const input = document.getElementById('input-chat-search');
+  if (input) {
+    input.focus();
+    input.select();
+    if (input.value.trim()) {
+      performChatSearch(input.value.trim());
+    }
+  }
+}
+
+export function closeChatSearch() {
+  const bar = document.getElementById('chat-search-bar');
+  if (bar) bar.classList.add('hidden');
+  clearChatSearchHighlights();
+  const counter = document.getElementById('chat-search-counter');
+  if (counter) counter.textContent = '0 / 0';
+}
+
+export function clearChatSearchHighlights() {
+  const marks = document.querySelectorAll('mark.chat-search-match');
+  marks.forEach(mark => {
+    const parent = mark.parentNode;
+    if (parent) {
+      parent.replaceChild(document.createTextNode(mark.textContent), mark);
+      parent.normalize();
+    }
+  });
+  searchMatches = [];
+  currentSearchIndex = -1;
+}
+
+export function performChatSearch(query) {
+  clearChatSearchHighlights();
+  const counter = document.getElementById('chat-search-counter');
+  const trimmed = (query || '').trim();
+  if (!trimmed || trimmed.length < 1) {
+    if (counter) counter.textContent = '0 / 0';
+    return;
+  }
+
+  const container = document.getElementById('chat-messages');
+  if (!container) return;
+
+  const msgWrappers = container.querySelectorAll('.chat-msg-wrapper');
+  const lowerQuery = trimmed.toLowerCase();
+
+  msgWrappers.forEach(wrapper => {
+    const textNodes = [];
+    const walker = document.createTreeWalker(
+      wrapper,
+      NodeFilter.SHOW_TEXT,
+      {
+        acceptNode: (node) => {
+          if (!node.nodeValue || !node.nodeValue.trim()) return NodeFilter.FILTER_REJECT;
+          const parentTag = node.parentElement?.tagName;
+          if (parentTag === 'SCRIPT' || parentTag === 'STYLE' || parentTag === 'MARK') return NodeFilter.FILTER_REJECT;
+          return NodeFilter.FILTER_ACCEPT;
+        }
+      }
+    );
+
+    let node;
+    while ((node = walker.nextNode())) {
+      textNodes.push(node);
+    }
+
+    for (const tNode of textNodes) {
+      const textVal = tNode.nodeValue;
+      const lowerVal = textVal.toLowerCase();
+      let matchIdx = lowerVal.indexOf(lowerQuery);
+      if (matchIdx === -1) continue;
+
+      const fragment = document.createDocumentFragment();
+      let lastIdx = 0;
+
+      while (matchIdx !== -1) {
+        if (matchIdx > lastIdx) {
+          fragment.appendChild(document.createTextNode(textVal.substring(lastIdx, matchIdx)));
+        }
+
+        const mark = document.createElement('mark');
+        mark.className = 'chat-search-match';
+        mark.textContent = textVal.substring(matchIdx, matchIdx + trimmed.length);
+        fragment.appendChild(mark);
+
+        lastIdx = matchIdx + trimmed.length;
+        matchIdx = lowerVal.indexOf(lowerQuery, lastIdx);
+      }
+
+      if (lastIdx < textVal.length) {
+        fragment.appendChild(document.createTextNode(textVal.substring(lastIdx)));
+      }
+
+      const parent = tNode.parentNode;
+      if (parent) {
+        parent.replaceChild(fragment, tNode);
+      }
+    }
+  });
+
+  searchMatches = Array.from(document.querySelectorAll('mark.chat-search-match'));
+
+  if (searchMatches.length > 0) {
+    currentSearchIndex = 0;
+    searchMatches[0].classList.add('chat-search-match-active');
+    
+    // Auto-open thinking accordion if match is inside it
+    const parentDetails = searchMatches[0].closest('details');
+    if (parentDetails) parentDetails.open = true;
+
+    searchMatches[0].scrollIntoView({ behavior: 'smooth', block: 'center' });
+    if (counter) counter.textContent = `< 1 / ${searchMatches.length} >`;
+  } else {
+    if (counter) counter.textContent = '0 / 0';
+  }
+}
+
+export function navigateChatSearch(direction) {
+  if (!searchMatches || searchMatches.length === 0) return;
+
+  if (currentSearchIndex >= 0 && currentSearchIndex < searchMatches.length) {
+    searchMatches[currentSearchIndex].classList.remove('chat-search-match-active');
+  }
+
+  currentSearchIndex = (currentSearchIndex + direction + searchMatches.length) % searchMatches.length;
+
+  const activeMatch = searchMatches[currentSearchIndex];
+  if (activeMatch) {
+    activeMatch.classList.add('chat-search-match-active');
+    const parentDetails = activeMatch.closest('details');
+    if (parentDetails) parentDetails.open = true;
+
+    activeMatch.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    const counter = document.getElementById('chat-search-counter');
+    if (counter) counter.textContent = `< ${currentSearchIndex + 1} / ${searchMatches.length} >`;
+  }
+}
+
+// ==========================================
+// PROMPT LIBRARY & SNIPPET MACROS (/snippets)
+// (Centralized in ui/modals/snippets.html & ui/js/modals.js)
+// ==========================================
+
+export {
+  openPromptLibraryModal,
+  closePromptLibraryModal,
+  renderPromptSnippets,
+  applyPromptSnippet,
+  getAllPromptSnippets,
+  saveCustomPromptSnippet,
+  deleteCustomPromptSnippet,
+  DEFAULT_SNIPPETS
+};
 
 // ==========================================
 // SESSION & CONTEXT TOKEN TELEMETRY INSPECTOR

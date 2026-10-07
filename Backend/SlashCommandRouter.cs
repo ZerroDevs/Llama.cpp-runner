@@ -44,6 +44,17 @@ namespace LlamaServerControl.Backend
             string p = prompt.Trim();
             return p.StartsWith("/") && (
                 p == "/help" ||
+                p == "/think" || p.StartsWith("/think ") ||
+                p.StartsWith("/fast") ||
+                p == "/snippets" || p.StartsWith("/snippets ") ||
+                p == "/macro" || p.StartsWith("/macro ") ||
+                p.StartsWith("/review") ||
+                p.StartsWith("/summary") ||
+                p.StartsWith("/arabic") ||
+                p.StartsWith("/english") ||
+                p.StartsWith("/explain") ||
+                p.StartsWith("/tests") ||
+                p.StartsWith("/refactor") ||
                 p.StartsWith("/cfg") ||
                 p.StartsWith("/step") ||
                 p.StartsWith("/res") ||
@@ -78,6 +89,16 @@ namespace LlamaServerControl.Backend
             {
                 string helpMsg =
                     "**Available Commands:**\n" +
+                    "- `/think on|off` : Toggle reasoning process on or off\n" +
+                    "- `/fast <prompt>` : Send prompt in fast mode without reasoning\n" +
+                    "- `/snippets` or `/macro` : View prompt library and snippet macros\n" +
+                    "- `/review <code/text>` : Senior code review (bugs, bottlenecks, security)\n" +
+                    "- `/summary <text>` : Executive summary with key bullet points\n" +
+                    "- `/arabic <text>` : Professional Arabic translation\n" +
+                    "- `/english <text>` : Fluent English translation\n" +
+                    "- `/explain <concept>` : ELI5 plain language explanation\n" +
+                    "- `/tests <code>` : Unit tests covering edge cases and error handling\n" +
+                    "- `/refactor <code>` : Clean architecture and performance optimization\n" +
                     "- `/imagine <prompt> | <negative>` : Generate image directly without AI editing prompts\n" +
                     "- `/draw <prompt> | <negative>` : AI enhances positive prompt, keeps negative as-is\n" +
                     "- `/art <prompt> | <negative>` : AI enhances both positive and negative prompts\n" +
@@ -94,6 +115,96 @@ namespace LlamaServerControl.Backend
                     "- `/hook` : Send last generated image to Discord Webhook\n" +
                     "- `/api` : View API connection details";
                 await sendAssistantMessageAsync(context, helpMsg, isStream, isLegacyCompletion);
+                return true;
+            }
+
+            // /snippets or /macro
+            if (textPrompt is "/snippets" || textPrompt.StartsWith("/snippets ") || textPrompt is "/macro" || textPrompt.StartsWith("/macro "))
+            {
+                string snippetsMsg =
+                    "### 📚 Prompt Library & Snippet Macros\n\n" +
+                    "Use these shortcuts to quickly prefix tasks, or click **Snippets** in the Studio Chat toolbar:\n\n" +
+                    "| Command | Category | Description |\n" +
+                    "| :--- | :--- | :--- |\n" +
+                    "| `/review <code/text>` | **Coding** | Comprehensive senior-level code review for bugs, bottlenecks, and security |\n" +
+                    "| `/refactor <code>` | **Coding** | Clean architecture, idiomatic patterns, and performance optimization |\n" +
+                    "| `/tests <code>` | **Coding** | Edge-case covering unit tests and validation suites |\n" +
+                    "| `/summary <text>` | **Writing** | Executive summary followed by actionable takeaway bullet points |\n" +
+                    "| `/arabic <text>` | **Translation** | Accurate Modern Standard Arabic translation preserving technical context |\n" +
+                    "| `/english <text>` | **Translation** | Idiomatic, fluent English translation |\n" +
+                    "| `/explain <concept>` | **Learning** | Plain-language ELI5 explanation with intuitive analogies |\n\n" +
+                    "*Example: `/review public void CalculateTax() { ... }`*";
+                await sendAssistantMessageAsync(context, snippetsMsg, isStream, isLegacyCompletion);
+                return true;
+            }
+
+            // Macro shortcut dispatchers: /review, /summary, /arabic, /english, /explain, /tests, /refactor
+            if (textPrompt.StartsWith("/review") ||
+                textPrompt.StartsWith("/summary") ||
+                textPrompt.StartsWith("/arabic") ||
+                textPrompt.StartsWith("/english") ||
+                textPrompt.StartsWith("/explain") ||
+                textPrompt.StartsWith("/tests") ||
+                textPrompt.StartsWith("/refactor"))
+            {
+                string cmd = textPrompt.Split(' ')[0].ToLowerInvariant();
+                string userPayload = textPrompt.Length > cmd.Length ? textPrompt[cmd.Length..].Trim() : "";
+
+                string macroPrefix = cmd switch
+                {
+                    "/review" => "Perform a comprehensive senior-level code review of the following code. Inspect for bugs, edge cases, performance bottlenecks, and security vulnerabilities. Provide actionable improvements with clean code examples:\n\n",
+                    "/summary" => "Summarize the following text concisely. Provide a 2-3 sentence executive summary followed by bullet points of key takeaways and actionable conclusions:\n\n",
+                    "/arabic" => "ترجم النص التالي بدقة واحترافية إلى اللغة العربية الفصحى مع الحفاظ على المعنى والسياق والمصطلحات التقنية:\n\n",
+                    "/english" => "Translate the following text accurately and idiomatically into clear, fluent English while preserving technical terminology and tone:\n\n",
+                    "/explain" => "Explain the following concept or code simply in plain language as if explaining to a beginner, using intuitive real-world analogies:\n\n",
+                    "/tests" => "Write comprehensive, edge-case-covering unit tests for the following code. Include test cases for normal inputs, edge cases, error conditions, and null/empty values:\n\n",
+                    "/refactor" => "Refactor the following code to make it more clean, maintainable, modular, and performant. Adhere to idiomatic best practices and explain the rationale for each modification:\n\n",
+                    _ => ""
+                };
+
+                if (string.IsNullOrWhiteSpace(userPayload))
+                {
+                    await sendAssistantMessageAsync(context, $"*Usage: `{cmd} <code or text>` to apply this prompt macro.*", isStream, isLegacyCompletion);
+                    return true;
+                }
+
+                bodyJson = DiffusionOrchestrator.InjectPromptIntoBody(bodyJson, macroPrefix + userPayload);
+                await forwardBodyUpstreamAsync(context, bodyJson, isLegacyCompletion);
+                return true;
+            }
+
+            // /think
+            if (textPrompt is "/think" || textPrompt.StartsWith("/think "))
+            {
+                string arg = textPrompt.Replace("/think", "").Trim().ToLowerInvariant();
+                if (arg is "off" or "false" or "0")
+                {
+                    await sendAssistantMessageAsync(context, "*Reasoning disabled. The model will now respond directly and rapidly without internal thoughts.*", isStream, isLegacyCompletion);
+                }
+                else if (arg is "on" or "true" or "1")
+                {
+                    await sendAssistantMessageAsync(context, "*Reasoning enabled. The model will stream its full thought process in `<think>` blocks.*", isStream, isLegacyCompletion);
+                }
+                else
+                {
+                    await sendAssistantMessageAsync(context, "*Usage: `/think on` (enable reasoning) or `/think off` (disable reasoning for direct fast answers).* ", isStream, isLegacyCompletion);
+                }
+                return true;
+            }
+
+            // /fast
+            if (textPrompt.StartsWith("/fast"))
+            {
+                string userPrompt = textPrompt.Replace("/fast", "").Trim();
+                if (string.IsNullOrWhiteSpace(userPrompt))
+                {
+                    await sendAssistantMessageAsync(context, "*Usage: `/fast <prompt>` to request an immediate answer without reasoning.*", isStream, isLegacyCompletion);
+                    return true;
+                }
+
+                string directInstruction = "\n\nIMPORTANT: Respond directly to the user. Do not use <think> tags or output internal thoughts. Output only the final response.\n\n" + userPrompt;
+                bodyJson = DiffusionOrchestrator.InjectPromptIntoBody(bodyJson, directInstruction, appendAssistantPrefill: true);
+                await forwardBodyUpstreamAsync(context, bodyJson, isLegacyCompletion);
                 return true;
             }
 

@@ -435,7 +435,7 @@ namespace LlamaServerControl.Backend
             if (string.IsNullOrEmpty(neg)) neg = defaultNeg;
         }
 
-        public static string InjectPromptIntoBody(string bodyJson, string injection)
+        public static string InjectPromptIntoBody(string bodyJson, string injection, bool appendAssistantPrefill = false)
         {
             try
             {
@@ -450,6 +450,14 @@ namespace LlamaServerControl.Backend
                     {
                         var last = msgsList[^1];
                         last["content"] = injection;
+                        if (appendAssistantPrefill)
+                        {
+                            msgsList.Add(new Dictionary<string, object>
+                            {
+                                { "role", "assistant" },
+                                { "content", "<think>\n</think>\n" }
+                            });
+                        }
                         dict["messages"] = msgsList;
                     }
                 }

@@ -74,6 +74,12 @@
           </select>
         </div>
 
+        <!-- Reasoning / Fast Direct Mode Toggle -->
+        <button id="btn-toggle-reasoning" type="button" class="flex items-center gap-1.5 px-2.5 py-1 rounded-lg border border-amber-500/30 bg-amber-500/10 text-amber-300 hover:bg-amber-500/20 text-xs font-semibold transition-all cursor-pointer shadow-xs select-none" title="Toggle reasoning process (Click to switch to direct fast response mode)">
+          <i data-lucide="brain" id="icon-reasoning" class="w-3.5 h-3.5 text-amber-400"></i>
+          <span id="text-reasoning" class="hidden sm:inline">Thinking: ON</span>
+        </button>
+
         <!-- Switch to Default Llama Web UI -->
         <button id="btn-chat-to-llama-web" class="flex items-center gap-1.5 px-2.5 py-1 rounded-lg border border-[var(--border)] bg-[var(--bg-elevated)] hover:bg-[var(--border)] text-xs text-[var(--text-secondary)] hover:text-cyan-400 transition-all cursor-pointer shadow-xs" title="Open Default Llama Browser Chat">
           <i data-lucide="globe" class="w-3.5 h-3.5 text-cyan-400"></i>
@@ -81,10 +87,22 @@
         </button>
 
         <!-- Context Window Size & Cache Tokens Telemetry Badge -->
+        <!-- Context Window Size & Cache Tokens Telemetry Badge -->
         <button id="btn-chat-session-stats" class="flex items-center gap-1.5 px-2.5 py-1 rounded-lg border border-[var(--border)] bg-[var(--bg-elevated)] hover:border-cyan-500/50 hover:bg-[var(--border)] text-xs text-[var(--text-secondary)] hover:text-cyan-400 transition-all cursor-pointer shadow-xs font-mono" title="Click to view Context Window & Token Inspector">
           <i data-lucide="gauge" class="w-3.5 h-3.5 text-cyan-400 shrink-0"></i>
           <span id="chat-token-badge-ctx" class="font-semibold text-[var(--text-primary)]">0 / 65k ctx</span>
           <span id="chat-token-badge-cache" class="text-[10px] text-[var(--text-muted)] hidden sm:inline">• 0 cache</span>
+        </button>
+
+        <!-- Prompt Library & Snippets Macro Trigger (/snippets) -->
+        <button id="btn-chat-snippets" type="button" class="flex items-center gap-1.5 px-2.5 py-1 rounded-lg border border-violet-500/30 bg-violet-500/10 text-violet-300 hover:bg-violet-500/20 text-xs font-semibold transition-all cursor-pointer shadow-xs select-none" title="Prompt Library & Snippets (/snippets)">
+          <i data-lucide="sparkles" class="w-3.5 h-3.5 text-violet-400"></i>
+          <span class="hidden xl:inline">Snippets</span>
+        </button>
+
+        <!-- In-Chat Search Trigger (Ctrl+F) -->
+        <button id="btn-open-chat-search" type="button" class="p-1.5 rounded-lg border border-[var(--border)] bg-[var(--bg-elevated)] hover:bg-[var(--border)] text-[var(--text-secondary)] hover:text-cyan-400 transition-all cursor-pointer shadow-xs" title="Search conversation (Ctrl+F)">
+          <i data-lucide="search" class="w-4 h-4"></i>
         </button>
 
         <div id="chat-tps-badge" class="hidden items-center gap-1 px-2 py-0.5 rounded bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 font-mono text-[11px] font-bold">
@@ -97,6 +115,27 @@
       </div>
     </div>
 
+    <!-- In-Chat Search Bar Overlay (Ctrl+F) -->
+    <div id="chat-search-bar" class="hidden absolute top-12 right-4 z-30 flex items-center gap-1.5 p-1.5 rounded-xl bg-[var(--bg-card)]/95 backdrop-blur-md border border-[var(--border)] shadow-2xl transition-all select-none">
+      <div class="flex items-center gap-1.5 px-2 py-1 rounded-lg bg-[var(--bg-elevated)] border border-[var(--border)] focus-within:border-[var(--brand)] text-xs">
+        <i data-lucide="search" class="w-3.5 h-3.5 text-[var(--text-muted)]"></i>
+        <input id="input-chat-search" type="text" placeholder="Find in chat... (Ctrl+F)" class="bg-transparent outline-none text-xs text-[var(--text-primary)] w-40 placeholder-[var(--text-muted)] font-medium" />
+      </div>
+      <div id="chat-search-counter" class="text-[11px] font-mono font-semibold text-[var(--text-muted)] px-1 min-w-[50px] text-center">
+        0 / 0
+      </div>
+      <button id="btn-chat-search-prev" type="button" class="p-1 rounded-lg hover:bg-[var(--bg-elevated)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors cursor-pointer" title="Previous match (Shift+Enter)">
+        <i data-lucide="chevron-up" class="w-4 h-4"></i>
+      </button>
+      <button id="btn-chat-search-next" type="button" class="p-1 rounded-lg hover:bg-[var(--bg-elevated)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors cursor-pointer" title="Next match (Enter)">
+        <i data-lucide="chevron-down" class="w-4 h-4"></i>
+      </button>
+      <div class="w-px h-3.5 bg-[var(--border)] my-0.5"></div>
+      <button id="btn-chat-search-close" type="button" class="p-1 rounded-lg hover:bg-[var(--bg-elevated)] text-[var(--text-muted)] hover:text-rose-400 transition-colors cursor-pointer" title="Close search (Esc)">
+        <i data-lucide="x" class="w-4 h-4"></i>
+      </button>
+    </div>
+
     <!-- Chat Stream -->
     <div id="chat-messages" class="flex-1 overflow-y-auto p-5 space-y-4 select-text min-h-0">
       <div class="flex flex-col items-center justify-center text-center p-12 text-[var(--text-muted)] select-none">
@@ -104,14 +143,14 @@
           <i data-lucide="sparkles" class="w-6 h-6 text-[var(--brand)]"></i>
         </div>
         <h3 class="text-sm font-semibold text-[var(--text-primary)]">Ready for Conversation</h3>
-        <p class="text-xs text-[var(--text-secondary)] mt-1 max-w-sm">Type your prompt below, use slash commands like <code class="text-emerald-400">/imagine</code> for diffusion rendering, or attach images for vision.</p>
+        <p class="text-xs text-[var(--text-secondary)] mt-1 max-w-sm">Type your prompt below, drag-and-drop code or document files, use slash commands like <code class="text-emerald-400">/imagine</code>, or attach images for vision.</p>
       </div>
     </div>
 
     <!-- Slash Command Menu Overlay -->
     <div id="slash-menu" class="hidden mx-5 mb-2 p-1.5 bg-[var(--bg-card)] border border-[var(--border)] rounded-xl shadow-2xl flex flex-col gap-1 max-h-48 overflow-y-auto z-20"></div>
 
-    <!-- Attached Images Preview -->
+    <!-- Attached Files & Images Preview -->
     <div id="chat-attachment-preview" class="hidden px-5 py-2 bg-[var(--bg-card)] border-t border-[var(--border)] flex items-center gap-2 overflow-x-auto"></div>
 
     <!-- Floating Stop Button -->
@@ -125,11 +164,14 @@
     <!-- Chat Input Bar -->
     <div id="chat-input-bar" class="p-3 bg-[var(--bg-card)] border-t border-[var(--border)] shrink-0">
       <div class="chat-input-container flex items-end gap-2 bg-[var(--bg-elevated)] border border-[var(--border)] focus-within:border-[var(--brand)] rounded-2xl p-2 transition-colors">
-        <label class="p-2 text-[var(--text-secondary)] hover:text-cyan-400 cursor-pointer rounded-xl hover:bg-[var(--bg-base)] transition-colors shrink-0" title="Attach image for vision">
+        <label class="p-2 text-[var(--text-secondary)] hover:text-cyan-400 cursor-pointer rounded-xl hover:bg-[var(--bg-base)] transition-colors shrink-0" title="Attach image, document, or code file (.txt, .md, .cs, .py, .json, .pdf...)">
           <i data-lucide="paperclip" class="w-4 h-4"></i>
-          <input id="input-file-vision" type="file" accept="image/*" multiple class="hidden" />
+          <input id="input-file-vision" type="file" accept="image/*,.txt,.md,.markdown,.cs,.py,.json,.js,.mjs,.ts,.tsx,.jsx,.html,.css,.scss,.csv,.tsv,.xml,.yaml,.yml,.sql,.sh,.bat,.cmd,.ps1,.rs,.go,.cpp,.c,.h,.java,.pdf" multiple class="hidden" />
         </label>
-        <textarea id="chat-input" rows="1" placeholder="Type a message or '/' for commands..." class="flex-1 bg-transparent text-xs text-[var(--text-primary)] placeholder-[var(--text-muted)] resize-none outline-none max-h-32 py-1.5 leading-relaxed"></textarea>
+        <button id="btn-chat-input-snippets" type="button" class="p-2 text-[var(--text-secondary)] hover:text-violet-400 cursor-pointer rounded-xl hover:bg-[var(--bg-base)] transition-colors shrink-0" title="Prompt Library & Snippets (/snippets)">
+          <i data-lucide="sparkles" class="w-4 h-4"></i>
+        </button>
+        <textarea id="chat-input" rows="1" placeholder="Type a message, drop files, or '/' for commands..." class="flex-1 bg-transparent text-xs text-[var(--text-primary)] placeholder-[var(--text-muted)] resize-none outline-none max-h-32 py-1.5 leading-relaxed"></textarea>
         <button id="btn-chat-send" class="p-2 bg-[var(--brand)] hover:bg-[var(--brand-hover)] text-black rounded-xl font-bold transition-all shrink-0">
           <i data-lucide="send" class="w-4 h-4"></i>
         </button>
@@ -137,3 +179,5 @@
     </div>
   </div>
 </section>
+
+

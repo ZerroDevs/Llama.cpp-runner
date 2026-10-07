@@ -22,7 +22,8 @@ export async function loadPartials() {
     'image-inspector',
     'cmd-palette',
     'quick-model',
-    'session-stats'
+    'session-stats',
+    'snippets'
   ];
 
   const main = document.getElementById('main-content');
