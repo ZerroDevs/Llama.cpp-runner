@@ -302,7 +302,31 @@ export function saveCurrentChatSession() {
     current.updatedAt = Date.now();
   }
 
-  const payload = JSON.stringify(state.chatSessions, null, 2);
+  // Create lightweight sanitized copy for disk persistence (strip bulky base64 dataUrl)
+  const sanitizedSessions = state.chatSessions.map(session => ({
+    ...session,
+    messages: (session.messages || []).map(msg => {
+      if (!msg.attachments || msg.attachments.length === 0) return msg;
+      return {
+        ...msg,
+        attachments: msg.attachments.map(att => ({
+          name: att.name,
+          url: att.url || att.dataUrl || '',
+          path: att.path || ''
+        })),
+        versions: (msg.versions || []).map(ver => ({
+          ...ver,
+          attachments: (ver.attachments || []).map(att => ({
+            name: att.name,
+            url: att.url || att.dataUrl || '',
+            path: att.path || ''
+          }))
+        }))
+      };
+    })
+  }));
+
+  const payload = JSON.stringify(sanitizedSessions, null, 2);
   try {
     api.invoke('save_chats', payload);
   } catch {}
@@ -764,7 +788,7 @@ function appendMessage(role, text, attachments = [], idx = 0, msgObj = null) {
   if (role === 'user') {
     let attachHtml = '';
     if (attachments && attachments.length > 0) {
-      attachHtml = `<div class="flex gap-2 mb-2 flex-wrap">${attachments.map(a => `<img src="${a.dataUrl}" class="w-20 h-20 object-cover rounded-xl border border-white/20" />`).join('')}</div>`;
+      attachHtml = `<div class="flex gap-2 mb-2 flex-wrap">${attachments.map(a => `<img src="${a.url || a.dataUrl}" class="w-20 h-20 object-cover rounded-xl border border-white/20" />`).join('')}</div>`;
     }
 
     msgWrapper.innerHTML = `
@@ -1039,10 +1063,25 @@ async function triggerChatStream(existingAssistantMsg = null) {
     if (m.attachments && m.attachments.length > 0) {
       const parts = [{ type: 'text', text: m.content || '' }];
       for (const a of m.attachments) {
-        parts.push({
-          type: 'image_url',
-          image_url: { url: a.dataUrl }
-        });
+        let imgPayloadUrl = a.dataUrl;
+        if (!imgPayloadUrl && a.url) {
+          try {
+            const resp = await fetch(a.url);
+            const blob = await resp.blob();
+            imgPayloadUrl = await new Promise((res) => {
+              const r = new FileReader();
+              r.onload = () => res(r.result);
+              r.readAsDataURL(blob);
+            });
+            a.dataUrl = imgPayloadUrl;
+          } catch {}
+        }
+        if (imgPayloadUrl) {
+          parts.push({
+            type: 'image_url',
+            image_url: { url: imgPayloadUrl }
+          });
+        }
       }
       messagesPayload.push({ role: m.role, content: parts });
     } else {
@@ -1670,7 +1709,7 @@ function renderAttachmentPreviews() {
   container.classList.remove('hidden');
   container.innerHTML = state.attachedImages.map((img, idx) => `
     <div class="relative group shrink-0">
-      <img src="${img.dataUrl}" alt="${img.name}" class="w-12 h-12 object-cover rounded-xl border border-[var(--border)]" />
+      <img src="${img.url || img.dataUrl}" alt="${escapeHtml(img.name)}" class="w-12 h-12 object-cover rounded-xl border border-[var(--border)]" />
       <button class="btn-remove-attachment absolute -top-1.5 -right-1.5 w-4 h-4 rounded-full bg-rose-500 text-white flex items-center justify-center text-[10px] cursor-pointer" data-index="${idx}">×</button>
     </div>
   `).join('');
@@ -1745,12 +1784,31 @@ function handleIncomingImageFiles(files, source = 'pasted') {
 
   files.forEach(file => {
     const reader = new FileReader();
-    reader.onload = (event) => {
+    reader.onload = async (event) => {
       const safeName = file.name || `Pasted_Image_${Date.now()}.png`;
-      state.attachedImages.push({
+      const dataUrl = event.target.result;
+
+      const attItem = {
         name: safeName,
-        dataUrl: event.target.result
-      });
+        dataUrl: dataUrl,
+        url: '',
+        path: ''
+      };
+
+      state.attachedImages.push(attItem);
+      renderAttachmentPreviews();
+
+      // Persist attachment asynchronously to disk cache via NativeBridge
+      try {
+        const saveRes = await api.invoke('save_chat_attachment', { data: dataUrl, filename: safeName });
+        if (saveRes && saveRes.status === 'success') {
+          attItem.url = saveRes.url;
+          attItem.path = saveRes.file_path;
+        }
+      } catch (err) {
+        console.warn('[Chat] Failed to cache attachment to disk:', err);
+      }
+
       loadedCount++;
       if (loadedCount === total) {
         renderAttachmentPreviews();

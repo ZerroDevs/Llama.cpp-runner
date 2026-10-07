@@ -266,8 +266,12 @@ namespace LlamaServerControl.Backend
                     case "save_chats":
                         string saveChatsTarget = Path.Combine(Path.GetDirectoryName(_config.ConfigPath) ?? AppDomain.CurrentDomain.BaseDirectory, "chats.json");
                         string saveContent = args.ValueKind == JsonValueKind.String ? args.GetString() ?? "[]" : args.GetRawText();
-                        await File.WriteAllTextAsync(saveChatsTarget, saveContent);
+                        await SanitizeAndSaveChatsAsync(saveChatsTarget, saveContent);
                         result = new { status = "success" };
+                        break;
+
+                    case "save_chat_attachment":
+                        result = await SaveChatAttachmentAsync(args);
                         break;
 
                     case "search_hub":
@@ -371,6 +375,102 @@ namespace LlamaServerControl.Backend
             catch (Exception ex)
             {
                 return new { status = "error", message = ex.Message };
+            }
+        }
+
+        private async Task<object> SaveChatAttachmentAsync(JsonElement attArgs)
+        {
+            try
+            {
+                string b64 = attArgs.GetProperty("data").GetString() ?? "";
+                string origName = attArgs.TryGetProperty("filename", out var fnProp) ? fnProp.GetString() ?? "" : "";
+                if (string.IsNullOrWhiteSpace(origName)) origName = $"attachment_{DateTime.UtcNow.Ticks}.png";
+
+                string pureB64 = b64;
+                int commaIdx = pureB64.IndexOf(',');
+                if (commaIdx >= 0 && pureB64.StartsWith("data:", StringComparison.OrdinalIgnoreCase))
+                {
+                    pureB64 = pureB64.Substring(commaIdx + 1);
+                }
+
+                byte[] imgBytes = Convert.FromBase64String(pureB64);
+                string baseDir = AppDomain.CurrentDomain.BaseDirectory;
+                string parentDir = Directory.GetParent(baseDir)?.Parent?.Parent?.Parent?.FullName ?? "";
+                string targetDir = !string.IsNullOrEmpty(parentDir) && Directory.Exists(Path.Combine(parentDir, "ui"))
+                    ? Path.Combine(parentDir, "ui", "generated_cache", "attachments")
+                    : Path.Combine(baseDir, "ui", "generated_cache", "attachments");
+
+                Directory.CreateDirectory(targetDir);
+
+                string ext = Path.GetExtension(origName);
+                if (string.IsNullOrWhiteSpace(ext)) ext = ".png";
+                string cleanFileName = $"{DateTime.UtcNow:yyyyMMdd_HHmmss}_{Guid.NewGuid().ToString("N")[..8]}{ext}";
+                string fullPath = Path.Combine(targetDir, cleanFileName);
+                await File.WriteAllBytesAsync(fullPath, imgBytes);
+
+                int activeProxyPort = _proxy?.ActivePort ?? (int.TryParse(_config.GetConfig().GetValueOrDefault("port", 8080)?.ToString(), out int p) ? p : 8080);
+                string localUrl = $"http://127.0.0.1:{activeProxyPort}/local_image?path={Uri.EscapeDataString(fullPath)}";
+
+                return new
+                {
+                    status = "success",
+                    file_path = fullPath,
+                    file_name = cleanFileName,
+                    url = localUrl
+                };
+            }
+            catch (Exception ex)
+            {
+                return new { status = "error", message = ex.Message };
+            }
+        }
+
+        private async Task SanitizeAndSaveChatsAsync(string saveChatsTarget, string rawJson)
+        {
+            try
+            {
+                if (!rawJson.Contains("data:image/", StringComparison.OrdinalIgnoreCase))
+                {
+                    await File.WriteAllTextAsync(saveChatsTarget, rawJson);
+                    return;
+                }
+
+                string baseDir = AppDomain.CurrentDomain.BaseDirectory;
+                string parentDir = Directory.GetParent(baseDir)?.Parent?.Parent?.Parent?.FullName ?? "";
+                string targetDir = !string.IsNullOrEmpty(parentDir) && Directory.Exists(Path.Combine(parentDir, "ui"))
+                    ? Path.Combine(parentDir, "ui", "generated_cache", "attachments")
+                    : Path.Combine(baseDir, "ui", "generated_cache", "attachments");
+
+                Directory.CreateDirectory(targetDir);
+                int activeProxyPort = _proxy?.ActivePort ?? (int.TryParse(_config.GetConfig().GetValueOrDefault("port", 8080)?.ToString(), out int p) ? p : 8080);
+
+                string pattern = @"\""dataUrl\""\s*:\s*\""data:image/([a-zA-Z0-9]+);base64,([^\""]+)\""";
+                string sanitized = System.Text.RegularExpressions.Regex.Replace(rawJson, pattern, (match) =>
+                {
+                    try
+                    {
+                        string ext = "." + match.Groups[1].Value.ToLowerInvariant();
+                        if (ext == ".jpeg") ext = ".jpg";
+                        string b64 = match.Groups[2].Value;
+                        byte[] bytes = Convert.FromBase64String(b64);
+                        string fileName = $"{DateTime.UtcNow:yyyyMMdd_HHmmss}_{Guid.NewGuid().ToString("N")[..8]}{ext}";
+                        string fullPath = Path.Combine(targetDir, fileName);
+                        File.WriteAllBytes(fullPath, bytes);
+
+                        string localUrl = $"http://127.0.0.1:{activeProxyPort}/local_image?path={Uri.EscapeDataString(fullPath)}";
+                        return $"\"url\":\"{localUrl}\",\"path\":\"{fullPath.Replace("\\", "\\\\")}\"";
+                    }
+                    catch
+                    {
+                        return match.Value;
+                    }
+                });
+
+                await File.WriteAllTextAsync(saveChatsTarget, sanitized);
+            }
+            catch
+            {
+                await File.WriteAllTextAsync(saveChatsTarget, rawJson);
             }
         }
     }
