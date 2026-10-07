@@ -123,6 +123,11 @@ namespace LlamaServerControl.Backend
 
         public async Task<object> ExecuteToolAsync(string toolName, JsonElement args)
         {
+            if (toolName.Equals("fetch_web", StringComparison.OrdinalIgnoreCase))
+            {
+                return await FetchWebAsync(args);
+            }
+
             if (string.IsNullOrEmpty(_workspaceRoot))
             {
                 return new { status = "error", message = "No workspace project folder is currently opened. Please select a folder first." };
@@ -152,6 +157,9 @@ namespace LlamaServerControl.Backend
 
                     case "run_command":
                         return await RunCommandAsync(args);
+
+                    case "fetch_web":
+                        return await FetchWebAsync(args);
 
                     default:
                         return new { status = "error", message = $"Unknown tool: '{toolName}'" };
@@ -497,6 +505,253 @@ namespace LlamaServerControl.Backend
                 try { proc.Kill(true); } catch { }
                 return new { status = "timeout", message = "Command execution timed out after 45 seconds." };
             }
+        }
+
+        public object GetWorkspaceFileTree()
+        {
+            if (string.IsNullOrEmpty(_workspaceRoot) || !Directory.Exists(_workspaceRoot))
+            {
+                return new { status = "error", message = "No workspace opened" };
+            }
+
+            try
+            {
+                var rootDir = new DirectoryInfo(_workspaceRoot);
+                var tree = BuildDirectoryNode(rootDir);
+                return new
+                {
+                    status = "success",
+                    workspace_path = _workspaceRoot,
+                    folder_name = rootDir.Name,
+                    tree
+                };
+            }
+            catch (Exception ex)
+            {
+                return new { status = "error", message = ex.Message };
+            }
+        }
+
+        private object BuildDirectoryNode(DirectoryInfo dir)
+        {
+            var subDirs = new List<object>();
+            var files = new List<object>();
+
+            try
+            {
+                foreach (var d in dir.EnumerateDirectories().OrderBy(d => d.Name))
+                {
+                    if (IgnoredDirs.Contains(d.Name)) continue;
+                    subDirs.Add(BuildDirectoryNode(d));
+                }
+
+                foreach (var f in dir.EnumerateFiles().OrderBy(f => f.Name))
+                {
+                    string rel = Path.GetRelativePath(_workspaceRoot!, f.FullName).Replace('\\', '/');
+                    files.Add(new
+                    {
+                        name = f.Name,
+                        path = rel,
+                        size_bytes = f.Length,
+                        size_kb = Math.Round(f.Length / 1024.0, 1),
+                        extension = f.Extension.TrimStart('.').ToLowerInvariant(),
+                        last_modified = f.LastWriteTimeUtc.ToString("o")
+                    });
+                }
+            }
+            catch { }
+
+            string relDir = dir.FullName.Equals(_workspaceRoot, StringComparison.OrdinalIgnoreCase)
+                ? ""
+                : Path.GetRelativePath(_workspaceRoot!, dir.FullName).Replace('\\', '/');
+
+            return new
+            {
+                name = dir.Name,
+                path = relDir,
+                is_directory = true,
+                directories = subDirs,
+                files
+            };
+        }
+
+        public object OpenFileExternal(string relPath, string targetApp = "default")
+        {
+            try
+            {
+                string fullPath = ResolveSafePath(relPath);
+                if (!File.Exists(fullPath) && !Directory.Exists(fullPath))
+                {
+                    return new { status = "error", message = "File or directory not found" };
+                }
+
+                if (targetApp.Equals("vscode", StringComparison.OrdinalIgnoreCase) || targetApp.Equals("code", StringComparison.OrdinalIgnoreCase))
+                {
+                    Process.Start(new ProcessStartInfo
+                    {
+                        FileName = "code",
+                        Arguments = $"\"{fullPath}\"",
+                        UseShellExecute = true
+                    });
+                }
+                else if (targetApp.Equals("notepad", StringComparison.OrdinalIgnoreCase))
+                {
+                    Process.Start("notepad.exe", $"\"{fullPath}\"");
+                }
+                else if (targetApp.Equals("explorer", StringComparison.OrdinalIgnoreCase))
+                {
+                    if (Directory.Exists(fullPath))
+                    {
+                        Process.Start("explorer.exe", $"\"{fullPath}\"");
+                    }
+                    else
+                    {
+                        Process.Start("explorer.exe", $"/select,\"{fullPath}\"");
+                    }
+                }
+                else
+                {
+                    Process.Start(new ProcessStartInfo
+                    {
+                        FileName = fullPath,
+                        UseShellExecute = true
+                    });
+                }
+
+                return new { status = "success" };
+            }
+            catch (Exception ex)
+            {
+                return new { status = "error", message = ex.Message };
+            }
+        }
+
+        private static readonly System.Net.Http.HttpClient _httpClient = new()
+        {
+            Timeout = TimeSpan.FromSeconds(10)
+        };
+
+        public async Task<object> FetchWebAsync(JsonElement args)
+        {
+            string url = "";
+            if (args.ValueKind == JsonValueKind.String)
+            {
+                url = args.GetString() ?? "";
+            }
+            else if (args.ValueKind == JsonValueKind.Object && args.TryGetProperty("url", out var uProp))
+            {
+                url = uProp.GetString() ?? "";
+            }
+
+            url = url.Trim();
+            if (string.IsNullOrWhiteSpace(url))
+            {
+                return new { status = "error", message = "Missing 'url' parameter." };
+            }
+
+            if (!Uri.TryCreate(url, UriKind.Absolute, out var uri) || (uri.Scheme != Uri.UriSchemeHttp && uri.Scheme != Uri.UriSchemeHttps))
+            {
+                return new { status = "error", message = "Invalid URL. Only HTTP and HTTPS protocols are supported." };
+            }
+
+            // Security guard: block loopback and local IP ranges to prevent SSRF against internal server ports
+            string host = uri.DnsSafeHost.ToLowerInvariant();
+            if (host == "localhost" || host == "127.0.0.1" || host == "0.0.0.0" || host == "::1" ||
+                host.StartsWith("192.168.") || host.StartsWith("10.") || host.StartsWith("172.16.") ||
+                host.EndsWith(".local") || host.EndsWith(".internal"))
+            {
+                return new { status = "error", message = "Access denied: Requests to local/internal network addresses are forbidden for security." };
+            }
+
+            try
+            {
+                using var req = new System.Net.Http.HttpRequestMessage(System.Net.Http.HttpMethod.Get, uri);
+                req.Headers.UserAgent.ParseAdd("Mozilla/5.0 (Windows NT 10.0; Win64; x64) LlamaServerControl/1.0 AgentDocsFetcher");
+                req.Headers.Accept.ParseAdd("text/html,application/xhtml+xml,application/xml,text/plain,application/json,*/*;q=0.8");
+
+                using var resp = await _httpClient.SendAsync(req, System.Net.Http.HttpCompletionOption.ResponseHeadersRead);
+                int statusCode = (int)resp.StatusCode;
+
+                if (!resp.IsSuccessStatusCode)
+                {
+                    return new { status = "error", status_code = statusCode, message = $"HTTP request failed with status code {statusCode} ({resp.ReasonPhrase})." };
+                }
+
+                // Read up to 80 KB to prevent excessive memory allocations
+                var rawBytes = await resp.Content.ReadAsByteArrayAsync();
+                int maxBytes = 80 * 1024;
+                string rawText = Encoding.UTF8.GetString(rawBytes, 0, Math.Min(rawBytes.Length, maxBytes));
+
+                string contentType = resp.Content.Headers.ContentType?.MediaType?.ToLowerInvariant() ?? "";
+                string cleanedContent = rawText;
+
+                if (contentType.Contains("html") || rawText.Contains("<html") || rawText.Contains("<!DOCTYPE"))
+                {
+                    cleanedContent = CleanHtmlToMarkdownText(rawText);
+                }
+                else if (contentType.Contains("json"))
+                {
+                    try
+                    {
+                        using var doc = JsonDocument.Parse(rawText);
+                        cleanedContent = JsonSerializer.Serialize(doc.RootElement, new JsonSerializerOptions { WriteIndented = true });
+                    }
+                    catch { }
+                }
+
+                // Cap cleaned text to 16,000 characters to preserve context limit
+                if (cleanedContent.Length > 16000)
+                {
+                    cleanedContent = cleanedContent.Substring(0, 16000) + "\n\n... [Content truncated at 16k characters to preserve context limit]";
+                }
+
+                return new
+                {
+                    status = "success",
+                    url = uri.ToString(),
+                    status_code = statusCode,
+                    content_type = contentType,
+                    content = cleanedContent,
+                    lines = cleanedContent.Split('\n').Length,
+                    size_kb = Math.Round(cleanedContent.Length / 1024.0, 1)
+                };
+            }
+            catch (Exception ex)
+            {
+                return new { status = "error", message = $"Failed to fetch web document: {ex.Message}" };
+            }
+        }
+
+        private static string CleanHtmlToMarkdownText(string html)
+        {
+            if (string.IsNullOrEmpty(html)) return "";
+
+            // Strip scripts, styles, svgs, header, footer, nav
+            var clean = System.Text.RegularExpressions.Regex.Replace(html, @"<script[\s\S]*?</script>", "", System.Text.RegularExpressions.RegexOptions.IgnoreCase);
+            clean = System.Text.RegularExpressions.Regex.Replace(clean, @"<style[\s\S]*?</style>", "", System.Text.RegularExpressions.RegexOptions.IgnoreCase);
+            clean = System.Text.RegularExpressions.Regex.Replace(clean, @"<svg[\s\S]*?</svg>", "", System.Text.RegularExpressions.RegexOptions.IgnoreCase);
+            clean = System.Text.RegularExpressions.Regex.Replace(clean, @"<nav[\s\S]*?</nav>", "", System.Text.RegularExpressions.RegexOptions.IgnoreCase);
+            clean = System.Text.RegularExpressions.Regex.Replace(clean, @"<footer[\s\S]*?</footer>", "", System.Text.RegularExpressions.RegexOptions.IgnoreCase);
+
+            // Convert common markdown elements
+            clean = System.Text.RegularExpressions.Regex.Replace(clean, @"<h[1-6][^>]*>(.*?)</h[1-6]>", "\n\n### $1\n", System.Text.RegularExpressions.RegexOptions.IgnoreCase);
+            clean = System.Text.RegularExpressions.Regex.Replace(clean, @"<p[^>]*>(.*?)</p>", "\n\n$1\n", System.Text.RegularExpressions.RegexOptions.IgnoreCase);
+            clean = System.Text.RegularExpressions.Regex.Replace(clean, @"<br\s*/?>", "\n", System.Text.RegularExpressions.RegexOptions.IgnoreCase);
+            clean = System.Text.RegularExpressions.Regex.Replace(clean, @"<li[^>]*>(.*?)</li>", "\n- $1", System.Text.RegularExpressions.RegexOptions.IgnoreCase);
+            clean = System.Text.RegularExpressions.Regex.Replace(clean, @"<code[^>]*>(.*?)</code>", "`$1`", System.Text.RegularExpressions.RegexOptions.IgnoreCase);
+            clean = System.Text.RegularExpressions.Regex.Replace(clean, @"<pre[^>]*>([\s\S]*?)</pre>", "\n```\n$1\n```\n", System.Text.RegularExpressions.RegexOptions.IgnoreCase);
+
+            // Strip remaining tags
+            clean = System.Text.RegularExpressions.Regex.Replace(clean, @"<[^>]+>", " ");
+
+            // Unescape HTML entities
+            clean = System.Net.WebUtility.HtmlDecode(clean);
+
+            // Normalize multiple whitespaces and newlines
+            clean = System.Text.RegularExpressions.Regex.Replace(clean, @"[ \t]+", " ");
+            clean = System.Text.RegularExpressions.Regex.Replace(clean, @"\n{3,}", "\n\n");
+
+            return clean.Trim();
         }
     }
 }

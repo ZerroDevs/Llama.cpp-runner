@@ -28,7 +28,10 @@ import {
   renderToolCardsInText, 
   selectWorkspaceFolder,
   syncAgentModeForActiveSession,
-  registerAgentSessionCallback
+  registerAgentSessionCallback,
+  switchSidebarTab,
+  getActiveSidebarTab,
+  updateSidebarToggleButtonsState
 } from './agent.js';
 
 export function setupChat() {
@@ -66,7 +69,33 @@ export function setupChat() {
   });
 
   document.getElementById('btn-toggle-chat-sidebar')?.addEventListener('click', () => {
-    toggleChatSidebar();
+    const sidebar = document.getElementById('chat-history-sidebar');
+    const isCollapsed = sidebar ? sidebar.classList.contains('collapsed') : true;
+    const currentTab = getActiveSidebarTab();
+
+    if (isCollapsed) {
+      toggleChatSidebar(true);
+      switchSidebarTab('chats');
+    } else if (currentTab === 'chats') {
+      toggleChatSidebar(false);
+    } else {
+      switchSidebarTab('chats');
+    }
+  });
+
+  document.getElementById('btn-toggle-workspace-sidebar')?.addEventListener('click', () => {
+    const sidebar = document.getElementById('chat-history-sidebar');
+    const isCollapsed = sidebar ? sidebar.classList.contains('collapsed') : true;
+    const currentTab = getActiveSidebarTab();
+
+    if (isCollapsed) {
+      toggleChatSidebar(true);
+      switchSidebarTab('workspace');
+    } else if (currentTab === 'workspace') {
+      toggleChatSidebar(false);
+    } else {
+      switchSidebarTab('workspace');
+    }
   });
 
   document.getElementById('btn-collapse-chat-sidebar')?.addEventListener('click', () => {
@@ -760,6 +789,7 @@ export function toggleChatSidebar(show, savePreference = true) {
         toggleBtn.setAttribute('title', 'Open Saved Chats Drawer');
       }
     }
+    updateSidebarToggleButtonsState(shouldShow, getActiveSidebarTab());
   }
 
   // Preserve bottom scroll after transition reflow

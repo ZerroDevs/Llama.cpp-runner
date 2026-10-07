@@ -3,41 +3,103 @@
 <!-- ========================================== -->
 <section id="tab-chat" class="tab-pane h-full min-h-0 flex flex-row overflow-hidden relative">
 
-  <!-- Collapsible Left Conversation Drawer -->
-  <aside id="chat-history-sidebar" class="w-64 bg-[var(--bg-card)] border-r border-[var(--border)] flex flex-col shrink-0 h-full transition-all duration-200 z-10 select-none">
-    <!-- Drawer Header -->
-    <div class="p-3 border-b border-[var(--border)] flex items-center justify-between shrink-0 gap-2">
-      <button id="btn-new-chat" class="flex-1 flex items-center justify-center gap-1.5 py-1.5 px-3 rounded-xl bg-[var(--brand)] hover:bg-[var(--brand-hover)] text-black text-xs font-bold transition-all shadow-xs cursor-pointer">
-        <i data-lucide="plus" class="w-3.5 h-3.5"></i>
-        <span>New Chat</span>
-      </button>
-      <button id="btn-collapse-chat-sidebar" class="p-1.5 rounded-lg text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-elevated)] transition-colors cursor-pointer" title="Collapse history sidebar">
-        <i data-lucide="panel-left-close" class="w-4 h-4"></i>
-      </button>
-    </div>
-
-    <!-- Search / Filter Chats -->
-    <div class="px-3 pt-2.5 pb-1 shrink-0">
-      <div class="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-[var(--bg-elevated)] border border-[var(--border)] text-xs text-[var(--text-secondary)] focus-within:border-[var(--brand)]">
-        <i data-lucide="search" class="w-3.5 h-3.5 text-[var(--text-muted)] shrink-0"></i>
-        <input id="chat-search-input" type="text" placeholder="Search chats..." class="w-full bg-transparent outline-none text-xs text-[var(--text-primary)] placeholder-[var(--text-muted)]" />
+  <!-- Collapsible Left Conversation & Workspace Drawer -->
+  <aside id="chat-history-sidebar" class="w-72 bg-[var(--bg-card)] border-r border-[var(--border)] flex flex-col shrink-0 h-full transition-all duration-200 z-10 select-none">
+    <!-- Drawer Header with Mode Switcher (Chats vs Workspace Files) -->
+    <div class="p-2.5 border-b border-[var(--border)] flex flex-col gap-2 shrink-0">
+      <div class="flex items-center justify-between gap-1.5">
+        <div class="flex items-center gap-1 bg-[var(--bg-elevated)] p-0.5 rounded-lg border border-[var(--border)] flex-1">
+          <button id="btn-sidebar-tab-chats" type="button" class="sidebar-tab-btn active flex-1 flex items-center justify-center gap-1.5 py-1 px-2 rounded-md text-xs font-semibold bg-[var(--brand)] text-black transition-all cursor-pointer">
+            <i data-lucide="message-square" class="w-3.5 h-3.5"></i>
+            <span>Chats</span>
+          </button>
+          <button id="btn-sidebar-tab-workspace" type="button" class="sidebar-tab-btn flex-1 flex items-center justify-center gap-1.5 py-1 px-2 rounded-md text-xs font-medium text-[var(--text-secondary)] hover:text-cyan-400 transition-all cursor-pointer">
+            <i data-lucide="folder-tree" class="w-3.5 h-3.5"></i>
+            <span>Files</span>
+          </button>
+        </div>
+        <button id="btn-collapse-chat-sidebar" class="p-1.5 rounded-lg text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-elevated)] transition-colors cursor-pointer shrink-0" title="Collapse sidebar">
+          <i data-lucide="panel-left-close" class="w-4 h-4"></i>
+        </button>
       </div>
     </div>
 
-    <!-- Saved Conversations List -->
-    <div id="chat-sessions-list" class="flex-1 overflow-y-auto px-2 py-2 space-y-1 min-h-0">
-      <!-- Session cards rendered dynamically here -->
+    <!-- VIEW 1: Chats History Panel -->
+    <div id="sidebar-panel-chats" class="flex-1 flex flex-col min-h-0">
+      <!-- New Chat Action -->
+      <div class="p-2.5 pb-1 shrink-0">
+        <button id="btn-new-chat" class="w-full flex items-center justify-center gap-1.5 py-1.5 px-3 rounded-xl bg-[var(--brand)] hover:bg-[var(--brand-hover)] text-black text-xs font-bold transition-all shadow-xs cursor-pointer">
+          <i data-lucide="plus" class="w-3.5 h-3.5"></i>
+          <span>New Chat</span>
+        </button>
+      </div>
+
+      <!-- Search / Filter Chats -->
+      <div class="px-2.5 pt-1.5 pb-1 shrink-0">
+        <div class="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-[var(--bg-elevated)] border border-[var(--border)] text-xs text-[var(--text-secondary)] focus-within:border-[var(--brand)]">
+          <i data-lucide="search" class="w-3.5 h-3.5 text-[var(--text-muted)] shrink-0"></i>
+          <input id="chat-search-input" type="text" placeholder="Search chats..." class="w-full bg-transparent outline-none text-xs text-[var(--text-primary)] placeholder-[var(--text-muted)]" />
+        </div>
+      </div>
+
+      <!-- Saved Conversations List -->
+      <div id="chat-sessions-list" class="flex-1 overflow-y-auto px-2 py-1.5 space-y-1 min-h-0">
+        <!-- Session cards rendered dynamically here -->
+      </div>
+
+      <!-- Drawer Footer / Export Actions -->
+      <div class="p-2.5 border-t border-[var(--border)] bg-[var(--bg-card)] shrink-0 flex items-center justify-between gap-1 text-[11px]">
+        <span class="text-[var(--text-muted)] font-mono text-[10px]" id="chat-session-count">0 Chats</span>
+        <div class="flex items-center gap-1">
+          <button id="btn-export-chat-md" class="px-2 py-1 rounded hover:bg-[var(--bg-elevated)] text-[var(--text-secondary)] hover:text-cyan-400 transition-colors cursor-pointer" title="Export active conversation as Markdown (.md)">
+            <i data-lucide="file-text" class="w-3.5 h-3.5"></i>
+          </button>
+          <button id="btn-export-chat-json" class="px-2 py-1 rounded hover:bg-[var(--bg-elevated)] text-[var(--text-secondary)] hover:text-emerald-400 transition-colors cursor-pointer" title="Export active conversation as JSON (.json)">
+            <i data-lucide="download" class="w-3.5 h-3.5"></i>
+          </button>
+        </div>
+      </div>
     </div>
 
-    <!-- Drawer Footer / Export Actions -->
-    <div class="p-2.5 border-t border-[var(--border)] bg-[var(--bg-card)] shrink-0 flex items-center justify-between gap-1 text-[11px]">
-      <span class="text-[var(--text-muted)] font-mono text-[10px]" id="chat-session-count">0 Chats</span>
-      <div class="flex items-center gap-1">
-        <button id="btn-export-chat-md" class="px-2 py-1 rounded hover:bg-[var(--bg-elevated)] text-[var(--text-secondary)] hover:text-cyan-400 transition-colors cursor-pointer" title="Export active conversation as Markdown (.md)">
-          <i data-lucide="file-text" class="w-3.5 h-3.5"></i>
-        </button>
-        <button id="btn-export-chat-json" class="px-2 py-1 rounded hover:bg-[var(--bg-elevated)] text-[var(--text-secondary)] hover:text-emerald-400 transition-colors cursor-pointer" title="Export active conversation as JSON (.json)">
-          <i data-lucide="download" class="w-3.5 h-3.5"></i>
+    <!-- VIEW 2: Workspace File Explorer Panel -->
+    <div id="sidebar-panel-workspace" class="hidden flex-1 flex flex-col min-h-0">
+      <!-- Project Summary & Quick Tool Actions -->
+      <div class="p-2.5 pb-2 border-b border-[var(--border)] bg-[var(--bg-elevated)]/40 shrink-0">
+        <div class="flex items-center justify-between gap-1 mb-1.5">
+          <div class="flex items-center gap-1.5 min-w-0">
+            <span class="w-2 h-2 rounded-full bg-cyan-400 shrink-0 animate-pulse"></span>
+            <span id="explorer-project-title" class="font-bold text-xs text-[var(--text-primary)] truncate font-mono">No Workspace</span>
+          </div>
+          <div class="flex items-center gap-1 shrink-0">
+            <button id="btn-explorer-refresh" type="button" class="p-1 rounded hover:bg-[var(--bg-card)] text-[var(--text-muted)] hover:text-cyan-400 transition-colors cursor-pointer" title="Refresh files">
+              <i data-lucide="refresh-cw" class="w-3 h-3"></i>
+            </button>
+            <button id="btn-explorer-vscode" type="button" class="p-1 rounded hover:bg-[var(--bg-card)] text-[var(--text-muted)] hover:text-cyan-400 transition-colors cursor-pointer" title="Open workspace folder in VS Code">
+              <i data-lucide="code" class="w-3 h-3"></i>
+            </button>
+            <button id="btn-explorer-reveal" type="button" class="p-1 rounded hover:bg-[var(--bg-card)] text-[var(--text-muted)] hover:text-indigo-400 transition-colors cursor-pointer" title="Reveal workspace folder in Windows Explorer">
+              <i data-lucide="folder-open" class="w-3 h-3"></i>
+            </button>
+          </div>
+        </div>
+        <!-- Search/Filter Files -->
+        <div class="flex items-center gap-1.5 px-2 py-1 rounded-md bg-[var(--bg-card)] border border-[var(--border)] text-xs text-[var(--text-secondary)] focus-within:border-cyan-500/50">
+          <i data-lucide="filter" class="w-3 h-3 text-[var(--text-muted)] shrink-0"></i>
+          <input id="explorer-filter-input" type="text" placeholder="Filter files..." class="w-full bg-transparent outline-none text-[11px] text-[var(--text-primary)] placeholder-[var(--text-muted)] font-mono" />
+        </div>
+      </div>
+
+      <!-- File Tree Container -->
+      <div id="workspace-file-tree" class="flex-1 overflow-y-auto px-2 py-2 space-y-0.5 min-h-0 font-mono text-xs">
+        <!-- Rendered file and folder nodes -->
+      </div>
+
+      <!-- Explorer Footer -->
+      <div class="p-2 border-t border-[var(--border)] bg-[var(--bg-card)] shrink-0 flex items-center justify-between text-[10px] text-[var(--text-muted)] font-mono">
+        <span id="explorer-stats-files">0 files</span>
+        <button id="btn-explorer-pick-folder" type="button" class="hover:text-cyan-400 transition-colors cursor-pointer flex items-center gap-1">
+          <i data-lucide="folder-symlink" class="w-3 h-3"></i>
+          <span>Switch Folder</span>
         </button>
       </div>
     </div>
@@ -52,6 +114,10 @@
         <button id="btn-toggle-chat-sidebar" class="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border border-[var(--border)] bg-[var(--bg-elevated)] hover:bg-[var(--border)] text-xs text-[var(--brand)] transition-all cursor-pointer shadow-xs shrink-0 mr-1" title="Toggle Saved Chats Drawer">
           <i data-lucide="panel-left" class="w-3.5 h-3.5 text-[var(--brand)]"></i>
           <span class="font-medium hidden sm:inline">Chats</span>
+        </button>
+        <button id="btn-toggle-workspace-sidebar" class="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border border-[var(--border)] bg-[var(--bg-elevated)] hover:bg-[var(--border)] text-xs text-[var(--text-secondary)] hover:text-cyan-400 transition-all cursor-pointer shadow-xs shrink-0 mr-1" title="Toggle Workspace File Explorer">
+          <i data-lucide="folder-tree" class="w-3.5 h-3.5 text-cyan-400"></i>
+          <span class="font-medium hidden sm:inline">Files</span>
         </button>
         <button id="btn-expand-chat-sidebar" class="hidden p-1.5 rounded-lg border border-[var(--border)] bg-[var(--bg-elevated)] hover:bg-[var(--border)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors cursor-pointer mr-1" title="Show conversation history">
           <i data-lucide="panel-left-open" class="w-3.5 h-3.5"></i>

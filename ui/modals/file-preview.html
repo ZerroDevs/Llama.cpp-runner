@@ -1,0 +1,47 @@
+<!-- ========================================== -->
+<!-- MODAL: WORKSPACE FILE PREVIEW & INSPECTOR  -->
+<!-- ========================================== -->
+<div id="modal-file-preview" class="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-xs flex items-center justify-center p-4 animate-in fade-in duration-150">
+  <div class="bg-[var(--bg-card)] border border-[var(--border)] rounded-2xl w-full max-w-4xl max-h-[85vh] flex flex-col shadow-2xl overflow-hidden animate-in zoom-in-95 duration-150">
+    <!-- Header -->
+    <div class="px-5 py-3 border-b border-[var(--border)] flex items-center justify-between shrink-0 bg-[var(--bg-elevated)]">
+      <div class="flex items-center gap-2.5 min-w-0">
+        <div class="w-8 h-8 rounded-lg bg-cyan-500/15 border border-cyan-500/30 flex items-center justify-center text-cyan-400 shrink-0">
+          <i data-lucide="file-code" id="preview-file-icon" class="w-4 h-4"></i>
+        </div>
+        <div class="min-w-0">
+          <div class="flex items-center gap-2">
+            <h3 id="preview-file-name" class="text-sm font-bold text-[var(--text-primary)] font-mono truncate">file.ext</h3>
+            <span id="preview-file-meta" class="text-[10px] font-mono text-[var(--text-muted)] bg-black/40 px-1.5 py-0.5 rounded border border-white/5">0 lines • 0 KB</span>
+          </div>
+          <div id="preview-file-path" class="text-[11px] font-mono text-[var(--text-secondary)] truncate">path/to/file</div>
+        </div>
+      </div>
+      <div class="flex items-center gap-2 shrink-0">
+        <button id="btn-preview-open-vscode" type="button" class="flex items-center gap-1.5 px-2.5 py-1 rounded-lg border border-[var(--border)] bg-[var(--bg-card)] hover:border-cyan-500/50 hover:text-cyan-300 text-xs font-medium text-[var(--text-secondary)] transition-colors cursor-pointer" title="Open file in VS Code">
+          <i data-lucide="code" class="w-3.5 h-3.5 text-cyan-400"></i>
+          <span class="hidden sm:inline">VS Code</span>
+        </button>
+        <button id="btn-preview-open-notepad" type="button" class="flex items-center gap-1.5 px-2.5 py-1 rounded-lg border border-[var(--border)] bg-[var(--bg-card)] hover:border-amber-500/50 hover:text-amber-300 text-xs font-medium text-[var(--text-secondary)] transition-colors cursor-pointer" title="Open file in Notepad">
+          <i data-lucide="file-text" class="w-3.5 h-3.5 text-amber-400"></i>
+          <span class="hidden sm:inline">Notepad</span>
+        </button>
+        <button id="btn-preview-open-explorer" type="button" class="flex items-center gap-1.5 px-2.5 py-1 rounded-lg border border-[var(--border)] bg-[var(--bg-card)] hover:border-indigo-500/50 hover:text-indigo-300 text-xs font-medium text-[var(--text-secondary)] transition-colors cursor-pointer" title="Reveal in Windows Explorer">
+          <i data-lucide="folder-open" class="w-3.5 h-3.5 text-indigo-400"></i>
+          <span class="hidden sm:inline">Explorer</span>
+        </button>
+        <button id="btn-preview-insert-chat" type="button" class="flex items-center gap-1.5 px-2.5 py-1 rounded-lg border border-emerald-500/30 bg-emerald-500/10 text-emerald-300 hover:bg-emerald-500/20 text-xs font-semibold transition-colors cursor-pointer" title="Insert file content into chat composer">
+          <i data-lucide="plus" class="w-3.5 h-3.5"></i>
+          <span>Insert to Chat</span>
+        </button>
+        <button id="btn-preview-close" type="button" class="p-1.5 rounded-lg text-[var(--text-muted)] hover:text-rose-400 hover:bg-[var(--bg-card)] transition-colors cursor-pointer" title="Close Preview (Esc)">
+          <i data-lucide="x" class="w-4 h-4"></i>
+        </button>
+      </div>
+    </div>
+    <!-- Code Content -->
+    <div class="flex-1 overflow-auto p-4 bg-[#04080d] font-mono text-xs select-text">
+      <pre class="m-0"><code id="preview-file-code" class="text-zinc-300 whitespace-pre leading-relaxed"></code></pre>
+    </div>
+  </div>
+</div>

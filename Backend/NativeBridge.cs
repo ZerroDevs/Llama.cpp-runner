@@ -185,6 +185,16 @@ namespace LlamaServerControl.Backend
                         result = await _agentWorkspace.ExecuteToolAsync(toolName, toolArgs);
                         break;
 
+                    case "agent_get_file_tree":
+                        result = _agentWorkspace.GetWorkspaceFileTree();
+                        break;
+
+                    case "agent_open_file_external":
+                        string openRelPath = args.TryGetProperty("path", out var opProp) ? opProp.GetString() ?? "" : "";
+                        string targetApp = args.TryGetProperty("app", out var appProp) ? appProp.GetString() ?? "default" : "default";
+                        result = _agentWorkspace.OpenFileExternal(openRelPath, targetApp);
+                        break;
+
                     case "start_swarm":
                         var swarmCfg = JsonSerializer.Deserialize<Dictionary<string, object>>(args.GetRawText());
                         result = _swarm.StartSwarm(swarmCfg ?? _config.GetConfig());

@@ -204,13 +204,24 @@ The **Llama Server Control Native Engine** is engineered in **C# / .NET 10** wit
     - **Native Workspace Project Selector:** Select any project folder on your PC (e.g. `MyWebsite`, Node.js, Python, or .NET solution) using a native Windows folder picker. The active project name, path, detected frameworks, and discovered file counts are displayed in the chat header and banner.
     - **ReAct Autonomous Tool Calling Loop:** When Agent Mode is toggled on (`Agent: ON`), models can autonomously plan, inspect, create, edit files, and run commands over multi-turn execution loops (up to 10 turns) until tasks are completed.
     - **Reasoning-Style Action Disclosure Boxes:** Tool executions and action results render inside sleek, collapsible disclosure accordions matching the thinking/reasoning design language:
-      - Clean header summary with tool icon (`file-plus-2`, `file-edit`, `terminal`, etc.), action name, target file path, metrics badge (e.g. `93 lines • 2 KB`), and live status pill (`Running`, `Success`, `Error`).
-      - Collapsed by default when finished to keep conversations clean and clutter-free, with 1-click expansion to inspect code previews or command logs.
+      - Clean header summary with tool icon (`file-plus-2`, `file-edit`, `terminal`, `globe`, etc.), action name, target file path or URL, metrics badge (e.g. `93 lines • 2 KB` or `HTTP 200 • 3.4k chars`), and live status pill (`Running`, `Success`, `Error`).
+      - Collapsed by default when finished to keep conversations clean and clutter-free, with 1-click expansion to inspect code previews, command logs, or fetched web documentation.
       - `write_file`: File creation or replacement with lines written, KB metrics, and scrollable code preview.
       - `edit_file`: Surgical search-and-replace with delta lines indicator and replaced/new chunk comparison.
       - `read_file`: Displays lines read and byte counts with content view.
       - `run_command`: Monospace terminal card displaying `$ <command>`, captured `stdout`, `stderr`, exit code, and execution duration in ms.
       - `list_directory`, `create_directory`, `delete_file`: Folder tree and file manipulation badges.
+      - `fetch_web`: Sandboxed HTTP GET tool allowing the agent to fetch online docs, npm READMEs, and API specifications.
+    - **Real-Time Docs Fetcher (`fetch_web` Tool):**
+      - Allows the coding agent to query external URLs in real time when implementing solutions for modern or unfamiliar frameworks.
+      - **SSRF Loopback Defense:** Blocks requests targeting localhost (`127.0.0.1`, `::1`), internal subnets (`192.168.*`, `10.*`, `172.16.*`), and local port endpoints (`8080`, `7801`).
+      - **Clean HTML-to-Markdown Scraper:** Automatically strips scripts, stylesheets, and HTML tags, delivering concise markdown text capped at 16,000 characters to conserve prompt tokens.
+    - **Collapsible Workspace File Explorer Drawer (Closeable / Openable):**
+      - **Dual-Mode Drawer Navigation:** A lightweight left-hand secondary panel next to chat sessions featuring segmented `[Chats]` and `[Files]` tabs, allowing users to toggle between conversations and project files effortlessly.
+      - **Visual Folder Tree:** Renders the workspace directory tree with folder expand/collapse state memory, item counts, file extension icons, file sizes, and instant filename filtering.
+      - **Full-Featured File Preview Modal:** Click any file to view its contents in a syntax-highlighted code inspector modal powered by `highlight.js`.
+      - **External Editor Integration:** Quick buttons to open files or the root project folder in VS Code (`code`), open files in Notepad (`notepad.exe`), or reveal items directly in Windows Explorer (`explorer.exe`).
+      - **1-Click Insert to Chat:** Inserts the selected file content directly into the chat composer as a formatted markdown code block.
     - **Strict Sandboxed Security:** All file system operations are strictly verified against the workspace root to block path traversal attacks outside the selected directory.
     - **Automated Snapshots & Backups:** Overwritten and edited files are automatically backed up into `.llama_agent/backups/` with timestamped snapshots before modifications occur.
     - **Real-Time Stop Control:** Click Stop Generation at any moment to cleanly abort running terminal processes and break the agent loop.

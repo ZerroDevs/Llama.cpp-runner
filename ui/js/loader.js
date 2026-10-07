@@ -23,7 +23,8 @@ export async function loadPartials() {
     'cmd-palette',
     'quick-model',
     'session-stats',
-    'snippets'
+    'snippets',
+    'file-preview'
   ];
 
   const main = document.getElementById('main-content');

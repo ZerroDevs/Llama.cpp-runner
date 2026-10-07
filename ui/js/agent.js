@@ -32,6 +32,9 @@ export function initAgent() {
   document.getElementById('btn-toggle-agent-mode')?.addEventListener('click', () => {
     toggleAgentMode();
   });
+
+  // 3. Workspace File Explorer Drawer
+  initWorkspaceExplorer();
 }
 
 /**
@@ -127,6 +130,7 @@ export function updateWorkspaceUI(ws) {
   const bannerPath = document.getElementById('agent-banner-path');
   const bannerType = document.getElementById('agent-banner-type');
   const bannerFiles = document.getElementById('agent-banner-files');
+  const explorerTitle = document.getElementById('explorer-project-title');
 
   if (ws && (ws.has_workspace !== false)) {
     const folderName = ws.folder_name || (ws.workspace_path ? ws.workspace_path.split(/[\\/]/).pop() : 'Project');
@@ -135,6 +139,7 @@ export function updateWorkspaceUI(ws) {
 
     if (labelFolder) labelFolder.textContent = folderName;
     if (btnClear) btnClear.classList.remove('hidden');
+    if (explorerTitle) explorerTitle.textContent = folderName;
 
     if (banner) {
       banner.classList.remove('hidden');
@@ -143,10 +148,21 @@ export function updateWorkspaceUI(ws) {
       if (bannerType) bannerType.textContent = pType;
       if (bannerFiles) bannerFiles.textContent = `${fileCount} files`;
     }
+
+    const workspacePanel = document.getElementById('sidebar-panel-workspace');
+    if (workspacePanel && !workspacePanel.classList.contains('hidden')) {
+      loadWorkspaceFileTree();
+    }
   } else {
     if (labelFolder) labelFolder.textContent = 'No Project';
     if (btnClear) btnClear.classList.add('hidden');
+    if (explorerTitle) explorerTitle.textContent = 'No Workspace';
     if (banner) banner.classList.add('hidden');
+
+    const treeContainer = document.getElementById('workspace-file-tree');
+    if (treeContainer) {
+      renderEmptyWorkspaceTree(treeContainer);
+    }
   }
 
   if (window.lucide) window.lucide.createIcons();
@@ -278,6 +294,12 @@ AVAILABLE TOOLS:
    {"name": "delete_file", "arguments": {"path": "relative/filename.ext"}}
    </tool_call>
 
+8. fetch_web: Fetch online documentation, npm READMEs, or API specifications from external URLs.
+   Syntax:
+   <tool_call>
+   {"name": "fetch_web", "arguments": {"url": "https://raw.githubusercontent.com/.../README.md"}}
+   </tool_call>
+
 EXECUTION RULES:
 - When the user asks to edit, add, or create something, plan concisely and immediately execute the tool calls.
 - When editing or adding features to code, output write_file with the updated code.
@@ -332,27 +354,36 @@ export function safeParseJson(raw) {
     return JSON.parse(out);
   } catch {}
 
-  // 2. Aggressive regex-based fallback for write_file / edit_file
+  // 2. Aggressive regex-based fallback for write_file / edit_file / fetch_web
   try {
     const nameMatch = /"(?:name|tool)"\s*:\s*"([^"]+)"/i.exec(trimmed);
     const pathMatch = /"path"\s*:\s*"([^"]+)"/i.exec(trimmed);
-    if (nameMatch && pathMatch) {
+    const urlMatch = /"url"\s*:\s*"([^"]+)"/i.exec(trimmed);
+    if (nameMatch) {
       const toolName = nameMatch[1].toLowerCase();
-      const filePath = pathMatch[1];
+      if (toolName === 'fetch_web' && urlMatch) {
+        return {
+          name: 'fetch_web',
+          arguments: { url: urlMatch[1] }
+        };
+      }
+      if (pathMatch) {
+        const filePath = pathMatch[1];
 
-      if (toolName === 'write_file') {
-        const contentMatch = /"content"\s*:\s*"([\s\S]*)"\s*\}?\s*$/i.exec(trimmed);
-        if (contentMatch) {
+        if (toolName === 'write_file') {
+          const contentMatch = /"content"\s*:\s*"([\s\S]*)"\s*\}?\s*$/i.exec(trimmed);
+          if (contentMatch) {
+            return {
+              name: 'write_file',
+              arguments: { path: filePath, content: unescapeJsonString(contentMatch[1]) }
+            };
+          }
+        } else if (toolName === 'read_file' || toolName === 'delete_file' || toolName === 'create_directory' || toolName === 'list_directory') {
           return {
-            name: 'write_file',
-            arguments: { path: filePath, content: unescapeJsonString(contentMatch[1]) }
+            name: toolName,
+            arguments: { path: filePath }
           };
         }
-      } else if (toolName === 'read_file' || toolName === 'delete_file' || toolName === 'create_directory' || toolName === 'list_directory') {
-        return {
-          name: toolName,
-          arguments: { path: filePath }
-        };
       }
     }
   } catch {}
@@ -410,7 +441,7 @@ export function extractBalancedJson(text, startIndex) {
 export function extractRawToolCalls(text) {
   if (!text) return [];
   const calls = [];
-  const toolNames = ['write_file', 'edit_file', 'read_file', 'run_command', 'create_directory', 'delete_file', 'list_directory'];
+  const toolNames = ['write_file', 'edit_file', 'read_file', 'run_command', 'create_directory', 'delete_file', 'list_directory', 'fetch_web'];
 
   let i = 0;
   while (i < text.length) {
@@ -418,7 +449,7 @@ export function extractRawToolCalls(text) {
     if (nextBrace === -1) break;
 
     const snippet = text.slice(nextBrace, nextBrace + 120);
-    const hasToolKeyword = /"(?:name|tool)"\s*:\s*"(?:write_file|edit_file|read_file|run_command|create_directory|delete_file|list_directory)"/i.test(snippet);
+    const hasToolKeyword = /"(?:name|tool)"\s*:\s*"(?:write_file|edit_file|read_file|run_command|create_directory|delete_file|list_directory|fetch_web)"/i.test(snippet);
 
     if (!hasToolKeyword) {
       i = nextBrace + 1;
@@ -528,6 +559,8 @@ export function getToolIconName(toolName) {
       return 'trash-2';
     case 'list_directory':
       return 'folder-tree';
+    case 'fetch_web':
+      return 'globe';
     default:
       return 'wrench';
   }
@@ -547,7 +580,7 @@ export function buildPendingToolCardHtml(toolName = 'workspace_action') {
 export function buildToolCardHtml(toolName, args, result) {
   const isPending = !result;
   const isSuccess = result && result.status === 'success';
-  const targetPath = args?.path || args?.command || result?.path || '';
+  const targetPath = args?.path || args?.command || args?.url || result?.path || result?.url || '';
   const iconName = getToolIconName(toolName);
 
   // Status Badge
@@ -580,6 +613,10 @@ export function buildToolCardHtml(toolName, args, result) {
     } else if (toolName === 'list_directory') {
       const count = result.entries ? result.entries.length : 0;
       metricsBadge = `<span class="px-1.5 py-0.5 rounded text-[10px] font-mono bg-cyan-500/10 text-cyan-300 border border-cyan-500/20">${count} items</span>`;
+    } else if (toolName === 'fetch_web') {
+      const chars = result.chars ?? (result.content ? result.content.length : 0);
+      const statusHttp = result.http_status ?? 200;
+      metricsBadge = `<span class="px-1.5 py-0.5 rounded text-[10px] font-mono bg-cyan-500/10 text-cyan-300 border border-cyan-500/20">HTTP ${statusHttp} • ${chars} chars</span>`;
     }
   }
 
@@ -611,6 +648,11 @@ export function buildToolCardHtml(toolName, args, result) {
   } else if (toolName === 'list_directory') {
     const entries = result?.entries || [];
     bodyHtml = `<div class="space-y-1 font-mono text-[11px]"><div class="text-[var(--text-muted)] mb-1">Directory contents (${entries.length} items):</div><div class="bg-black/50 border border-white/5 rounded-lg p-2 max-h-48 overflow-y-auto space-y-0.5">${entries.map(e => `<div class="flex items-center gap-2 ${e.is_directory ? 'text-cyan-300' : 'text-zinc-300'}"><i data-lucide="${e.is_directory ? 'folder' : 'file'}" class="w-3 h-3 shrink-0"></i><span>${escapeHtml(e.name)}</span></div>`).join('')}</div></div>`;
+  } else if (toolName === 'fetch_web') {
+    const url = args?.url || result?.url || '';
+    const title = result?.title || '';
+    const chars = result?.chars || (result?.content ? result.content.length : 0);
+    bodyHtml = `<div class="space-y-1.5"><div class="text-[11px] text-[var(--text-muted)] flex items-center justify-between"><span>Source: <a href="${escapeHtml(url)}" target="_blank" rel="noopener noreferrer" class="text-cyan-300 font-mono hover:underline break-all">${escapeHtml(url)}</a></span><span class="font-mono text-[10px] text-zinc-400 shrink-0 ml-2">${chars} chars</span></div>${title ? `<div class="text-[11px] text-zinc-300 font-semibold">${escapeHtml(title)}</div>` : ''}${result?.content ? `<pre class="bg-black/50 border border-white/5 rounded-lg p-2.5 text-[11px] text-zinc-300 font-mono overflow-x-auto max-h-56 whitespace-pre leading-relaxed select-text"><code>${escapeHtml(result.content)}</code></pre>` : '<div class="text-xs text-emerald-400">Content retrieved successfully.</div>'}</div>`;
   }
 
   return `<details class="group-agent-action mb-2.5 bg-[var(--bg-elevated)] border border-cyan-500/25 hover:border-cyan-500/40 rounded-xl p-3 transition-colors"${isPending ? ' open' : ''}><summary class="flex items-center justify-between cursor-pointer select-none text-xs font-semibold text-cyan-400 hover:text-cyan-300 transition-colors list-none"><div class="flex items-center gap-2 min-w-0 flex-1 mr-2"><span class="agent-action-icon flex items-center justify-center w-5 h-5 rounded-md bg-cyan-500/15 text-cyan-400 shrink-0"><i data-lucide="${iconName}" class="w-3.5 h-3.5"></i></span><span class="agent-action-name font-mono text-cyan-300 font-semibold shrink-0">${escapeHtml(toolName)}</span>${targetPath ? `<span class="agent-action-target font-mono text-[var(--text-secondary)] truncate max-w-[260px]" title="${escapeHtml(targetPath)}">${escapeHtml(targetPath)}</span>` : ''}${metricsBadge}</div><div class="flex items-center gap-2 shrink-0">${statusBadge}<svg class="w-3.5 h-3.5 transition-transform duration-200 details-chevron text-[var(--text-muted)]" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"/></svg></div></summary><div class="agent-action-body text-xs text-[var(--text-secondary)] mt-2 pt-2 border-t border-[var(--border)] leading-relaxed select-text font-mono">${bodyHtml}</div></details>`;
@@ -623,7 +665,7 @@ export function buildActionResultCardHtml(actionResult) {
   if (!actionResult) return '';
 
   const action = actionResult.action || 'action';
-  const targetPath = actionResult.path || actionResult.target || '';
+  const targetPath = actionResult.path || actionResult.target || actionResult.url || '';
   const isSuccess = actionResult.status === 'success';
 
   let toolName = 'workspace_action';
@@ -644,6 +686,9 @@ export function buildActionResultCardHtml(actionResult) {
   } else if (action === 'deleted') {
     toolName = 'delete_file';
     iconName = 'trash-2';
+  } else if (action === 'fetched_web') {
+    toolName = 'fetch_web';
+    iconName = 'globe';
   }
 
   const lines = actionResult.lines ?? 0;
@@ -711,9 +756,9 @@ export function renderToolCardsInText(text) {
     }
 
     const jsonStr = balanced.jsonStr;
-    const isToolCall = /"(?:name|tool)"\s*:\s*"(?:write_file|edit_file|read_file|run_command|create_directory|delete_file|list_directory)"/i.test(jsonStr);
-    const isActionResult = /"(?:action|status)"\s*:\s*"(?:created_or_updated|surgical_edit|success|error)"/i.test(jsonStr) &&
-      (jsonStr.includes('"lines"') || jsonStr.includes('"path"') || jsonStr.includes('"action"') || jsonStr.includes('"size_bytes"'));
+    const isToolCall = /"(?:name|tool)"\s*:\s*"(?:write_file|edit_file|read_file|run_command|create_directory|delete_file|list_directory|fetch_web)"/i.test(jsonStr);
+    const isActionResult = /"(?:action|status)"\s*:\s*"(?:created_or_updated|surgical_edit|fetched_web|success|error)"/i.test(jsonStr) &&
+      (jsonStr.includes('"lines"') || jsonStr.includes('"path"') || jsonStr.includes('"action"') || jsonStr.includes('"size_bytes"') || jsonStr.includes('"chars"') || jsonStr.includes('"url"'));
 
     if (isToolCall) {
       const parsedCall = safeParseJson(jsonStr);
@@ -782,3 +827,581 @@ function escapeHtml(str) {
     '"': '&quot;'
   }[tag] || tag));
 }
+
+// ==========================================
+// WORKSPACE FILE EXPLORER DRAWER CONTROLLER
+// ==========================================
+
+let cachedTreeData = null;
+let activePreviewFilePath = '';
+let activeSidebarTab = 'chats';
+const expandedFolderPaths = new Set(['']);
+
+export function getActiveSidebarTab() {
+  return activeSidebarTab;
+}
+
+export function initWorkspaceExplorer() {
+  // 1. Drawer Tab Switching
+  document.getElementById('btn-sidebar-tab-chats')?.addEventListener('click', () => {
+    switchSidebarTab('chats');
+  });
+
+  document.getElementById('btn-sidebar-tab-workspace')?.addEventListener('click', () => {
+    switchSidebarTab('workspace');
+  });
+
+  // 2. Explorer Top Toolbar Actions
+  document.getElementById('btn-explorer-refresh')?.addEventListener('click', async () => {
+    await loadWorkspaceFileTree(document.getElementById('explorer-filter-input')?.value || '');
+    showToast('Files Refreshed', 'Workspace tree synchronized.', 'info', 1500);
+  });
+
+  document.getElementById('btn-explorer-vscode')?.addEventListener('click', async () => {
+    if (!state.activeWorkspace?.workspace_path) {
+      showToast('No Workspace', 'Select a project folder first.', 'warning');
+      return;
+    }
+    await api.invoke('agent_open_file_external', { path: '', target: 'vscode' });
+    showToast('VS Code Launched', 'Opening workspace directory.', 'info', 1800);
+  });
+
+  document.getElementById('btn-explorer-reveal')?.addEventListener('click', async () => {
+    if (!state.activeWorkspace?.workspace_path) {
+      showToast('No Workspace', 'Select a project folder first.', 'warning');
+      return;
+    }
+    await api.invoke('agent_open_file_external', { path: '', target: 'explorer' });
+  });
+
+  document.getElementById('btn-explorer-pick-folder')?.addEventListener('click', async () => {
+    await selectWorkspaceFolder();
+  });
+
+  // 3. Search / Filter File Tree
+  const filterInput = document.getElementById('explorer-filter-input');
+  if (filterInput) {
+    filterInput.addEventListener('input', () => {
+      const q = filterInput.value.trim().toLowerCase();
+      if (cachedTreeData) {
+        renderWorkspaceFileTree(cachedTreeData, q);
+      }
+    });
+  }
+
+  // 4. File Tree Container Event Delegation
+  const treeContainer = document.getElementById('workspace-file-tree');
+  if (treeContainer) {
+    treeContainer.addEventListener('click', async (e) => {
+      // a. Open in VS Code button
+      const btnVsCode = e.target.closest('.btn-node-open-vscode');
+      if (btnVsCode) {
+        e.stopPropagation();
+        const fPath = btnVsCode.getAttribute('data-file-path');
+        if (fPath) {
+          await api.invoke('agent_open_file_external', { path: fPath, target: 'vscode' });
+          showToast('Opened in VS Code', fPath, 'info', 1500);
+        }
+        return;
+      }
+
+      // b. Reveal in Explorer button
+      const btnExp = e.target.closest('.btn-node-reveal-explorer');
+      if (btnExp) {
+        e.stopPropagation();
+        const fPath = btnExp.getAttribute('data-file-path');
+        if (fPath) {
+          await api.invoke('agent_open_file_external', { path: fPath, target: 'explorer' });
+        }
+        return;
+      }
+
+      // c. Folder row toggle (expand/collapse)
+      const folderRow = e.target.closest('.tree-folder-row');
+      if (folderRow) {
+        const folderEl = folderRow.closest('.tree-folder');
+        const folderPath = folderEl?.getAttribute('data-folder-path') || '';
+        const childrenEl = folderEl?.querySelector(':scope > .tree-folder-children');
+
+        if (folderEl && childrenEl) {
+          const isCurrentlyOpen = folderEl.classList.contains('open');
+          if (isCurrentlyOpen) {
+            folderEl.classList.remove('open');
+            childrenEl.classList.add('hidden');
+            expandedFolderPaths.delete(folderPath);
+          } else {
+            folderEl.classList.add('open');
+            childrenEl.classList.remove('hidden');
+            expandedFolderPaths.add(folderPath);
+          }
+          if (window.lucide) window.lucide.createIcons({ root: folderRow });
+        }
+        return;
+      }
+
+      // d. File node click -> Open Preview Modal
+      const fileNode = e.target.closest('.workspace-tree-node');
+      if (fileNode) {
+        const fPath = fileNode.getAttribute('data-file-path');
+        const fName = fileNode.getAttribute('data-file-name');
+        const fSize = fileNode.getAttribute('data-file-size');
+        if (fPath) {
+          await openFilePreviewModal(fPath, fName, fSize);
+        }
+      }
+    });
+  }
+
+  // 5. File Preview Modal Setup
+  const modalPreview = document.getElementById('modal-file-preview');
+  if (modalPreview) {
+    modalPreview.addEventListener('click', (e) => {
+      if (e.target === modalPreview) closeFilePreviewModal();
+    });
+
+    document.getElementById('btn-preview-close')?.addEventListener('click', () => {
+      closeFilePreviewModal();
+    });
+
+    document.getElementById('btn-preview-open-vscode')?.addEventListener('click', async () => {
+      if (activePreviewFilePath) {
+        await api.invoke('agent_open_file_external', { path: activePreviewFilePath, target: 'vscode' });
+        showToast('Opened in VS Code', activePreviewFilePath, 'info', 1500);
+      }
+    });
+
+    document.getElementById('btn-preview-open-notepad')?.addEventListener('click', async () => {
+      if (activePreviewFilePath) {
+        await api.invoke('agent_open_file_external', { path: activePreviewFilePath, target: 'notepad' });
+      }
+    });
+
+    document.getElementById('btn-preview-open-explorer')?.addEventListener('click', async () => {
+      if (activePreviewFilePath) {
+        await api.invoke('agent_open_file_external', { path: activePreviewFilePath, target: 'explorer' });
+      }
+    });
+
+    document.getElementById('btn-preview-insert-chat')?.addEventListener('click', () => {
+      insertPreviewCodeToChat();
+    });
+  }
+}
+
+export function switchSidebarTab(tabName) {
+  activeSidebarTab = tabName;
+  const btnChats = document.getElementById('btn-sidebar-tab-chats');
+  const btnFiles = document.getElementById('btn-sidebar-tab-workspace');
+  const panelChats = document.getElementById('sidebar-panel-chats');
+  const panelFiles = document.getElementById('sidebar-panel-workspace');
+
+  if (tabName === 'chats') {
+    if (btnChats) {
+      btnChats.className = 'sidebar-tab-btn active flex-1 flex items-center justify-center gap-1.5 py-1 px-2 rounded-md text-xs font-semibold bg-[var(--brand)] text-black transition-all cursor-pointer shadow-xs';
+    }
+    if (btnFiles) {
+      btnFiles.className = 'sidebar-tab-btn flex-1 flex items-center justify-center gap-1.5 py-1 px-2 rounded-md text-xs font-medium text-[var(--text-secondary)] hover:text-cyan-400 transition-all cursor-pointer bg-transparent';
+    }
+    panelChats?.classList.remove('hidden');
+    panelFiles?.classList.add('hidden');
+  } else {
+    if (btnFiles) {
+      btnFiles.className = 'sidebar-tab-btn active flex-1 flex items-center justify-center gap-1.5 py-1 px-2 rounded-md text-xs font-semibold bg-cyan-500 text-black transition-all cursor-pointer shadow-xs';
+    }
+    if (btnChats) {
+      btnChats.className = 'sidebar-tab-btn flex-1 flex items-center justify-center gap-1.5 py-1 px-2 rounded-md text-xs font-medium text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-all cursor-pointer bg-transparent';
+    }
+    panelFiles?.classList.remove('hidden');
+    panelChats?.classList.add('hidden');
+    loadWorkspaceFileTree();
+  }
+
+  updateSidebarToggleButtonsState(true, tabName);
+  if (window.lucide) window.lucide.createIcons();
+}
+
+export function updateSidebarToggleButtonsState(isOpen, currentTab) {
+  const btnChats = document.getElementById('btn-toggle-chat-sidebar');
+  const btnFiles = document.getElementById('btn-toggle-workspace-sidebar');
+
+  if (!isOpen) {
+    if (btnChats) {
+      btnChats.classList.remove('text-[var(--brand)]');
+      btnChats.classList.add('text-[var(--text-secondary)]');
+      const icon = btnChats.querySelector('i, svg');
+      if (icon) {
+        icon.classList.remove('text-[var(--brand)]');
+        icon.classList.add('text-[var(--text-secondary)]');
+      }
+    }
+    if (btnFiles) {
+      btnFiles.classList.remove('text-cyan-400');
+      btnFiles.classList.add('text-[var(--text-secondary)]');
+      const icon = btnFiles.querySelector('i, svg');
+      if (icon) {
+        icon.classList.remove('text-cyan-400');
+        icon.classList.add('text-[var(--text-secondary)]');
+      }
+    }
+    return;
+  }
+
+  if (currentTab === 'chats') {
+    if (btnChats) {
+      btnChats.classList.add('text-[var(--brand)]');
+      btnChats.classList.remove('text-[var(--text-secondary)]');
+      const icon = btnChats.querySelector('i, svg');
+      if (icon) {
+        icon.classList.add('text-[var(--brand)]');
+        icon.classList.remove('text-[var(--text-secondary)]');
+      }
+    }
+    if (btnFiles) {
+      btnFiles.classList.remove('text-cyan-400');
+      btnFiles.classList.add('text-[var(--text-secondary)]');
+      const icon = btnFiles.querySelector('i, svg');
+      if (icon) {
+        icon.classList.remove('text-cyan-400');
+        icon.classList.add('text-[var(--text-secondary)]');
+      }
+    }
+  } else {
+    if (btnChats) {
+      btnChats.classList.remove('text-[var(--brand)]');
+      btnChats.classList.add('text-[var(--text-secondary)]');
+      const icon = btnChats.querySelector('i, svg');
+      if (icon) {
+        icon.classList.remove('text-[var(--brand)]');
+        icon.classList.add('text-[var(--text-secondary)]');
+      }
+    }
+    if (btnFiles) {
+      btnFiles.classList.add('text-cyan-400');
+      btnFiles.classList.remove('text-[var(--text-secondary)]');
+      const icon = btnFiles.querySelector('i, svg');
+      if (icon) {
+        icon.classList.add('text-cyan-400');
+        icon.classList.remove('text-[var(--text-secondary)]');
+      }
+    }
+  }
+}
+
+export async function loadWorkspaceFileTree(filterQuery = '') {
+  const treeContainer = document.getElementById('workspace-file-tree');
+  if (!treeContainer) return;
+
+  if (!state.activeWorkspace || (state.activeWorkspace.has_workspace === false)) {
+    renderEmptyWorkspaceTree(treeContainer);
+    return;
+  }
+
+  const explorerTitle = document.getElementById('explorer-project-title');
+  if (explorerTitle) {
+    explorerTitle.textContent = state.activeWorkspace.folder_name || 'Project';
+  }
+
+  try {
+    const res = await api.invoke('agent_get_file_tree');
+    if (res && res.status === 'success' && res.tree) {
+      cachedTreeData = res.tree;
+      renderWorkspaceFileTree(res.tree, filterQuery);
+
+      const stats = countTreeStats(res.tree);
+      const statsEl = document.getElementById('explorer-stats-files');
+      if (statsEl) {
+        statsEl.textContent = `${stats.files} files, ${stats.dirs} dirs`;
+      }
+    } else {
+      treeContainer.innerHTML = `<div class="p-3 text-xs text-rose-400">Failed to load directory tree: ${escapeHtml(res?.message || 'Unknown error')}</div>`;
+    }
+  } catch (err) {
+    treeContainer.innerHTML = `<div class="p-3 text-xs text-rose-400">Tree Error: ${escapeHtml(err.message)}</div>`;
+  }
+}
+
+function countTreeStats(node) {
+  let files = 0;
+  let dirs = 0;
+  if (!node) return { files, dirs };
+
+  if (node.files && Array.isArray(node.files)) {
+    files += node.files.length;
+  }
+  if (node.directories && Array.isArray(node.directories)) {
+    dirs += node.directories.length;
+    for (const d of node.directories) {
+      const sub = countTreeStats(d);
+      files += sub.files;
+      dirs += sub.dirs;
+    }
+  }
+  return { files, dirs };
+}
+
+export function renderEmptyWorkspaceTree(container) {
+  container.innerHTML = `
+    <div class="p-4 text-center text-xs text-[var(--text-muted)] space-y-3 mt-4 select-none">
+      <div class="w-10 h-10 mx-auto rounded-xl bg-cyan-500/10 border border-cyan-500/20 flex items-center justify-center text-cyan-400">
+        <i data-lucide="folder-code" class="w-5 h-5"></i>
+      </div>
+      <div>
+        <div class="font-semibold text-[var(--text-primary)]">No Project Connected</div>
+        <p class="text-[11px] text-[var(--text-muted)] mt-1">Select a folder to view files and enable autonomous code editing.</p>
+      </div>
+      <button id="btn-empty-select-folder" type="button" class="px-3 py-1.5 rounded-lg bg-cyan-500 hover:bg-cyan-400 text-black font-semibold text-xs transition-colors cursor-pointer inline-flex items-center gap-1.5 shadow-xs">
+        <i data-lucide="folder-open" class="w-3.5 h-3.5"></i>
+        <span>Open Project Folder</span>
+      </button>
+    </div>
+  `;
+
+  document.getElementById('btn-empty-select-folder')?.addEventListener('click', async () => {
+    await selectWorkspaceFolder();
+  });
+
+  const statsEl = document.getElementById('explorer-stats-files');
+  if (statsEl) statsEl.textContent = '0 files';
+
+  if (window.lucide) window.lucide.createIcons({ root: container });
+}
+
+export function renderWorkspaceFileTree(tree, filterQuery = '') {
+  const container = document.getElementById('workspace-file-tree');
+  if (!container || !tree) return;
+
+  const q = (filterQuery || '').toLowerCase();
+  const effectiveExpanded = new Set(expandedFolderPaths);
+
+  if (q) {
+    autoExpandMatchingAncestors(tree, q, effectiveExpanded);
+  }
+
+  const html = renderDirectoryChildrenHtml(tree, q, effectiveExpanded, true);
+  if (!html.trim()) {
+    container.innerHTML = `<div class="p-4 text-center text-xs text-[var(--text-muted)] font-mono">No matching files found.</div>`;
+    return;
+  }
+
+  container.innerHTML = html;
+  if (window.lucide) window.lucide.createIcons({ root: container });
+}
+
+function autoExpandMatchingAncestors(dirNode, query, expandSet) {
+  let hasMatch = false;
+  if (dirNode.files) {
+    for (const f of dirNode.files) {
+      if (f.name.toLowerCase().includes(query) || f.path.toLowerCase().includes(query)) {
+        hasMatch = true;
+      }
+    }
+  }
+  if (dirNode.directories) {
+    for (const d of dirNode.directories) {
+      if (autoExpandMatchingAncestors(d, query, expandSet)) {
+        hasMatch = true;
+      }
+    }
+  }
+  if (hasMatch && dirNode.path !== undefined) {
+    expandSet.add(dirNode.path);
+  }
+  return hasMatch;
+}
+
+function renderDirectoryChildrenHtml(dirNode, query, expandSet, isRoot = false) {
+  let out = '';
+
+  // Render Subdirectories
+  if (dirNode.directories && Array.isArray(dirNode.directories)) {
+    for (const sub of dirNode.directories) {
+      const subDirHtml = renderDirectoryChildrenHtml(sub, query, expandSet, false);
+      const nameMatches = sub.name.toLowerCase().includes(query);
+      if (query && !nameMatches && !subDirHtml.trim()) {
+        continue;
+      }
+
+      const isOpen = expandSet.has(sub.path);
+      const totalItems = (sub.directories ? sub.directories.length : 0) + (sub.files ? sub.files.length : 0);
+
+      out += `
+        <div class="tree-folder ${isOpen ? 'open' : ''}" data-folder-path="${escapeHtml(sub.path)}">
+          <div class="tree-folder-row flex items-center justify-between py-1 px-1.5 rounded-md hover:bg-white/5 cursor-pointer text-xs select-none group">
+            <div class="flex items-center gap-1.5 min-w-0 flex-1">
+              <i data-lucide="chevron-right" class="w-3 h-3 text-zinc-500 tree-chevron shrink-0"></i>
+              <i data-lucide="${isOpen ? 'folder-open' : 'folder'}" class="w-3.5 h-3.5 text-cyan-400/90 shrink-0"></i>
+              <span class="truncate font-medium text-zinc-200">${escapeHtml(sub.name)}</span>
+            </div>
+            <span class="text-[10px] text-zinc-500 font-mono shrink-0">${totalItems}</span>
+          </div>
+          <div class="tree-folder-children ${isOpen ? '' : 'hidden'} pl-2 ml-1.5 border-l border-white/5 space-y-0.5 mt-0.5">
+            ${subDirHtml}
+          </div>
+        </div>
+      `;
+    }
+  }
+
+  // Render Files in this directory
+  if (dirNode.files && Array.isArray(dirNode.files)) {
+    for (const file of dirNode.files) {
+      if (query && !file.name.toLowerCase().includes(query) && !file.path.toLowerCase().includes(query)) {
+        continue;
+      }
+
+      const iconMeta = getFileIconMeta(file.extension);
+      out += `
+        <div class="workspace-tree-node flex items-center justify-between py-1 px-1.5 rounded-md hover:bg-white/5 cursor-pointer text-xs select-none group" data-file-path="${escapeHtml(file.path)}" data-file-name="${escapeHtml(file.name)}" data-file-size="${file.size_kb}">
+          <div class="flex items-center gap-1.5 min-w-0 flex-1 mr-1">
+            <i data-lucide="${iconMeta.icon}" class="w-3.5 h-3.5 ${iconMeta.color} shrink-0"></i>
+            <span class="truncate text-zinc-300 group-hover:text-cyan-300 transition-colors">${escapeHtml(file.name)}</span>
+          </div>
+          <div class="flex items-center gap-1 shrink-0">
+            <span class="text-[10px] text-zinc-500 font-mono group-hover:hidden">${file.size_kb}KB</span>
+            <div class="tree-node-actions flex items-center gap-0.5">
+              <button type="button" class="btn-node-open-vscode p-1 rounded hover:bg-cyan-500/20 text-zinc-400 hover:text-cyan-300 transition-colors" title="Open in VS Code" data-file-path="${escapeHtml(file.path)}">
+                <i data-lucide="code" class="w-3 h-3"></i>
+              </button>
+              <button type="button" class="btn-node-reveal-explorer p-1 rounded hover:bg-indigo-500/20 text-zinc-400 hover:text-indigo-300 transition-colors" title="Reveal in Windows Explorer" data-file-path="${escapeHtml(file.path)}">
+                <i data-lucide="folder-open" class="w-3 h-3"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+  }
+
+  return out;
+}
+
+export function getFileIconMeta(ext = '') {
+  const norm = (ext || '').toLowerCase();
+  switch (norm) {
+    case 'js':
+    case 'mjs':
+    case 'cjs':
+    case 'jsx':
+    case 'ts':
+    case 'tsx':
+      return { icon: 'file-code', color: 'text-amber-400' };
+    case 'html':
+    case 'htm':
+      return { icon: 'file-code', color: 'text-orange-400' };
+    case 'css':
+    case 'scss':
+    case 'sass':
+    case 'less':
+      return { icon: 'palette', color: 'text-cyan-400' };
+    case 'json':
+      return { icon: 'file-json', color: 'text-yellow-300' };
+    case 'cs':
+      return { icon: 'file-code', color: 'text-violet-400' };
+    case 'py':
+      return { icon: 'file-code', color: 'text-emerald-400' };
+    case 'md':
+    case 'txt':
+    case 'log':
+      return { icon: 'file-text', color: 'text-zinc-400' };
+    case 'png':
+    case 'jpg':
+    case 'jpeg':
+    case 'gif':
+    case 'svg':
+    case 'webp':
+    case 'ico':
+      return { icon: 'image', color: 'text-pink-400' };
+    case 'sh':
+    case 'bash':
+    case 'ps1':
+    case 'bat':
+    case 'cmd':
+      return { icon: 'terminal', color: 'text-emerald-300' };
+    default:
+      return { icon: 'file', color: 'text-zinc-400' };
+  }
+}
+
+export async function openFilePreviewModal(relPath, fileName, sizeKb) {
+  if (!relPath) return;
+  activePreviewFilePath = relPath;
+
+  const modal = document.getElementById('modal-file-preview');
+  const nameEl = document.getElementById('preview-file-name');
+  const pathEl = document.getElementById('preview-file-path');
+  const metaEl = document.getElementById('preview-file-meta');
+  const codeEl = document.getElementById('preview-file-code');
+  const iconEl = document.getElementById('preview-file-icon');
+
+  const baseName = fileName || relPath.split(/[\\/]/).pop();
+  const ext = baseName.includes('.') ? baseName.split('.').pop().toLowerCase() : '';
+
+  if (nameEl) nameEl.textContent = baseName;
+  if (pathEl) pathEl.textContent = relPath;
+  if (metaEl) metaEl.textContent = 'Loading file...';
+  if (codeEl) {
+    codeEl.textContent = 'Loading content...';
+    codeEl.className = 'text-zinc-300 whitespace-pre leading-relaxed';
+  }
+
+  if (iconEl) {
+    const meta = getFileIconMeta(ext);
+    iconEl.setAttribute('data-lucide', meta.icon);
+    iconEl.setAttribute('class', `w-4 h-4 ${meta.color}`);
+  }
+
+  modal?.classList.remove('hidden');
+  if (window.lucide) window.lucide.createIcons({ root: modal });
+
+  try {
+    const res = await executeAgentTool('read_file', { path: relPath });
+    if (res && res.status === 'success') {
+      const content = res.content || '';
+      const lines = res.lines ?? content.split('\n').length;
+      const kb = sizeKb || (res.size_bytes ? (res.size_bytes / 1024).toFixed(1) : '0.0');
+
+      if (metaEl) metaEl.textContent = `${lines} lines • ${kb} KB`;
+      if (codeEl) {
+        codeEl.textContent = content || '(Empty file)';
+        if (ext) codeEl.classList.add(`language-${ext}`);
+        if (window.hljs && typeof window.hljs.highlightElement === 'function') {
+          try { window.hljs.highlightElement(codeEl); } catch {}
+        }
+      }
+    } else {
+      if (metaEl) metaEl.textContent = 'Error';
+      if (codeEl) codeEl.textContent = `Failed to read file: ${res?.message || 'Unknown error'}`;
+    }
+  } catch (err) {
+    if (metaEl) metaEl.textContent = 'Error';
+    if (codeEl) codeEl.textContent = `Read error: ${err.message}`;
+  }
+}
+
+export function closeFilePreviewModal() {
+  const modal = document.getElementById('modal-file-preview');
+  modal?.classList.add('hidden');
+  activePreviewFilePath = '';
+}
+
+export function insertPreviewCodeToChat() {
+  const codeEl = document.getElementById('preview-file-code');
+  const chatInput = document.getElementById('chat-user-input');
+
+  if (!codeEl || !chatInput || !activePreviewFilePath) return;
+
+  const content = codeEl.textContent || '';
+  const ext = activePreviewFilePath.includes('.') ? activePreviewFilePath.split('.').pop() : '';
+  const snippet = `\`\`\`${ext}\n// ${activePreviewFilePath}\n${content}\n\`\`\``;
+
+  if (chatInput.value.trim().length > 0) {
+    chatInput.value = `${chatInput.value.trim()}\n\n${snippet}\n`;
+  } else {
+    chatInput.value = `${snippet}\n`;
+  }
+
+  closeFilePreviewModal();
+  chatInput.focus();
+  showToast('Code Inserted', `Added ${activePreviewFilePath} into chat composer.`, 'success', 2000);
+}
+

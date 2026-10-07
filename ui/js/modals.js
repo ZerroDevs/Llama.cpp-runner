@@ -36,6 +36,7 @@ export function closeAllModals() {
   document.getElementById('modal-cmd-palette')?.classList.add('hidden');
   document.getElementById('modal-quick-model')?.classList.add('hidden');
   document.getElementById('modal-session-stats')?.classList.add('hidden');
+  document.getElementById('modal-file-preview')?.classList.add('hidden');
   closePromptLibraryModal();
 }
 
