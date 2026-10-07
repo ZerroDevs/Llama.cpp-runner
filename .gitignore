@@ -39,6 +39,9 @@ agents.md
 .agents/**
 
 #ignore , old v1 
+Installer_Output/
+Installer_Output/**
+setup.iss
 ignore
 ignore/**
 ignore/*
