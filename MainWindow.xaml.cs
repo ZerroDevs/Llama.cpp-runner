@@ -50,6 +50,21 @@ namespace LlamaServerControl
             string devUiDir = Path.Combine(parentDir, "ui");
             string uiDir = Directory.Exists(devUiDir) ? devUiDir : Path.Combine(appDir, "ui");
 
+            // Set window and taskbar icon safely from file if present
+            try
+            {
+                string iconPath = Path.Combine(uiDir, "images", "Icon.ico");
+                if (File.Exists(iconPath))
+                {
+                    Icon = System.Windows.Media.Imaging.BitmapFrame.Create(
+                        new Uri(iconPath, UriKind.Absolute),
+                        System.Windows.Media.Imaging.BitmapCreateOptions.None,
+                        System.Windows.Media.Imaging.BitmapCacheOption.OnLoad
+                    );
+                }
+            }
+            catch { }
+
             // Start WebHostServer on port 9095 (Local & Network Host)
             _webHostServer = new WebHostServer(_nativeBridge, _configManager, _processManager, _streamingProxy, uiDir);
             _webHostServer.Start();
