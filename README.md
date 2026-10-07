@@ -5,11 +5,13 @@
 [![C# 13](https://img.shields.io/badge/C%23-13-239120.svg)]()
 [![WPF & WebView2](https://img.shields.io/badge/UI-WPF%20%26%20WebView2-0078D7.svg)]()
 [![Kestrel Web Host: Port 9095](https://img.shields.io/badge/WebHost-Port%209095-emerald.svg)]()
+[![Llama.cpp Web Host: Port 8080](https://img.shields.io/badge/WebHost-Port%208080-emerald.svg)]()
 [![Platform: Windows](https://img.shields.io/badge/Platform-Windows%2010%2F11-lightgrey.svg)]()
 
 Llama Server Control is a high-performance, native Windows desktop application and network web host for managing your local AI ecosystem. Built with native **C# (.NET 10)**, **WPF**, and **Microsoft Edge WebView2** on the desktop, and powered by an embedded **ASP.NET Core Kestrel** server on port 9095, it acts as a lightweight, zero-waste central hub for running LLMs via `llama.cpp` and diffusion models via `SwarmUI`.
 
 ## Project Vision
+
 Our vision is to build the absolute lightest, most performant, zero-waste local AI manager in existence. Hardware headroom is precious. Every megabyte of RAM saved by the control panel is a megabyte given back to your models or your games. We enforce aggressive thread hygiene, zero-copy binary streaming, and strict UI DOM virtualization. Whether you are daily-driving a massive LLM or generating hundreds of high-res images, Llama Server Control is designed to stay completely out of your hardware's way.
 
 ---
@@ -17,6 +19,7 @@ Our vision is to build the absolute lightest, most performant, zero-waste local 
 ## Current Features
 
 ### 🚀 Advanced Server Management
+
 - **Full Configuration Control:** Easily tune `llama-server` settings including Host, Port, Context Size, CPU Threads, GPU Layers, Batch Sizes, Flash Attention, and K/V Cache Types.
 - **Hardware Acceleration:** Native support for Vision Projectors, LoRA Adapters, and Draft Models for speculative decoding.
 - **1-Click Start/Stop:** Effortlessly boot up your local AI server and shut it down cleanly through the UI or the System Tray. UI buttons dynamically lock/grey-out based on live server state.
@@ -24,11 +27,13 @@ Our vision is to build the absolute lightest, most performant, zero-waste local 
 - **Auto-Sleep / VRAM Reclaimer:** Automatically unloads LLMs from VRAM after 10 minutes of inactivity to instantly return hardware resources back to the host system for gaming or heavy browsing. Seamlessly hot-loads the model back in the exact moment a new chat request is received.
 
 ### 🧠 Model Hub & Library
+
 - **HuggingFace Integration:** Search, browse, and download `.gguf` models directly from HuggingFace Hub right inside the app. Filter by "Uncensored", exact max VRAM constraints, and specific quantizations.
 - **Local Models Directory:** Scan your local folders for GGUF files. See exact file sizes at a glance.
 - **Auto VRAM Calculation:** Click the "Auto" button next to any local model to dynamically compute the ideal number of GPU layers based on your currently available system VRAM.
 
 ### 🖼️ SwarmUI Studio & Gallery
+
 - **Integrated Image Generation:** Boot up SwarmUI seamlessly in the background on your chosen port. Use our robust internal bridge to generate images directly through text prompts using `qwen-image-2.1-UC-Q6_K.gguf`.
 - **Dynamic Image Library:** View all generated images grouped elegantly into folders by date. Includes a smart dropdown filter to organize your viewing experience.
 - **Deep Metadata Viewer:** Click any image to view it in a modal. The app meticulously parses binary PNG `tEXt` and `iTXt` chunks to flawlessly retrieve the exact `prompt`, `negativeprompt`, `steps`, and `cfgscale` used to generate the image, bypassing any binary garbage!
@@ -37,6 +42,7 @@ Our vision is to build the absolute lightest, most performant, zero-waste local 
 - **Blur / Censor Filter:** Got spicy or NSFW generations? Select images and hit the "Eye-Off" button to apply a heavy, permanent blur mask to them in the gallery. Hover to temporarily peek, or hit "Eye" to permanently uncensor them. Memory persists locally via a `censored.json` footprint.
 
 ### 💻 Testing & Development
+
 - **API Playground:** A built-in coding environment to fire requests against your running local server. Test Chat Completions, Text Completions, and Text-to-Image API routes instantly.
 - **Live Logs Terminal:** Watch raw `stdout` and `stderr` streams directly from `llama-server` and `SwarmUI` with auto-scrolling and one-click copying.
 - **Benchmarking Tools:** Run localized benchmarks to evaluate Prompt Processing speed and Token Generation (T/s) using the actively loaded model.
@@ -88,7 +94,7 @@ Our vision is to build the absolute lightest, most performant, zero-waste local 
     - `/explain <concept>`: Explain concepts simply with analogies and progressive breakdown.
     - `/tests <code/function>`: Generate comprehensive unit test suites covering edge cases.
     - `/refactor <code/snippet>`: Refactor for clarity, speed, modularity, and modern conventions.
-- **Persona Generator & Presets:** Inject custom system prompts to change AI behavior. Save your favorite personas as persistent presets, delete unused ones, or give the AI a tiny hint (e.g. "Grumpy Pirate") to have it *generate its own rich system prompt* to adopt the persona!
+- **Persona Generator & Presets:** Inject custom system prompts to change AI behavior. Save your favorite personas as persistent presets, delete unused ones, or give the AI a tiny hint (e.g. "Grumpy Pirate") to have it _generate its own rich system prompt_ to adopt the persona!
 - **Real-Time Thinking & Reasoning Control:**
   - **Live Thinking Stream & Dynamic Accordions:** Native live streaming of model thinking/reasoning processes (for DeepSeek-R1, QwQ, Qwen-distill models) rendered inside expandable `<details>` blocks with live brain indicators and real-time elapsed duration counters (e.g. `Thinking for 4s...` -> `Thought for 4.2s`).
   - **Thinking Toggle & Fast Direct Mode:** Dedicated toolbar toggle in Studio Chat (`Thinking: ON` vs `Direct: Fast`) with `localStorage` memory. When Fast Direct Mode is active, reasoning models respond immediately without generating hundreds of `<think>` tokens.
@@ -97,9 +103,11 @@ Our vision is to build the absolute lightest, most performant, zero-waste local 
 - **External Agent & IDE Compatibility:** Seamlessly connect Cline, Cursor, Open-WebUI, or Continue using standard OpenAI endpoints (`http://127.0.0.1:8080/v1`) with full Private Network Access (PNA) and CORS compliance.
 
 ### 📊 System Monitoring
+
 - **Hardware Monitor:** Watch real-time graphical usage metrics for CPU, System RAM, GPU Core Utilization, and Dedicated VRAM (powered by `psutil` and `pynvml`).
 
 ### ⚙️ UI & Personalization
+
 - **Modern Aesthetic:** Deeply customized UI featuring glassmorphism, smooth micro-animations, and striking neon accents.
 - **Engine Automation & On-Demand Lifecycle:**
   - **Auto Wake LLM on Request (`auto_wake_llm`):** Toggleable setting that automatically starts `llama-server` and loads the model into VRAM on demand when any chat prompt, API completion, or slash command arrives while offline. Actively monitors `/health` model weights readiness with keep-alive heartbeats, and immediately processes and streams the response to the user's prompt without requiring a re-send.
@@ -112,9 +120,10 @@ Our vision is to build the absolute lightest, most performant, zero-waste local 
 - **System Tray:** Minimize to the system tray to keep your servers running silently in the background. Features quick actions to open SwarmUI or stop servers.
 
 ### ⚡ Ultra-Low Memory Footprint
+
 - **Zero-Copy Binary Streaming:** The app meticulously stream-skips over multi-megabyte `IDAT` image payloads without allocating them to RAM, achieving zero-footprint metadata extraction.
 - **Virtual DOM Trimming:** Live streaming terminal logs are aggressively ring-buffered to a strict 500-line cap, preventing infinite browser DOM bloat during extended 24-hour sessions.
-- **Lazy Module Initialization:** Heavy libraries (like `huggingface_hub`) are strictly deferred and loaded on-the-fly *only* when you interact with specific tabs, slashing idle RAM usage.
+- **Lazy Module Initialization:** Heavy libraries (like `huggingface_hub`) are strictly deferred and loaded on-the-fly _only_ when you interact with specific tabs, slashing idle RAM usage.
 - **Lazy Gallery Virtualization:** Generated images are never dumped directly into memory. They are cleanly proxied via a highly-efficient `/local_image` endpoint and dynamically requested by the browser strictly when scrolled into view.
 - **Aggressive Garbage Collection:** Tight background WMI/NVML hardware polling drops to 0% background activity when the UI is minimized, constantly triggering `gc.collect()` sweeps to ensure pristine memory states.
 
@@ -137,7 +146,7 @@ Our vision is to build the absolute lightest, most performant, zero-waste local 
   - For **Classic Engine (`app.py`)**: Python 3.10+ (`pywebview`, `psutil`, `pynvml`, `requests`, `huggingface_hub`)
 - **Server Binaries:**
   - `llama-server.exe` (Downloadable via the [Llama.cpp project](https://github.com/ggml-org/llama.cpp))
-  - *(Optional)* [SwarmUI](https://github.com/mcmonkeyprojects/SwarmUI) installed locally for image generation features (SwarmUI is powered by [ComfyUI](https://github.com/Comfy-Org/ComfyUI) under the hood)
+  - _(Optional)_ [SwarmUI](https://github.com/mcmonkeyprojects/SwarmUI) installed locally for image generation features (SwarmUI is powered by [ComfyUI](https://github.com/Comfy-Org/ComfyUI) under the hood)
 
 ---
 
@@ -146,6 +155,7 @@ Our vision is to build the absolute lightest, most performant, zero-waste local 
 The **Llama Server Control Native Engine** is engineered in **C# / .NET 10** with **Microsoft Edge WebView2**. It completely eliminates Python runtime dependencies, PyInstaller bootloader overhead, and extraction lag, achieving sub-45MB idle memory and instantaneous 0ms application startup.
 
 ### Key Native Enhancements:
+
 - **Preserved Classic Workflow Dropdowns:**
   - **Active Model File Dropdown (`#select-model`):** Auto-scans `.gguf` models in your directory, displaying formatted filenames and exact file size badges (e.g. `4.2 GB`).
   - **Context Size Dropdown (`#select-context-size`):** Instant selector for 2K, 4K, 8K, 16K, 32K, and 64K tokens without manual typing.
@@ -238,9 +248,9 @@ The **Llama Server Control Native Engine** is engineered in **C# / .NET 10** wit
   - **Categorized Source Tabs & Live Counters:** Filter real-time terminal streams seamlessly by **Show All**, **Llama** (llama.cpp engine), **SwarmUI** (diffusion pipeline), and **Other** (reverse proxy, auto-sleep, and system actions) with dynamic counter badges.
   - **Distinct Color Coding & Severity Badges:** Visual differentiation with emerald/mint for Llama, lavender/violet for SwarmUI, sky blue for Proxy/System, warm amber for warnings (`[Warning]`, `W `), and crimson red for errors (`[ERR]`, `E `).
   - **Automated Milestone Readiness Notifications:** Real-time log detection triggers instant notifications when key services are online:
-    - `llama_server: model loaded` $\rightarrow$ *"Model Ready: Model started and ready to use!"*
-    - `Self-Start ComfyUI-0 on port 7821 started.` $\rightarrow$ *"ComfyUI Started: Self-Start ComfyUI backend started."*
-    - `SwarmUI vn.n.n.n - Local is now running.` $\rightarrow$ *"SwarmUI Started: SwarmUI is now running and ready."*
+    - `llama_server: model loaded` $\rightarrow$ _"Model Ready: Model started and ready to use!"_
+    - `Self-Start ComfyUI-0 on port 7821 started.` $\rightarrow$ _"ComfyUI Started: Self-Start ComfyUI backend started."_
+    - `SwarmUI vn.n.n.n - Local is now running.` $\rightarrow$ _"SwarmUI Started: SwarmUI is now running and ready."_
   - **Zero-Lag Bounded DOM Streaming:** Appends new lines in constant time while enforcing a strict 500-line ring buffer to maintain zero CPU/RAM footprint during intensive logging.
   - **1-Click Clipboard Copy & Real-Time Search:** Instant search filter across active source tabs and 1-click clipboard export of visible logs.
 - **Universal Kestrel Reverse Proxy & Modular Architecture:**
@@ -274,21 +284,26 @@ The **Llama Server Control Native Engine** is engineered in **C# / .NET 10** wit
 ### Running & Building Native Engine
 
 #### Run in Development Mode:
+
 ```cmd
 dotnet run
 ```
 
 #### Build / Compile:
+
 ```cmd
 dotnet build .\LlamaServerControl.csproj
 ```
+
 The compiled executable will be located at:
 `bin/Debug/net10.0-windows/LlamaServerControl.exe`
 
 #### Publish as a Standalone Single-File Executable:
+
 ```cmd
 dotnet publish .\LlamaServerControl.csproj -c Release -r win-x64 --self-contained true -p:PublishSingleFile=true -o .\dist
 ```
+
 The published standalone distribution will be located at:
 `dist/LlamaServerControl.exe` (with bundled `dist/ui/` web interface)
 
@@ -306,4 +321,3 @@ The published standalone distribution will be located at:
 ## License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
