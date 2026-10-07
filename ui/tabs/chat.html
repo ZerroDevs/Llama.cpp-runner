@@ -41,6 +41,14 @@
   <!-- Attached Images Preview -->
   <div id="chat-attachment-preview" class="hidden px-5 py-2 bg-[var(--bg-card)] border-t border-[var(--border)] flex items-center gap-2 overflow-x-auto"></div>
 
+  <!-- Floating Stop Button -->
+  <div id="chat-stop-container" class="hidden flex justify-center -mb-2 pb-1 z-10">
+    <button id="btn-floating-stop" class="flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[var(--bg-elevated)] border border-rose-500/30 text-rose-400 hover:bg-rose-500/10 text-xs font-semibold shadow-xl transition-all cursor-pointer">
+      <span class="w-2.5 h-2.5 bg-rose-500 rounded-xs"></span>
+      <span>Stop Generating</span>
+    </button>
+  </div>
+
   <!-- Chat Input Bar -->
   <div class="p-3 bg-[var(--bg-card)] border-t border-[var(--border)] shrink-0">
     <div class="flex items-end gap-2 bg-[var(--bg-elevated)] border border-[var(--border)] focus-within:border-[var(--brand)] rounded-2xl p-2 transition-colors">

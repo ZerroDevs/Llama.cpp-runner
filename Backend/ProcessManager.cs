@@ -79,10 +79,11 @@ namespace LlamaServerControl.Backend
                 int threads = int.TryParse(config.GetValueOrDefault("threads", config.GetValueOrDefault("cpu_threads", 8))?.ToString(), out int t) ? t : 8;
                 int batch = int.TryParse(config.GetValueOrDefault("batch_size", 512)?.ToString(), out int b) ? b : 512;
                 int ubatch = int.TryParse(config.GetValueOrDefault("ubatch_size", 512)?.ToString(), out int ub) ? ub : 512;
-                int port = int.TryParse(config.GetValueOrDefault("port", 8080)?.ToString(), out int p) ? p : 8080;
+                int publicPort = int.TryParse(config.GetValueOrDefault("port", 8080)?.ToString(), out int p) ? p : 8080;
+                int internalPort = publicPort + 1;
                 string host = config.GetValueOrDefault("host", "127.0.0.1")?.ToString() ?? "127.0.0.1";
 
-                // Construct CLI arguments
+                // Construct CLI arguments (llama-server binds internally to 127.0.0.1 on port + 1)
                 var args = new List<string>
                 {
                     $"-m \"{modelPath}\"",
@@ -91,8 +92,8 @@ namespace LlamaServerControl.Backend
                     $"-t {threads}",
                     $"-b {batch}",
                     $"-ub {ubatch}",
-                    $"--port {port}",
-                    $"--host {host}"
+                    $"--port {internalPort}",
+                    $"--host 127.0.0.1"
                 };
 
                 // Flash Attention: llama-server requires explicit 'on' or 'off'
@@ -233,12 +234,18 @@ namespace LlamaServerControl.Backend
             }
         }
 
+        public void Log(string msg) => OnLog?.Invoke(msg);
+
+        public static int GetInternalPort(Dictionary<string, object> config)
+        {
+            int publicPort = int.TryParse(config.GetValueOrDefault("port", 8080)?.ToString(), out int p) ? p : 8080;
+            return publicPort + 1;
+        }
+
         public async Task<Dictionary<string, object>> FlushKvCacheAsync(Dictionary<string, object> config)
         {
-            string host = config.GetValueOrDefault("host", "127.0.0.1")?.ToString() ?? "127.0.0.1";
-            if (host == "0.0.0.0") host = "127.0.0.1";
-            string port = config.GetValueOrDefault("port", 8080)?.ToString() ?? "8080";
-            string url = $"http://{host}:{port}/slots?action=erase";
+            int internalPort = GetInternalPort(config);
+            string url = $"http://127.0.0.1:{internalPort}/slots?action=erase";
 
             try
             {

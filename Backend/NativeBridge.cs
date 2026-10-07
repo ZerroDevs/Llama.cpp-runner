@@ -15,15 +15,17 @@ namespace LlamaServerControl.Backend
         private readonly SwarmManager _swarm;
         private readonly HardwareMonitor _hardware;
         private readonly HubManager _hub;
+        private readonly StreamingProxy? _proxy;
         private CoreWebView2? _coreWebView;
 
-        public NativeBridge(ConfigManager config, ProcessManager process, SwarmManager swarm, HardwareMonitor hardware, HubManager hub)
+        public NativeBridge(ConfigManager config, ProcessManager process, SwarmManager swarm, HardwareMonitor hardware, HubManager hub, StreamingProxy? proxy = null)
         {
             _config = config;
             _process = process;
             _swarm = swarm;
             _hardware = hardware;
             _hub = hub;
+            _proxy = proxy;
 
             _process.OnLog += (line) => EmitEvent("log", line);
             _swarm.OnLog += (line) => EmitEvent("log", line);
@@ -79,7 +81,14 @@ namespace LlamaServerControl.Backend
 
                     case "save_config":
                         var cfgDict = JsonSerializer.Deserialize<Dictionary<string, object>>(args.GetRawText());
-                        if (cfgDict != null) _config.SaveConfig(cfgDict);
+                        if (cfgDict != null)
+                        {
+                            _config.SaveConfig(cfgDict);
+                            if (cfgDict.TryGetValue("port", out var pObj) && int.TryParse(pObj?.ToString(), out int newPort))
+                            {
+                                _proxy?.CheckPortUpdate(newPort);
+                            }
+                        }
                         result = new { status = "success" };
                         break;
 
@@ -131,7 +140,8 @@ namespace LlamaServerControl.Backend
                         break;
 
                     case "get_swarm_images":
-                        result = _swarm.GetSwarmImages(_config.GetConfig(), 8081);
+                        int proxyPort = _proxy?.ActivePort ?? (int.TryParse(_config.GetConfig().GetValueOrDefault("port", 8080)?.ToString(), out int p) ? p : 8080);
+                        result = _swarm.GetSwarmImages(_config.GetConfig(), proxyPort);
                         break;
 
                     case "get_image_metadata":

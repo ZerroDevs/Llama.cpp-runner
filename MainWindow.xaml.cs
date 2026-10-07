@@ -40,17 +40,21 @@ namespace LlamaServerControl
             _hardwareMonitor = new HardwareMonitor();
             _hubManager = new HubManager();
 
-            _nativeBridge = new NativeBridge(_configManager, _processManager, _swarmManager, _hardwareMonitor, _hubManager);
+            _streamingProxy = new StreamingProxy(_processManager, _configManager, _swarmManager, _hardwareMonitor);
+            _streamingProxy.Start();
 
-            _streamingProxy = new StreamingProxy(_processManager, _configManager, _swarmManager);
-            _streamingProxy.Start(8081);
+            _nativeBridge = new NativeBridge(_configManager, _processManager, _swarmManager, _hardwareMonitor, _hubManager, _streamingProxy);
 
             // Locate UI directory (prioritize source dev directory for instant live updates)
             string devUiDir = Path.Combine(parentDir, "ui");
             string uiDir = Directory.Exists(devUiDir) ? devUiDir : Path.Combine(appDir, "ui");
 
-            // Initialize WebView2
-            await webView.EnsureCoreWebView2Async();
+            // Initialize WebView2 with security flags permitting local loopback HTTP assets & mixed content
+            var envOptions = new CoreWebView2EnvironmentOptions(
+                "--disable-web-security --allow-running-insecure-content --disable-features=BlockInsecurePrivateNetworkRequests"
+            );
+            var env = await CoreWebView2Environment.CreateAsync(null, null, envOptions);
+            await webView.EnsureCoreWebView2Async(env);
 
             _nativeBridge.SetWebView(webView.CoreWebView2);
 

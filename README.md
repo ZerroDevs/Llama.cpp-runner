@@ -147,17 +147,17 @@ The **Llama Server Control Native Engine** is engineered in **C# / .NET 10** wit
     - **SEED** with instant click-to-copy.
     - **STEPS** and **CFG SCALE** badges.
   - **Interactive Fullscreen Zoom & Pan:** View high-res images in Fullscreen mode with mouse wheel zoom (1x–7x), smooth drag-to-pan navigation, double-click reset, and a prominent floating top-right "Exit Fullscreen" button.
-- **Robust Telemetry & Engine Execution Fixes:**
-  - **Vision Model Auto-Detection & Tagging:** Automatically scans local `.gguf` models and identifies any file containing `mmproj` as a Vision Projector, tagging it with high-visibility badges in the Models Library, Model Dropdown, and Quick Switcher, prioritizing it in the Vision dropdown, and offering 1-click "Set as Vision" activation.
-  - **Expanded High-Context Windows (124k / 128k):** Context Size selector expanded with 124,000 tokens (124k) and 131,072 tokens (128k) for massive document ingestion and agentic workflows.
-  - **Dynamic Action Button States:** Fixed SwarmUI and LLM Server runner buttons to toggle both text and icons dynamically (switching from Play to Stop square icons with rose danger styling when running, and restoring back cleanly when stopped).
-  - **Sidebar Fast Controls:** Integrated a dedicated `Start/Stop SwarmUI` button directly beside `Start/Stop LLM Server` in the persistent sidebar navigation rail for 1-click dual-engine management.
-  - **Model Selection & Advanced Options Accordion:** Direct primary model dropdown with an expandable "Advanced options >" panel enabling hot-selection of Vision Projectors (`--mmproj`), Draft Models (`--model-draft`), and LoRA Adapters (`--lora`), complete with dedicated file pickers.
-  - **Reparse Point & Symlink Size Resolution:** Enhanced Model Scanner to resolve underlying Windows file streams for HuggingFace Hub cached snapshot symlinks, accurately computing true gigabyte sizes (e.g., `4.82 GB`, `0.86 GB`) instead of defaulting to `0 GB`.
-  - **Zero-Latency Telemetry HUD:** Fixed key mapping between native metrics (`_pct` / `_percent`) and frontend controllers, ensuring live VRAM, RAM, and CPU telemetry percentages render accurately.
-  - **Modern Llama.cpp CLI Flag Alignment:** Automatically generates modern CLI syntax (`-fa on`, `-ctk`, `-ctv`, `-ub`, `--lora`) to prevent argument parse crashes on startup.
-  - **UI Dispatcher Thread Marshalling:** Marshals background process `stdout`/`stderr` events safely to the WPF UI thread, ensuring continuous live logging in the terminal box.
-  - **Resilient Upstream Streaming Proxy:** Provides clear status feedback (503 with informative diagnostics) when models are actively loading into VRAM instead of opaque connection dropouts.
+- **Conversational Chat & Productivity Controls:**
+  - **Live Stop Generation Button:** Instant abort of streaming LLM responses via both the transformed send button (red stop square icon) and a floating action pill.
+  - **Inline User Message Editing:** Edit prior user prompts in-place with "Save & Submit" and "Cancel", dynamically truncating subsequent messages and automatically re-streaming fresh responses.
+  - **1-Click Assistant Regeneration:** Re-roll responses from any assistant turn directly using the message action toolbar.
+  - **Message Clipboard Copy:** 1-click clipboard export on all chat cards.
+- **Universal Kestrel Reverse Proxy & Slash Commands:**
+  - **Dual Local & LAN Access (`0.0.0.0:{port}`):** High-performance Kestrel reverse proxy listening on all network interfaces without requiring administrator URLACL reservations. Seamlessly serves the native `llama-server` web UI at `http://127.0.0.1:8080/#/` and local LAN access (`http://192.168.1.100:8080/#/`).
+  - **Hop-by-Hop Header Sanitization & True SSE Chunk Streaming:** Correctly suppresses hop-by-hop headers (`Transfer-Encoding`, `Connection`) from being invalidly written to Kestrel responses while immediately flushing chunked SSE byte blocks with zero-buffering latency.
+  - **Zero-Copy Local Image Endpoint (`/local_image`):** Dynamically resolves SwarmUI gallery assets across Unicode/Arabic paths with automatic query unescaping and CORS compliance, resolving both thumbnail grids and deep metadata inspector views.
+  - **Universal Slash Command Interception:** Intercepts slash commands (`/imagine`, `/draw`, `/art`, `/guess`, `/yes`, `/cfg`, `/step`, `/res`, `/sys`, `/hw`, `/eject`, `/unload`, `/models`, `/clear`, `/compact`, `/hook`, `/api`, `/help`) across all clients—including the desktop chat tab, the browser web UI, external agents (Cline/Cursor), and mobile devices.
+  - **Dual-Engine Auto-VRAM Orchestration:** Automatically halts `llama-server` to reclaim 100% VRAM when generating images via SwarmUI, then automatically hot-reloads the LLM back into VRAM once generation completes.
 
 ### Running & Building Native Engine
 
