@@ -5,6 +5,7 @@
         Title="Llama Server Control" Height="840" Width="1280"
         WindowStartupLocation="CenterScreen"
         Background="#050C12"
+        Icon="ui/images/Icon.ico"
         MinHeight="680" MinWidth="1000">
     <Grid Background="#050C12">
         <wv2:WebView2 x:Name="webView" />
