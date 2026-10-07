@@ -1,10 +1,13 @@
 # Llama Server Control
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
-[![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
-[![Platform: Windows](https://img.shields.io/badge/platform-Windows-lightgrey.svg)]()
+[![.NET 10.0](https://img.shields.io/badge/.NET-10.0-512BD4.svg)](https://dotnet.microsoft.com/)
+[![C# 13](https://img.shields.io/badge/C%23-13-239120.svg)]()
+[![WPF & WebView2](https://img.shields.io/badge/UI-WPF%20%26%20WebView2-0078D7.svg)]()
+[![Kestrel Web Host: Port 9095](https://img.shields.io/badge/WebHost-Port%209095-emerald.svg)]()
+[![Platform: Windows](https://img.shields.io/badge/Platform-Windows%2010%2F11-lightgrey.svg)]()
 
-Llama Server Control is a sleek, unified graphical interface for managing your local AI ecosystem. Built with Python (PyWebview) on the backend and modern web technologies (Vanilla JS, TailwindCSS) on the frontend, it acts as a powerful central hub for running LLMs via `llama.cpp` and Image Generation models via `SwarmUI`.
+Llama Server Control is a high-performance, native Windows desktop application and network web host for managing your local AI ecosystem. Built with native **C# (.NET 10)**, **WPF**, and **Microsoft Edge WebView2** on the desktop, and powered by an embedded **ASP.NET Core Kestrel** server on port 9095, it acts as a lightweight, zero-waste central hub for running LLMs via `llama.cpp` and diffusion models via `SwarmUI`.
 
 ## Project Vision
 Our vision is to build the absolute lightest, most performant, zero-waste local AI manager in existence. Hardware headroom is precious. Every megabyte of RAM saved by the control panel is a megabyte given back to your models or your games. We enforce aggressive thread hygiene, zero-copy binary streaming, and strict UI DOM virtualization. Whether you are daily-driving a massive LLM or generating hundreds of high-res images, Llama Server Control is designed to stay completely out of your hardware's way.
@@ -284,17 +287,21 @@ The compiled executable will be located at:
 
 #### Publish as a Standalone Single-File Executable:
 ```cmd
-dotnet publish .\LlamaServerControl.csproj -c Release -r win-x64 --self-contained false -p:PublishSingleFile=true -o .\dist
+dotnet publish .\LlamaServerControl.csproj -c Release -r win-x64 --self-contained true -p:PublishSingleFile=true -o .\dist
 ```
+The published standalone distribution will be located at:
+`dist/LlamaServerControl.exe` (with bundled `dist/ui/` web interface)
 
 ---
 
-## Running Classic Engine (Python)
+## Architecture Overview
 
-If you prefer to run the original Python version:
-```cmd
-python app.py
-```
+- **Native Core:** Built on `.NET 10 (C# 13)` with WPF and modern async task management.
+- **Desktop Interface:** Microsoft Edge WebView2 with direct virtual host mapping (`https://app.local/`) for 0 ms latency.
+- **Embedded Web Host:** ASP.NET Core Kestrel listening on `0.0.0.0:9095` for local and network access with real-time WebSockets (`/api/ws`).
+- **Zero Python Runtime Overhead:** Completely eliminates Python interpreter dependencies, virtual environments, and heavy startup imports.
+
+---
 
 ## License
 
