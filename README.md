@@ -19,6 +19,9 @@ Our vision is to build the absolute lightest, most performant, zero-waste local 
 Download the latest pre-built Windows installer from our **[Releases Page](https://github.com/ZerroDevs/Llama.cpp-runner/releases/latest)**:
 - Run `LlamaServerControl_Setup.exe` and follow the installation wizard.
 
+"For local AI, crafted with local AI."
+(Designed by human intent, developed & refined side-by-side with local LLM coding agents).
+
 ---
 
 ## Current Features
