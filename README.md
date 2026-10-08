@@ -7,6 +7,10 @@
 [![Kestrel Web Host: Port 9095](https://img.shields.io/badge/WebHost-Port%209095-emerald.svg)]()
 [![Llama.cpp Web Host: Port 8080](https://img.shields.io/badge/WebHost-Port%208080-emerald.svg)]()
 [![Platform: Windows](https://img.shields.io/badge/Platform-Windows%2010%2F11-lightgrey.svg)]()
+> [![Crafted With Local AI](https://img.shields.io/badge/Crafted%20With-Local%20LLMs-10b981.svg?style=flat-square)]()
+> 
+> *"For local AI, crafted with local AI."*  
+> *(Designed by human intent, developed & refined side-by-side with local LLM coding agents).*
 
 Llama Server Control is a high-performance, native Windows desktop application and network web host for managing your local AI ecosystem. Built with native **C# (.NET 10)**, **WPF**, and **Microsoft Edge WebView2** on the desktop, and powered by an embedded **ASP.NET Core Kestrel** server on port 9095, it acts as a lightweight, zero-waste central hub for running LLMs via `llama.cpp` and diffusion models via `SwarmUI`.
 
@@ -18,11 +22,6 @@ Our vision is to build the absolute lightest, most performant, zero-waste local 
 
 Download the latest pre-built Windows installer from our **[Releases Page](https://github.com/ZerroDevs/Llama.cpp-runner/releases/latest)**:
 - Run `LlamaServerControl_Setup.exe` and follow the installation wizard.
-
-> [![Crafted With Local AI](https://img.shields.io/badge/Crafted%20With-Local%20LLMs-10b981.svg?style=flat-square)]()
-> 
-> *"For local AI, crafted with local AI."*  
-> *(Designed by human intent, developed & refined side-by-side with local LLM coding agents).*
 
 ---
 
