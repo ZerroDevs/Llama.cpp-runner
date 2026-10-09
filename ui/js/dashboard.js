@@ -228,6 +228,7 @@ export function applyConfigToForm(cfg) {
   if (document.getElementById('input-swarm-path')) document.getElementById('input-swarm-path').value = cfg.swarm_launcher_path || '';
   if (document.getElementById('input-swarm-port')) document.getElementById('input-swarm-port').value = cfg.swarm_port || 7801;
   if (document.getElementById('input-discord-webhook')) document.getElementById('input-discord-webhook').value = cfg.discord_webhook || '';
+  if (document.getElementById('input-voicestudio-url')) document.getElementById('input-voicestudio-url').value = cfg.voicestudio_url || 'http://127.0.0.1:3900';
   if (document.getElementById('check-tray')) document.getElementById('check-tray').checked = !!cfg.minimize_to_tray;
   if (document.getElementById('check-startup')) document.getElementById('check-startup').checked = !!cfg.run_on_startup;
   if (document.getElementById('check-auto-wake-llm')) document.getElementById('check-auto-wake-llm').checked = cfg.auto_wake_llm !== false;
@@ -321,6 +322,7 @@ export function collectConfigFromForm() {
     swarm_launcher_path: document.getElementById('input-swarm-path')?.value.trim() || '',
     swarm_port: parseInt(document.getElementById('input-swarm-port')?.value || 7801),
     discord_webhook: document.getElementById('input-discord-webhook')?.value.trim() || '',
+    voicestudio_url: document.getElementById('input-voicestudio-url')?.value.trim() || 'http://127.0.0.1:3900',
     minimize_to_tray: document.getElementById('check-tray')?.checked || false,
     run_on_startup: document.getElementById('check-startup')?.checked || false,
     auto_wake_llm: document.getElementById('check-auto-wake-llm') ? document.getElementById('check-auto-wake-llm').checked : (state.config.auto_wake_llm ?? true),

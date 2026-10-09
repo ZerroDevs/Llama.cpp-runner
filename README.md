@@ -5,14 +5,33 @@
 [![C# 13](https://img.shields.io/badge/C%23-13-239120.svg)]()
 [![WPF & WebView2](https://img.shields.io/badge/UI-WPF%20%26%20WebView2-0078D7.svg)]()
 [![Kestrel Web Host: Port 9095](https://img.shields.io/badge/WebHost-Port%209095-emerald.svg)]()
-[![Llama.cpp Web Host: Port 8080](https://img.shields.io/badge/WebHost-Port%208080-emerald.svg)]()
+[![Llama.cpp Web Host: Port 8080](https://img.shields.io/badge/WebHost-Port%208080-emerald.svg)](https://github.com/ggerganov/llama.cpp)
+[![SwarmUI Diffusion: Port 7801](https://img.shields.io/badge/SwarmUI-Port%207801-violet.svg)](https://github.com/mcmonkeyprojects/SwarmUI)
+[![VoiceStudio Engine: Port 3900](https://img.shields.io/badge/VoiceStudio-Port%203900-emerald.svg)](https://github.com/debpalash/VoiceStudio)
 [![Platform: Windows](https://img.shields.io/badge/Platform-Windows%2010%2F11-lightgrey.svg)]()
+[![Crafted With Local AI](https://img.shields.io/badge/Crafted%20With-Local%20LLMs-10b981.svg?style=flat-square)]()
 
-Llama Server Control is a high-performance, native Windows desktop application and network web host for managing your local AI ecosystem. Built with native **C# (.NET 10)**, **WPF**, and **Microsoft Edge WebView2** on the desktop, and powered by an embedded **ASP.NET Core Kestrel** server on port 9095, it acts as a lightweight, zero-waste central hub for running LLMs via `llama.cpp` and diffusion models via `SwarmUI`.
+> *"For local AI, crafted with local AI."*  
+> *(Designed by human intent, developed & refined side-by-side with local LLM coding agents).*
+
+Llama Server Control is a high-performance, native Windows desktop application and network web host for managing your local AI ecosystem. Built with native **C# (.NET 10)**, **WPF**, and **Microsoft Edge WebView2** on the desktop, and powered by an embedded **ASP.NET Core Kestrel** server on port 9095, it acts as a lightweight, zero-waste central hub for running LLMs via [llama.cpp](https://github.com/ggerganov/llama.cpp), diffusion models via [SwarmUI](https://github.com/mcmonkeyprojects/SwarmUI) / [ComfyUI](https://github.com/comfyanonymous/ComfyUI), and zero-latency local speech synthesis via [VoiceStudio](https://github.com/debpalash/VoiceStudio).
 
 ## Project Vision
 
 Our vision is to build the absolute lightest, most performant, zero-waste local AI manager in existence. Hardware headroom is precious. Every megabyte of RAM saved by the control panel is a megabyte given back to your models or your games. We enforce aggressive thread hygiene, zero-copy binary streaming, and strict UI DOM virtualization. Whether you are daily-driving a massive LLM or generating hundreds of high-res images, Llama Server Control is designed to stay completely out of your hardware's way.
+
+---
+
+## 🧩 Supported Engines & Ecosystem
+
+Llama Server Control seamlessly coordinates and bridges the top open-source local AI runtimes into a unified, zero-friction desktop experience:
+
+| Engine | Role | Default Port | Link |
+|---|---|---|---|
+| **llama.cpp** | Local LLM inference server (GGUF, Flash Attention, Vision) | `8080` | [github.com/ggerganov/llama.cpp](https://github.com/ggerganov/llama.cpp) |
+| **SwarmUI** | High-performance modular AI image generation UI | `7801` | [github.com/mcmonkeyprojects/SwarmUI](https://github.com/mcmonkeyprojects/SwarmUI) |
+| **ComfyUI** | Powerful node-based backend engine powering SwarmUI image generation | `7821` | [github.com/comfyanonymous/ComfyUI](https://github.com/comfyanonymous/ComfyUI) |
+| **VoiceStudio** | Zero-latency local speech synthesis, voice cloning & audio pipeline | `3900` | [github.com/debpalash/VoiceStudio](https://github.com/debpalash/VoiceStudio) |
 
 ---
 
@@ -40,6 +59,30 @@ Our vision is to build the absolute lightest, most performant, zero-waste local 
 - **Interactive Previews:** Zoom (mouse-wheel) and Pan (click-and-drag) your high-res generated images. Click "Fullscreen" to view them boundlessly. One-click copy for metadata tags directly to your clipboard.
 - **Bulk Action Mode:** Effortlessly manage your gallery with a multi-select mode. Delete massive batches of old generations straight from your hard drive with one click.
 - **Blur / Censor Filter:** Got spicy or NSFW generations? Select images and hit the "Eye-Off" button to apply a heavy, permanent blur mask to them in the gallery. Hover to temporarily peek, or hit "Eye" to permanently uncensor them. Memory persists locally via a `censored.json` footprint.
+
+### 🎙️ [VoiceStudio](https://github.com/debpalash/VoiceStudio) Engine & Speech Synthesis
+
+- **Integrated [VoiceStudio](https://github.com/debpalash/VoiceStudio) Workspace (`#tab-voice-studio`):** Dedicated desktop studio tab connecting directly to the [VoiceStudio](https://github.com/debpalash/VoiceStudio) OpenAPI engine (`http://127.0.0.1:3900`) for zero-latency local speech synthesis, voice cloning, DSP audio chains, and speech-to-speech morphing.
+- **Real-Time VRAM Telemetry & 1-Click Model Unload:** Live GPU VRAM usage and checkpoint monitor (`/model/status` and `/model/loaded`). A dedicated **Unload Model** button calls `/model/unload/tts` to instantly release ~2,000 MB of GPU VRAM back to the system for games or large LLMs.
+- **DSP Audio Effect Master Chains:** Built-in DSP mastering effects selector powered by `/tools/effects`:
+  - **Raw (🔇):** Clean engine output with no post-processing.
+  - **Broadcast (📻):** Radio standard with warm lows, gentle multiband compression, and clarity.
+  - **Cinematic (🎬):** Film-grade presentation with spacious stereo reverb and dynamics.
+  - **Podcast (🎙️):** Intimate close-mic presence with heavy vocal compression.
+  - **Warm (☀️):** Boosted low-mid harmonics for cozy storytelling.
+  - **Bright (✨):** High-frequency presence boost for modern crispness.
+- **Advanced Acoustic & CFG Controls:** Sliders for Guidance Scale (CFG: 1.0 to 8.0), Diffusion Steps (`num_step`: 16 to 96), RNG Seed (deterministic seed setting or one-click randomizer), and personality presets fetched dynamically from `/personalities`.
+- **Voice Cloning & Custom Profiles Studio:** Create instant persistent voice clones (`POST /profiles`) using 5–30 seconds of clean reference audio (WAV/MP3/M4A/FLAC) with optional reference transcripts and style directives. Manage profiles with inline reference audio previews and one-click activation as the active synthesis voice.
+- **Speech-to-Speech (Voice Morphing):** Transform spoken recordings into any character profile's voice (`POST /convert`) with duration alignment (atempo 0.5x to 2.0x) and optional Demucs vocal isolation (`POST /clean-audio`) to strip mic background noise before conversion.
+- **Natural Voice Designer:** Natural language voice description analysis (`/design/describe`) that automatically parses complex acoustic prompts (e.g. `a warm elderly British storyteller, slightly raspy`) and maps them to fine-tuned gender, age, pitch, accent, and style controls.
+- **Starting Point Archetypes:** One-click preset pills for popular narration and dialogue personas including `Narrator`, `Storyteller`, `Casual`, `News Anchor`, `Corporate`, `Energetic`, `Authoritative`, `Excited Child`, `Whisper`, `Surprised`, and `Elder`.
+- **Granular Detail Tuning:** Collapsible accordion with full controls for Gender, Age, Pitch, Style, English Accent, and multi-language support (English, Arabic, Spanish, French, German, Japanese, Chinese, Russian, etc.).
+- **Autonomous Chat Agent Tooling (`generate_speech`):** Autonomous ReAct tool enabling LLM agents to synthesize speech on demand, outputting structured markup that renders inline high-contrast audio cards.
+- **Inline Chat Audio Player (`renderAudioBubble`):** High-contrast dark-mode audio card featuring an emerald glowing indicator, voice badge, spoken text quote, native `<audio>` controls, and a direct 1-click **Download MP3** button.
+- **Starred Takes & Library Pinning:** Persistent SQLite audio library with one-click take starring (`PUT /history/{id}/starred`). Starred keeper takes survive retention caps and can be filtered via the **Keepers** toggle.
+- **Stories & Longform Studio:** Multi-character script composer with line-by-line speaker allocation, chapterized script compiling (`LongformRenderRequest`), SSE stream decoding (`data: {"type": "done", "output": "..."}`), and direct retrieval of finished audiobooks from `/audio/` with local SQLite persistence.
+- **Zero-Waste Engine & Memory Hygiene:** 1-click VRAM reclamation (`/system/flush-memory?unload_model=true`) and streaming kernel-level zero-copy audio delivery.
+- **Resilient Engine Health Probing:** Sub-millisecond heartbeat monitoring via `/health` with automatic hardware device telemetry (e.g. `CUDA Active` / `NVIDIA RTX 3060 Ti`), zero false-offline warnings, and 1-click connection retry banner.
 
 ### 💻 Testing & Development
 
@@ -314,7 +357,11 @@ The published standalone distribution will be located at:
 - **Native Core:** Built on `.NET 10 (C# 13)` with WPF and modern async task management.
 - **Desktop Interface:** Microsoft Edge WebView2 with direct virtual host mapping (`https://app.local/`) for 0 ms latency.
 - **Embedded Web Host:** ASP.NET Core Kestrel listening on `0.0.0.0:9095` for local and network access with real-time WebSockets (`/api/ws`).
-- **Zero Python Runtime Overhead:** Completely eliminates Python interpreter dependencies, virtual environments, and heavy startup imports.
+- **Unified Local AI Ecosystem:**
+  - **LLM Inference:** [llama.cpp](https://github.com/ggerganov/llama.cpp) (`llama-server`) with dynamic KV context clearing and automated sleep/hot-load.
+  - **Diffusion Generation:** [SwarmUI](https://github.com/mcmonkeyprojects/SwarmUI) and [ComfyUI](https://github.com/comfyanonymous/ComfyUI) with automated VRAM orchestration, chunk parsing, and gallery curation.
+  - **Speech & Audio:** [VoiceStudio](https://github.com/debpalash/VoiceStudio) with OmniVoice TTS, voice cloning, DSP mastering chains, Demucs vocal isolation, and speech-to-speech morphing.
+- **Zero Python Runtime Overhead in Host Control:** Completely eliminates Python interpreter dependencies, virtual environments, and heavy startup imports in the host desktop process itself.
 
 ---
 

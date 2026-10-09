@@ -14,6 +14,7 @@ export async function loadPartials() {
     'tuning',
     'api',
     'swarm',
+    'voice-studio',
     'logs',
     'settings'
   ];

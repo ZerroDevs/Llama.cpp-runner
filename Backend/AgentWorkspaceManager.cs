@@ -13,12 +13,18 @@ namespace LlamaServerControl.Backend
     public class AgentWorkspaceManager
     {
         private string? _workspaceRoot;
+        private VoiceStudioService? _voiceStudioService;
         private static readonly HashSet<string> IgnoredDirs = new(StringComparer.OrdinalIgnoreCase)
         {
             ".git", "node_modules", "bin", "obj", ".vs", ".vscode", "__pycache__", ".llama_agent", "dist", "build"
         };
 
         public string? WorkspaceRoot => _workspaceRoot;
+
+        public void SetVoiceStudioService(VoiceStudioService service)
+        {
+            _voiceStudioService = service;
+        }
 
         public object SetWorkspace(string path)
         {
@@ -131,6 +137,15 @@ namespace LlamaServerControl.Backend
             if (toolName.Equals("screenshot_web", StringComparison.OrdinalIgnoreCase))
             {
                 return await CaptureWebScreenshotAsync(args);
+            }
+
+            if (toolName.Equals("generate_speech", StringComparison.OrdinalIgnoreCase))
+            {
+                if (_voiceStudioService == null)
+                {
+                    return new { status = "error", message = "VoiceStudio service is not initialized." };
+                }
+                return await VoiceStudioTools.ExecuteAsync(_voiceStudioService, args);
             }
 
             if (string.IsNullOrEmpty(_workspaceRoot))

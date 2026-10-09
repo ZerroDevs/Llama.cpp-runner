@@ -1988,6 +1988,52 @@ function cleanMarkdownTables(text) {
   return result.join('\n');
 }
 
+export function renderAudioBubble(matchTag) {
+  const idMatch = matchTag.match(/\bid=["']([^"']+)["']/i);
+  const fileMatch = matchTag.match(/\bfile=["']([^"']+)["']/i);
+  const voiceMatch = matchTag.match(/\bvoice=["']([^"']+)["']/i);
+  const promptMatch = matchTag.match(/\bprompt=["']([^"']+)["']/i);
+
+  const id = idMatch ? idMatch[1] : ('aud_' + Math.random().toString(36).substring(2, 9));
+  const file = fileMatch ? fileMatch[1] : '';
+  const voice = voiceMatch ? voiceMatch[1] : 'OmniVoice';
+  const prompt = promptMatch ? promptMatch[1] : '';
+
+  const filename = file ? (file.split('/').pop() || 'tts_speech.mp3') : 'tts_speech.mp3';
+  const audioSrc = file.startsWith('/') || file.startsWith('http') ? file : `/media/audio/${file}`;
+
+  const escapedPrompt = escapeHtml(prompt);
+  const escapedVoice = escapeHtml(voice);
+  const escapedSrc = escapeHtml(audioSrc);
+  const escapedFilename = escapeHtml(filename);
+
+  return `<div class="audio-card my-3.5 p-4 rounded-2xl bg-zinc-950/95 border border-zinc-800/90 shadow-xl select-text max-w-xl transition-all hover:border-emerald-500/40" data-audio-id="${id}">
+    <div class="flex items-center justify-between gap-3 mb-2.5 pb-2.5 border-b border-zinc-800/80">
+      <div class="flex items-center gap-2 min-w-0">
+        <span class="relative flex h-2.5 w-2.5 shrink-0">
+          <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+          <span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500 shadow-[0_0_10px_rgba(16,185,129,0.8)]"></span>
+        </span>
+        <span class="px-2.5 py-0.5 rounded-lg text-xs font-semibold bg-emerald-500/15 border border-emerald-500/30 text-emerald-400 truncate">
+          Voice: ${escapedVoice}
+        </span>
+        <span class="text-[11px] text-zinc-500 font-mono hidden sm:inline">VoiceStudio</span>
+      </div>
+      <a href="${escapedSrc}" download="${escapedFilename}" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold bg-zinc-900 border border-zinc-700/80 text-zinc-200 hover:text-emerald-400 hover:border-emerald-500/60 hover:bg-zinc-800 transition-all cursor-pointer shadow-xs shrink-0" title="Download Audio File (.mp3)">
+        <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        <span>Download MP3</span>
+      </a>
+    </div>
+    ${prompt ? `<div class="text-xs text-zinc-300 italic mb-3 px-3 py-2 bg-zinc-900/70 rounded-xl border-l-2 border-emerald-500/70 leading-relaxed font-sans select-text">“${escapedPrompt}”</div>` : ''}
+    <div class="audio-player-wrapper pt-1">
+      <audio controls preload="metadata" class="w-full h-10 rounded-xl outline-none accent-emerald-500 bg-zinc-900">
+        <source src="${escapedSrc}" type="audio/mpeg">
+        Your browser does not support audio playback.
+      </audio>
+    </div>
+  </div>`;
+}
+
 export function renderMarkdownWithThinking(text) {
   if (!text) return '';
 
@@ -2008,10 +2054,18 @@ export function renderMarkdownWithThinking(text) {
   // Transform Agent Mode tool calls & results into interactive cards
   raw = renderToolCardsInText(raw);
 
-  // Isolate and protect all interactive HTML blocks (agent action cards, status, thinking)
+  // Isolate and protect all interactive HTML blocks (agent action cards, status, thinking, audio)
   // so that marked.parse never escapes tags or turns indented markup into code blocks
   const protectedBlocks = [];
   let blockSeq = 0;
+
+  // 0. Protect Audio Card tags ([AUDIO_CARD:...])
+  raw = raw.replace(/\[AUDIO_CARD:[\s\S]*?\]/gi, (match) => {
+    const html = renderAudioBubble(match);
+    const token = `%%LLAMA_AUDIO_CARD_${blockSeq++}%%`;
+    protectedBlocks.push({ token, html });
+    return `\n\n${token}\n\n`;
+  });
 
   // 1. Protect Agent Action accordion cards
   raw = raw.replace(/<details class="group-agent-action[\s\S]*?<\/details>/gi, (match) => {

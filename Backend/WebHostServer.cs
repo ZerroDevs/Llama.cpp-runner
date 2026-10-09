@@ -26,6 +26,7 @@ namespace LlamaServerControl.Backend
         private readonly ProcessManager _processManager;
         private readonly StreamingProxy _streamingProxy;
         private readonly string _uiDir;
+        private readonly VoiceStudioService? _voiceStudioService;
 
         private readonly ConcurrentDictionary<Guid, WebSocket> _clients = new();
         private readonly HttpClient _http = new(new SocketsHttpHandler
@@ -47,13 +48,15 @@ namespace LlamaServerControl.Backend
             ConfigManager configManager,
             ProcessManager processManager,
             StreamingProxy streamingProxy,
-            string uiDir)
+            string uiDir,
+            VoiceStudioService? voiceStudioService = null)
         {
             _nativeBridge = nativeBridge;
             _configManager = configManager;
             _processManager = processManager;
             _streamingProxy = streamingProxy;
             _uiDir = uiDir;
+            _voiceStudioService = voiceStudioService;
 
             _nativeBridge.OnEventBroadcast += OnEventBroadcastReceived;
         }
@@ -123,6 +126,251 @@ namespace LlamaServerControl.Backend
                     // Local Images & Cache Assets
                     app.MapGet("/local_image", HandleLocalImageAsync);
                     app.MapGet("/generated_cache/{*filePath}", HandleGeneratedCacheAsync);
+
+                    // VoiceStudio Speech & Audio Endpoints
+                    app.MapGet("/api/voicestudio/status", async (ctx) =>
+                    {
+                        if (_voiceStudioService != null)
+                        {
+                            var st = await _voiceStudioService.CheckStatusAsync();
+                            await ctx.Response.WriteAsJsonAsync(st);
+                        }
+                        else
+                        {
+                            await ctx.Response.WriteAsJsonAsync(new { online = false, error = "VoiceStudio service not initialized" });
+                        }
+                    });
+
+                    app.MapGet("/api/voicestudio/voices", async (ctx) =>
+                    {
+                        if (_voiceStudioService != null)
+                        {
+                            bool force = ctx.Request.Query.ContainsKey("refresh");
+                            var v = await _voiceStudioService.DiscoverVoicesAsync(force);
+                            await ctx.Response.WriteAsJsonAsync(v);
+                        }
+                        else
+                        {
+                            await ctx.Response.WriteAsJsonAsync(new List<object>());
+                        }
+                    });
+
+                    app.MapPost("/api/voicestudio/generate", async (ctx) =>
+                    {
+                        if (_voiceStudioService == null)
+                        {
+                            ctx.Response.StatusCode = 500;
+                            await ctx.Response.WriteAsJsonAsync(new { status = "error", message = "VoiceStudio service not initialized" });
+                            return;
+                        }
+                        try
+                        {
+                            using var doc = await JsonDocument.ParseAsync(ctx.Request.Body);
+                            var root = doc.RootElement;
+                            string text = root.TryGetProperty("text", out var tp) ? tp.GetString() ?? "" : "";
+                            string? voice = root.TryGetProperty("voice", out var vp) ? vp.GetString() : null;
+                            double speed = 1.0;
+                            if (root.TryGetProperty("speed", out var sp))
+                            {
+                                if (sp.ValueKind == JsonValueKind.Number) speed = sp.GetDouble();
+                                else if (double.TryParse(sp.GetString(), out var spVal)) speed = spVal;
+                            }
+                            string? instruct = root.TryGetProperty("instruct", out var ip) ? ip.GetString() : null;
+                            string? language = root.TryGetProperty("language", out var lp) ? lp.GetString() : null;
+                            string? effect = root.TryGetProperty("effect", out var ep) ? ep.GetString() : null;
+                            double? guidance = root.TryGetProperty("guidance_scale", out var gp) && gp.ValueKind == JsonValueKind.Number ? gp.GetDouble() : null;
+                            int? steps = root.TryGetProperty("num_step", out var stp) && stp.ValueKind == JsonValueKind.Number ? stp.GetInt32() : null;
+                            long? seed = root.TryGetProperty("seed", out var sdp) && sdp.ValueKind == JsonValueKind.Number ? sdp.GetInt64() : null;
+
+                            var rec = await _voiceStudioService.GenerateSpeechAsync(text, voice, speed, instruct, language, effect, guidance, steps, seed);
+                            await ctx.Response.WriteAsJsonAsync(new { status = "success", record = rec });
+                        }
+                        catch (Exception ex)
+                        {
+                            ctx.Response.StatusCode = 500;
+                            await ctx.Response.WriteAsJsonAsync(new { status = "error", message = ex.Message });
+                        }
+                    });
+
+                    app.MapGet("/api/voicestudio/history", (ctx) =>
+                    {
+                        var hist = _voiceStudioService?.GetHistory() ?? new List<GeneratedAudioRecord>();
+                        return ctx.Response.WriteAsJsonAsync(hist);
+                    });
+
+                    app.MapDelete("/api/voicestudio/history/{id}", (ctx) =>
+                    {
+                        string id = ctx.Request.RouteValues["id"]?.ToString() ?? "";
+                        bool ok = _voiceStudioService?.DeleteHistoryItem(id) ?? false;
+                        return ctx.Response.WriteAsJsonAsync(new { status = ok ? "success" : "not_found", id });
+                    });
+
+                    app.MapPut("/api/voicestudio/history/{id}/starred", async (ctx) =>
+                    {
+                        string id = ctx.Request.RouteValues["id"]?.ToString() ?? "";
+                        bool starred = true;
+                        try
+                        {
+                            using var doc = await JsonDocument.ParseAsync(ctx.Request.Body);
+                            if (doc.RootElement.TryGetProperty("starred", out var sp)) starred = sp.GetBoolean();
+                        }
+                        catch { }
+                        bool ok = _voiceStudioService != null && await _voiceStudioService.ToggleStarRecordAsync(id, starred);
+                        await ctx.Response.WriteAsJsonAsync(new { success = ok, id, starred });
+                    });
+
+                    app.MapGet("/api/voicestudio/model_info", async (ctx) =>
+                    {
+                        var info = _voiceStudioService != null ? await _voiceStudioService.GetModelInfoAsync() : (object)new { error = "Not initialized" };
+                        await ctx.Response.WriteAsJsonAsync(info);
+                    });
+
+                    app.MapPost("/api/voicestudio/model_unload", async (ctx) =>
+                    {
+                        string mId = "tts";
+                        try
+                        {
+                            if (ctx.Request.ContentLength > 0)
+                            {
+                                using var doc = await JsonDocument.ParseAsync(ctx.Request.Body);
+                                if (doc.RootElement.TryGetProperty("model_id", out var midp)) mId = midp.GetString() ?? "tts";
+                            }
+                        }
+                        catch { }
+                        var res = _voiceStudioService != null ? await _voiceStudioService.UnloadModelAsync(mId) : (object)new { success = false };
+                        await ctx.Response.WriteAsJsonAsync(res);
+                    });
+
+                    app.MapGet("/api/voicestudio/effects", async (ctx) =>
+                    {
+                        var effs = _voiceStudioService != null ? await _voiceStudioService.GetEffectsPresetsAsync() : new object[0];
+                        await ctx.Response.WriteAsJsonAsync(effs);
+                    });
+
+                    app.MapGet("/api/voicestudio/personalities", async (ctx) =>
+                    {
+                        var p = _voiceStudioService != null ? await _voiceStudioService.GetPersonalitiesAsync() : new object[0];
+                        await ctx.Response.WriteAsJsonAsync(p);
+                    });
+
+                    app.MapGet("/api/voicestudio/profiles", async (ctx) =>
+                    {
+                        var profs = _voiceStudioService != null ? await _voiceStudioService.GetProfilesAsync() : new object[0];
+                        await ctx.Response.WriteAsJsonAsync(profs);
+                    });
+
+                    app.MapPost("/api/voicestudio/profiles", async (ctx) =>
+                    {
+                        if (_voiceStudioService == null)
+                        {
+                            ctx.Response.StatusCode = 500;
+                            await ctx.Response.WriteAsJsonAsync(new { status = "error", message = "VoiceStudio service not initialized" });
+                            return;
+                        }
+                        using var doc = await JsonDocument.ParseAsync(ctx.Request.Body);
+                        var root = doc.RootElement;
+                        string pName = root.TryGetProperty("name", out var pnp) ? pnp.GetString() ?? "Custom Voice" : "Custom Voice";
+                        string? pAudio = root.TryGetProperty("audio_path", out var pap) ? pap.GetString() : null;
+                        string? pRef = root.TryGetProperty("ref_text", out var prp) ? prp.GetString() : null;
+                        string? pInst = root.TryGetProperty("instruct", out var pip) ? pip.GetString() : null;
+                        string? pLang = root.TryGetProperty("language", out var plp) ? plp.GetString() : null;
+                        var res = await _voiceStudioService.CreateProfileAsync(pName, pAudio, pRef, pInst, pLang);
+                        await ctx.Response.WriteAsJsonAsync(res);
+                    });
+
+                    app.MapDelete("/api/voicestudio/profiles/{id}", async (ctx) =>
+                    {
+                        string id = ctx.Request.RouteValues["id"]?.ToString() ?? "";
+                        var res = _voiceStudioService != null ? await _voiceStudioService.DeleteProfileAsync(id) : (object)new { success = false };
+                        await ctx.Response.WriteAsJsonAsync(res);
+                    });
+
+                    app.MapPost("/api/voicestudio/convert", async (ctx) =>
+                    {
+                        if (_voiceStudioService == null)
+                        {
+                            ctx.Response.StatusCode = 500;
+                            await ctx.Response.WriteAsJsonAsync(new { status = "error", message = "VoiceStudio service not initialized" });
+                            return;
+                        }
+                        using var doc = await JsonDocument.ParseAsync(ctx.Request.Body);
+                        var root = doc.RootElement;
+                        string sAudio = root.TryGetProperty("audio_path", out var sap) ? sap.GetString() ?? "" : "";
+                        string tProfile = root.TryGetProperty("profile_id", out var tpp) ? tpp.GetString() ?? "" : "";
+                        bool mDur = !root.TryGetProperty("match_duration", out var mdp) || mdp.GetBoolean();
+                        bool cFirst = root.TryGetProperty("clean_first", out var cfp) && cfp.GetBoolean();
+                        var res = await _voiceStudioService.ConvertSpeechAsync(sAudio, tProfile, mDur, cFirst);
+                        await ctx.Response.WriteAsJsonAsync(res);
+                    });
+
+                    app.MapPost("/api/voicestudio/clean", async (ctx) =>
+                    {
+                        if (_voiceStudioService == null)
+                        {
+                            ctx.Response.StatusCode = 500;
+                            await ctx.Response.WriteAsJsonAsync(new { status = "error", message = "VoiceStudio service not initialized" });
+                            return;
+                        }
+                        using var doc = await JsonDocument.ParseAsync(ctx.Request.Body);
+                        string clAudio = doc.RootElement.TryGetProperty("audio_path", out var cap) ? cap.GetString() ?? "" : "";
+                        var clRes = await _voiceStudioService.CleanAudioAsync(clAudio);
+                        if (clRes != null) await ctx.Response.WriteAsJsonAsync(new { status = "success", data = clRes });
+                        else await ctx.Response.WriteAsJsonAsync(new { status = "error", message = "Clean audio failed" });
+                    });
+
+                    app.MapPost("/api/voicestudio/describe", async (ctx) =>
+                    {
+                        if (_voiceStudioService == null)
+                        {
+                            await ctx.Response.WriteAsJsonAsync(new { status = "error", message = "VoiceStudio service not initialized" });
+                            return;
+                        }
+                        using var doc = await JsonDocument.ParseAsync(ctx.Request.Body);
+                        string desc = doc.RootElement.TryGetProperty("description", out var dp) ? dp.GetString() ?? "" : "";
+                        var res = await _voiceStudioService.ParseVoiceDescriptionAsync(desc);
+                        await ctx.Response.WriteAsJsonAsync(res);
+                    });
+
+                    app.MapGet("/api/voicestudio/archetypes", async (ctx) =>
+                    {
+                        if (_voiceStudioService != null)
+                        {
+                            var arch = await _voiceStudioService.GetArchetypesAsync();
+                            await ctx.Response.WriteAsJsonAsync(arch);
+                        }
+                        else
+                        {
+                            await ctx.Response.WriteAsJsonAsync(new string[0]);
+                        }
+                    });
+
+                    app.MapPost("/api/voicestudio/story", async (ctx) =>
+                    {
+                        if (_voiceStudioService == null)
+                        {
+                            await ctx.Response.WriteAsJsonAsync(new { status = "error", message = "VoiceStudio service not initialized" });
+                            return;
+                        }
+                        using var doc = await JsonDocument.ParseAsync(ctx.Request.Body);
+                        var res = await _voiceStudioService.RenderStoryAsync(doc.RootElement);
+                        await ctx.Response.WriteAsJsonAsync(res);
+                    });
+
+                    app.MapPost("/api/voicestudio/flush", async (ctx) =>
+                    {
+                        if (_voiceStudioService != null)
+                        {
+                            var res = await _voiceStudioService.FlushMemoryAsync();
+                            await ctx.Response.WriteAsJsonAsync(res);
+                        }
+                        else
+                        {
+                            await ctx.Response.WriteAsJsonAsync(new { status = "error", message = "VoiceStudio service not initialized" });
+                        }
+                    });
+
+                    // Generated Audio Stream Endpoint
+                    app.MapGet("/media/audio/{*fileName}", HandleAudioMediaAsync);
 
                     // Static UI Assets Fallback (index.html, JS, CSS, tabs, modals)
                     app.MapFallback("{*path}", HandleStaticFileFallbackAsync);
@@ -553,8 +801,46 @@ namespace LlamaServerControl.Backend
                 ".ttf" => "font/ttf",
                 ".txt" => "text/plain; charset=utf-8",
                 ".md" => "text/markdown; charset=utf-8",
+                ".mp3" => "audio/mpeg",
+                ".wav" => "audio/wav",
+                ".m4a" or ".m4b" => "audio/mp4",
                 _ => "application/octet-stream"
             };
+        }
+
+        private async Task HandleAudioMediaAsync(HttpContext context)
+        {
+            string fileName = context.Request.RouteValues["fileName"]?.ToString() ?? "";
+            if (string.IsNullOrWhiteSpace(fileName))
+            {
+                context.Response.StatusCode = 404;
+                return;
+            }
+
+            string fullPath = _voiceStudioService != null
+                ? _voiceStudioService.GetAudioFilePath(fileName)
+                : Path.Combine(_uiDir, "media", "audio", fileName);
+
+            if (!File.Exists(fullPath))
+            {
+                // Also check relative to AppDomain base directory
+                string altPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "ui", "media", "audio", fileName);
+                if (File.Exists(altPath))
+                {
+                    fullPath = altPath;
+                }
+                else
+                {
+                    context.Response.StatusCode = 404;
+                    return;
+                }
+            }
+
+            context.Response.ContentType = "audio/mpeg";
+            context.Response.Headers.Append("Accept-Ranges", "bytes");
+            context.Response.Headers.Append("Access-Control-Allow-Origin", "*");
+            context.Response.Headers.Append("Access-Control-Allow-Private-Network", "true");
+            await context.Response.SendFileAsync(fullPath);
         }
 
         public static List<string> GetLocalIPv4Addresses()

@@ -20,6 +20,8 @@ config.json
 censored.json
 chats.json
 exitcodes.json
+voicestudio_history.db*
+ui/media/
 
 # Logs
 *.log

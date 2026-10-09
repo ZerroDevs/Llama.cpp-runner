@@ -17,9 +17,10 @@ namespace LlamaServerControl.Backend
         private readonly HubManager _hub;
         private readonly StreamingProxy? _proxy;
         private readonly AgentWorkspaceManager _agentWorkspace;
+        private VoiceStudioService? _voiceStudio;
         private CoreWebView2? _coreWebView;
 
-        public NativeBridge(ConfigManager config, ProcessManager process, SwarmManager swarm, HardwareMonitor hardware, HubManager hub, StreamingProxy? proxy = null, AgentWorkspaceManager? agentWorkspace = null)
+        public NativeBridge(ConfigManager config, ProcessManager process, SwarmManager swarm, HardwareMonitor hardware, HubManager hub, StreamingProxy? proxy = null, AgentWorkspaceManager? agentWorkspace = null, VoiceStudioService? voiceStudio = null)
         {
             _config = config;
             _process = process;
@@ -28,6 +29,11 @@ namespace LlamaServerControl.Backend
             _hub = hub;
             _proxy = proxy;
             _agentWorkspace = agentWorkspace ?? new AgentWorkspaceManager();
+            _voiceStudio = voiceStudio;
+            if (_voiceStudio != null)
+            {
+                _agentWorkspace.SetVoiceStudioService(_voiceStudio);
+            }
 
             _process.OnLog += (line) =>
             {
@@ -50,6 +56,12 @@ namespace LlamaServerControl.Backend
         public void SetWebView(CoreWebView2 webView)
         {
             _coreWebView = webView;
+        }
+
+        public void SetVoiceStudioService(VoiceStudioService voiceStudio)
+        {
+            _voiceStudio = voiceStudio;
+            _agentWorkspace.SetVoiceStudioService(voiceStudio);
         }
 
         private void EmitEvent(string eventName, object data)
@@ -367,6 +379,171 @@ namespace LlamaServerControl.Backend
                         result = EstimateVram(args);
                         break;
 
+                    case "voicestudio_get_status":
+                        if (_voiceStudio != null)
+                        {
+                            result = await _voiceStudio.CheckStatusAsync();
+                        }
+                        else
+                        {
+                            result = new { online = false, error = "VoiceStudio service not initialized" };
+                        }
+                        break;
+
+                    case "voicestudio_get_voices":
+                        if (_voiceStudio != null)
+                        {
+                            bool forceRefresh = args.ValueKind == JsonValueKind.Object && args.TryGetProperty("refresh", out var rf) && rf.GetBoolean();
+                            result = await _voiceStudio.DiscoverVoicesAsync(forceRefresh);
+                        }
+                        else
+                        {
+                            result = new List<object>();
+                        }
+                        break;
+
+                    case "voicestudio_generate":
+                        if (_voiceStudio != null)
+                        {
+                            string gText = args.TryGetProperty("text", out var gtp) ? gtp.GetString() ?? "" : "";
+                            string? gVoice = args.TryGetProperty("voice", out var gvp) ? gvp.GetString() : null;
+                            double gSpeed = 1.0;
+                            if (args.TryGetProperty("speed", out var gsp))
+                            {
+                                if (gsp.ValueKind == JsonValueKind.Number) gSpeed = gsp.GetDouble();
+                                else if (double.TryParse(gsp.GetString(), out var spVal)) gSpeed = spVal;
+                            }
+                            string? gInst = args.TryGetProperty("instruct", out var gip) ? gip.GetString() : null;
+                            string? gLang = args.TryGetProperty("language", out var glp) ? glp.GetString() : null;
+                            string? gEff = args.TryGetProperty("effect", out var gep) ? gep.GetString() : null;
+                            double? gGuide = args.TryGetProperty("guidance_scale", out var ggp) && ggp.ValueKind == JsonValueKind.Number ? ggp.GetDouble() : null;
+                            int? gSteps = args.TryGetProperty("num_step", out var gstp) && gstp.ValueKind == JsonValueKind.Number ? gstp.GetInt32() : null;
+                            long? gSeed = args.TryGetProperty("seed", out var gsdp) && gsdp.ValueKind == JsonValueKind.Number ? gsdp.GetInt64() : null;
+
+                            result = await _voiceStudio.GenerateSpeechAsync(gText, gVoice, gSpeed, gInst, gLang, gEff, gGuide, gSteps, gSeed);
+                        }
+                        else
+                        {
+                            result = new { status = "error", message = "VoiceStudio service not initialized" };
+                        }
+                        break;
+
+                    case "voicestudio_get_history":
+                        result = _voiceStudio?.GetHistory() ?? new List<GeneratedAudioRecord>();
+                        break;
+
+                    case "voicestudio_delete_history":
+                        string delId = args.ValueKind == JsonValueKind.String ? args.GetString() ?? "" : (args.TryGetProperty("id", out var dip) ? dip.GetString() ?? "" : "");
+                        result = new { status = (_voiceStudio?.DeleteHistoryItem(delId) ?? false) ? "success" : "not_found", id = delId };
+                        break;
+
+                    case "voicestudio_toggle_star":
+                        string starId = args.TryGetProperty("id", out var sid) ? sid.GetString() ?? "" : "";
+                        bool starred = args.TryGetProperty("starred", out var stv) && stv.GetBoolean();
+                        result = new { success = _voiceStudio != null && await _voiceStudio.ToggleStarRecordAsync(starId, starred), id = starId, starred };
+                        break;
+
+                    case "voicestudio_get_model_info":
+                        result = _voiceStudio != null ? await _voiceStudio.GetModelInfoAsync() : new { error = "VoiceStudio service not initialized" };
+                        break;
+
+                    case "voicestudio_unload_model":
+                        string mId = args.ValueKind == JsonValueKind.String ? args.GetString() ?? "tts" : (args.TryGetProperty("model_id", out var midp) ? midp.GetString() ?? "tts" : "tts");
+                        result = _voiceStudio != null ? await _voiceStudio.UnloadModelAsync(mId) : new { success = false };
+                        break;
+
+                    case "voicestudio_get_effects":
+                        result = _voiceStudio != null ? await _voiceStudio.GetEffectsPresetsAsync() : new object[0];
+                        break;
+
+                    case "voicestudio_get_personalities":
+                        result = _voiceStudio != null ? await _voiceStudio.GetPersonalitiesAsync() : new object[0];
+                        break;
+
+                    case "voicestudio_get_profiles":
+                        result = _voiceStudio != null ? await _voiceStudio.GetProfilesAsync() : new object[0];
+                        break;
+
+                    case "voicestudio_create_profile":
+                        if (_voiceStudio != null)
+                        {
+                            string pName = args.TryGetProperty("name", out var pnp) ? pnp.GetString() ?? "Custom Voice" : "Custom Voice";
+                            string? pAudio = args.TryGetProperty("audio_path", out var pap) ? pap.GetString() : null;
+                            string? pRef = args.TryGetProperty("ref_text", out var prp) ? prp.GetString() : null;
+                            string? pInst = args.TryGetProperty("instruct", out var pip) ? pip.GetString() : null;
+                            string? pLang = args.TryGetProperty("language", out var plp) ? plp.GetString() : null;
+                            result = await _voiceStudio.CreateProfileAsync(pName, pAudio, pRef, pInst, pLang);
+                        }
+                        else
+                        {
+                            result = new { status = "error", message = "VoiceStudio service not initialized" };
+                        }
+                        break;
+
+                    case "voicestudio_delete_profile":
+                        string profId = args.ValueKind == JsonValueKind.String ? args.GetString() ?? "" : (args.TryGetProperty("id", out var pidp) ? pidp.GetString() ?? "" : "");
+                        result = _voiceStudio != null ? await _voiceStudio.DeleteProfileAsync(profId) : new { success = false };
+                        break;
+
+                    case "voicestudio_convert_speech":
+                        if (_voiceStudio != null)
+                        {
+                            string sAudio = args.TryGetProperty("audio_path", out var sap) ? sap.GetString() ?? "" : "";
+                            string tProfile = args.TryGetProperty("profile_id", out var tpp) ? tpp.GetString() ?? "" : "";
+                            bool mDur = !args.TryGetProperty("match_duration", out var mdp) || mdp.GetBoolean();
+                            bool cFirst = args.TryGetProperty("clean_first", out var cfp) && cfp.GetBoolean();
+                            result = await _voiceStudio.ConvertSpeechAsync(sAudio, tProfile, mDur, cFirst);
+                        }
+                        else
+                        {
+                            result = new { status = "error", message = "VoiceStudio service not initialized" };
+                        }
+                        break;
+
+                    case "voicestudio_clean_audio":
+                        if (_voiceStudio != null)
+                        {
+                            string clAudio = args.TryGetProperty("audio_path", out var cap) ? cap.GetString() ?? "" : "";
+                            var clRes = await _voiceStudio.CleanAudioAsync(clAudio);
+                            result = clRes != null ? (object)new { status = "success", data = clRes } : new { status = "error", message = "Clean audio failed" };
+                        }
+                        else
+                        {
+                            result = new { status = "error", message = "VoiceStudio service not initialized" };
+                        }
+                        break;
+
+                    case "voicestudio_describe":
+                        if (_voiceStudio != null)
+                        {
+                            string descText = args.ValueKind == JsonValueKind.String ? args.GetString() ?? "" : (args.TryGetProperty("description", out var dsp) ? dsp.GetString() ?? "" : "");
+                            result = await _voiceStudio.ParseVoiceDescriptionAsync(descText);
+                        }
+                        else
+                        {
+                            result = new { status = "error", message = "VoiceStudio service not initialized" };
+                        }
+                        break;
+
+                    case "voicestudio_get_archetypes":
+                        result = _voiceStudio != null ? await _voiceStudio.GetArchetypesAsync() : new string[0];
+                        break;
+
+                    case "voicestudio_render_story":
+                        if (_voiceStudio != null)
+                        {
+                            result = await _voiceStudio.RenderStoryAsync(args);
+                        }
+                        else
+                        {
+                            result = new { status = "error", message = "VoiceStudio service not initialized" };
+                        }
+                        break;
+
+                    case "voicestudio_flush_memory":
+                        result = _voiceStudio != null ? await _voiceStudio.FlushMemoryAsync() : new { status = "error", message = "VoiceStudio service not initialized" };
+                        break;
+
                     default:
                         result = new { status = "error", message = $"Unknown method {method}" };
                         break;
@@ -396,6 +573,10 @@ namespace LlamaServerControl.Backend
             else if (filter == "exe")
             {
                 dlg.Filter = "Executable Files (*.exe;*.bat;*.cmd)|*.exe;*.bat;*.cmd|All Files (*.*)|*.*";
+            }
+            else if (filter == "audio")
+            {
+                dlg.Filter = "Audio Files (*.wav;*.mp3;*.m4a;*.flac;*.ogg)|*.wav;*.mp3;*.m4a;*.flac;*.ogg|All Files (*.*)|*.*";
             }
             return dlg.ShowDialog() == true ? dlg.FileName : null;
         }

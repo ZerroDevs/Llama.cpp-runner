@@ -307,6 +307,13 @@ AVAILABLE TOOLS:
    {"name": "screenshot_web", "arguments": {"url": "https://example.com"}}
    </tool_call>
 
+10. generate_speech: Generate natural speech audio from text using VoiceStudio.
+    Use whenever the user asks to speak aloud, say something, generate voice/speech/audio, or create a voiceover.
+    Syntax:
+    <tool_call>
+    {"name": "generate_speech", "arguments": {"text": "Text to speak out loud", "voice": "Narrator", "speed": 1.0}}
+    </tool_call>
+
 EXECUTION RULES:
 - When the user asks to edit, add, or create something, plan concisely and immediately execute the tool calls.
 - When editing or adding features to code, output write_file with the updated code.
@@ -570,6 +577,8 @@ export function getToolIconName(toolName) {
       return 'globe';
     case 'screenshot_web':
       return 'camera';
+    case 'generate_speech':
+      return 'volume-2';
     default:
       return 'wrench';
   }

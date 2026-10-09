@@ -906,5 +906,26 @@ mark.chat-search-match-active {
   background: rgba(255, 255, 255, 0.22);
 }
 
+/* VoiceStudio Chat Audio Player Cards */
+.audio-card {
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5), 0 8px 10px -6px rgba(0, 0, 0, 0.4);
+}
+
+.audio-card audio::-webkit-media-controls-panel {
+  background-color: #18181b;
+}
+
+.audio-card audio::-webkit-media-controls-current-time-display,
+.audio-card audio::-webkit-media-controls-time-remaining-display {
+  color: #a1a1aa;
+  font-family: var(--font-mono, monospace);
+  font-size: 11px;
+}
+
+.audio-card audio::-webkit-media-controls-play-button,
+.audio-card audio::-webkit-media-controls-mute-button {
+  filter: invert(0.9);
+}
+
 
 

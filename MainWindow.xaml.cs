@@ -14,6 +14,7 @@ namespace LlamaServerControl
         private SwarmManager _swarmManager = null!;
         private HardwareMonitor _hardwareMonitor = null!;
         private HubManager _hubManager = null!;
+        private VoiceStudioService _voiceStudioService = null!;
         private NativeBridge _nativeBridge = null!;
         private StreamingProxy _streamingProxy = null!;
         private WebHostServer _webHostServer = null!;
@@ -44,11 +45,13 @@ namespace LlamaServerControl
             _streamingProxy = new StreamingProxy(_processManager, _configManager, _swarmManager, _hardwareMonitor);
             _streamingProxy.Start();
 
-            _nativeBridge = new NativeBridge(_configManager, _processManager, _swarmManager, _hardwareMonitor, _hubManager, _streamingProxy);
-
             // Locate UI directory (prioritize source dev directory for instant live updates)
             string devUiDir = Path.Combine(parentDir, "ui");
             string uiDir = Directory.Exists(devUiDir) ? devUiDir : Path.Combine(appDir, "ui");
+
+            _voiceStudioService = new VoiceStudioService(_configManager, uiDir);
+
+            _nativeBridge = new NativeBridge(_configManager, _processManager, _swarmManager, _hardwareMonitor, _hubManager, _streamingProxy, null, _voiceStudioService);
 
             // Set window and taskbar icon safely from file if present
             try
@@ -66,7 +69,7 @@ namespace LlamaServerControl
             catch { }
 
             // Start WebHostServer on port 9095 (Local & Network Host)
-            _webHostServer = new WebHostServer(_nativeBridge, _configManager, _processManager, _streamingProxy, uiDir);
+            _webHostServer = new WebHostServer(_nativeBridge, _configManager, _processManager, _streamingProxy, uiDir, _voiceStudioService);
             _webHostServer.Start();
 
             // Initialize WebView2 with security flags permitting local loopback HTTP assets & mixed content

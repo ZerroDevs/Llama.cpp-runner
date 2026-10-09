@@ -1,0 +1,599 @@
+<!-- Voice Studio Tab: Zero-Latency Local Speech & Voice Synthesis (OmniVoice) -->
+<div id="tab-voice-studio" class="tab-pane h-full flex flex-col overflow-hidden bg-[var(--bg-base)]">
+  
+  <!-- Studio Top Navigation & Telemetry Bar -->
+  <header class="px-6 py-3.5 border-b border-[var(--border)] bg-[var(--bg-card)] flex flex-wrap items-center justify-between gap-4 shrink-0">
+    <div class="flex items-center gap-3">
+      <div class="w-8 h-8 rounded-xl bg-emerald-500/15 border border-emerald-500/30 flex items-center justify-center text-emerald-400 shrink-0">
+        <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M2 10v3"/><path d="M6 6v11"/><path d="M10 3v18"/><path d="M14 8v7"/><path d="M18 5v13"/><path d="M22 10v3"/>
+        </svg>
+      </div>
+      <div>
+        <div class="flex items-center gap-2">
+          <h1 class="text-sm font-bold text-[var(--text-primary)]">Voice Studio</h1>
+          <span class="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-500/10 border border-emerald-500/25 text-emerald-400">
+            OmniVoice Engine
+          </span>
+        </div>
+        <p class="text-xs text-[var(--text-muted)]">Native local speech synthesis, voice cloning, DSP audio chains, & speech-to-speech</p>
+      </div>
+    </div>
+
+    <!-- Engine Status & Controls -->
+    <div class="flex items-center gap-2.5">
+      <!-- Status Badge -->
+      <div id="vs-engine-status-badge" class="flex items-center gap-1.5 px-2.5 py-1 rounded-lg border border-[var(--border)] bg-[var(--bg-elevated)] text-xs text-[var(--text-secondary)]">
+        <span id="vs-status-dot" class="w-2 h-2 rounded-full bg-amber-400 animate-pulse"></span>
+        <span id="vs-status-text" class="font-medium">Connecting...</span>
+      </div>
+
+      <!-- VRAM & Model Telemetry Badge -->
+      <div id="vs-vram-telemetry" class="hidden sm:flex items-center gap-2 px-2.5 py-1 rounded-lg border border-[var(--border)] bg-[var(--bg-elevated)] text-xs">
+        <span class="text-[var(--text-muted)] text-[10px] uppercase tracking-wider font-semibold">VRAM</span>
+        <span id="vs-vram-badge" class="font-mono text-emerald-400 font-semibold text-[11px]">0 MB</span>
+        <span id="vs-model-checkpoint" class="text-[10px] text-[var(--text-muted)] font-mono truncate max-w-[110px]" title="Active Model"></span>
+      </div>
+
+      <!-- Unload Model Button (1-Click GPU VRAM Reclaim) -->
+      <button id="btn-vs-unload-model" class="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border border-rose-500/30 bg-rose-500/10 hover:bg-rose-500/20 text-xs text-rose-300 hover:text-rose-200 transition-colors shadow-xs cursor-pointer" title="Unload active TTS model from GPU memory to free VRAM immediately">
+        <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18.36 6.64a9 9 0 1 1-12.73 0"/><line x1="12" y1="2" x2="12" y2="12"/></svg>
+        <span class="hidden md:inline font-medium">Unload Model</span>
+      </button>
+
+      <!-- Flush VRAM Memory -->
+      <button id="btn-vs-flush-memory" class="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border border-[var(--border)] bg-[var(--bg-elevated)] hover:border-amber-500/40 text-xs text-[var(--text-secondary)] hover:text-amber-400 transition-colors shadow-xs cursor-pointer" title="Flush VoiceStudio VRAM cache and release memory">
+        <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg>
+        <span class="hidden sm:inline">Flush</span>
+      </button>
+
+      <!-- Reload Voices -->
+      <button id="btn-vs-refresh-voices" class="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border border-[var(--border)] bg-[var(--bg-elevated)] hover:border-emerald-500/40 text-xs text-[var(--text-secondary)] hover:text-emerald-400 transition-colors shadow-xs cursor-pointer" title="Refresh discovered voices & profiles">
+        <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16"/><path d="M16 21h5v-5"/></svg>
+        <span class="hidden sm:inline">Reload</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- Offline Warning Banner (shown when port 3900 unreachable) -->
+  <div id="voicestudio-offline-banner" class="hidden mx-6 mt-4 p-3.5 rounded-2xl bg-amber-500/10 border border-amber-500/30 text-amber-300 flex items-center justify-between gap-4 animate-in fade-in duration-200">
+    <div class="flex items-center gap-2.5">
+      <svg class="w-4 h-4 text-amber-400 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+      <span class="text-xs">
+        <strong class="font-semibold">VoiceStudio is offline.</strong> Please launch VoiceStudio at <code class="font-mono text-amber-200 bg-amber-500/20 px-1 py-0.5 rounded">http://127.0.0.1:3900</code> to enable audio generation.
+      </span>
+    </div>
+    <button id="btn-voicestudio-retry" class="px-3 py-1 rounded-xl bg-amber-500/20 hover:bg-amber-500/30 border border-amber-500/40 text-amber-200 text-xs font-semibold flex items-center gap-1.5 transition-all cursor-pointer shrink-0">
+      <svg class="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12a9 9 0 1 1-9-9c2.52 0 4.93 1 6.74 2.74L21 8"/></svg>
+      <span>Retry Connection</span>
+    </button>
+  </div>
+
+  <!-- Studio Workspace Main 2-Column Body -->
+  <div class="flex-1 flex flex-col lg:flex-row overflow-hidden p-4 sm:p-6 gap-6 min-h-0">
+    
+    <!-- LEFT PANEL: Voice Designer & Synthesizer Controls -->
+    <div class="w-full lg:w-[470px] xl:w-[500px] flex flex-col gap-4 overflow-y-auto pr-1 shrink-0">
+      
+      <!-- 1. Voice Description Parsing -->
+      <section class="bg-[var(--bg-card)] border border-[var(--border)] rounded-2xl p-4 space-y-3 shadow-xs">
+        <div class="flex items-center justify-between">
+          <label for="vs-voice-description" class="text-xs font-semibold text-[var(--text-primary)] flex items-center gap-1.5">
+            <svg class="w-3.5 h-3.5 text-emerald-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/></svg>
+            <span>Describe your voice</span>
+          </label>
+          <button id="btn-vs-reset-description" type="button" class="text-[11px] text-[var(--text-muted)] hover:text-[var(--text-secondary)] transition-colors cursor-pointer">
+            Reset to description
+          </button>
+        </div>
+        
+        <div class="relative">
+          <textarea id="vs-voice-description" rows="2" class="w-full px-3 py-2 text-xs bg-[var(--bg-base)] border border-[var(--border)] rounded-xl text-[var(--text-primary)] placeholder-[var(--text-muted)] focus:border-emerald-500/60 focus:outline-none transition-colors resize-none leading-relaxed" placeholder="e.g. a warm elderly British storyteller, slightly raspy"></textarea>
+          <button id="btn-vs-analyze-description" class="absolute right-2 bottom-2 px-2.5 py-1 rounded-lg bg-emerald-500/15 border border-emerald-500/30 text-emerald-400 hover:bg-emerald-500/25 text-[11px] font-semibold transition-all flex items-center gap-1 cursor-pointer">
+            <svg class="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            <span>Analyze</span>
+          </button>
+        </div>
+
+        <!-- Predicted Tags Tray -->
+        <div id="vs-predicted-tags-tray" class="hidden flex flex-wrap gap-1.5 pt-1"></div>
+      </section>
+
+      <!-- 2. Starting Points (Preset Pills) -->
+      <section class="bg-[var(--bg-card)] border border-[var(--border)] rounded-2xl p-4 space-y-2.5 shadow-xs">
+        <div class="flex items-center justify-between">
+          <span class="text-xs font-semibold text-[var(--text-primary)]">Starting Points</span>
+          <span class="text-[10px] text-[var(--text-muted)]">Click preset to populate</span>
+        </div>
+        <div class="flex flex-wrap gap-1.5" id="vs-starting-points-pills">
+          <button type="button" class="vs-preset-pill px-2.5 py-1 rounded-lg text-xs font-medium bg-[var(--bg-elevated)] border border-[var(--border)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:border-emerald-500/40 transition-all cursor-pointer" data-preset="Narrator">Narrator</button>
+          <button type="button" class="vs-preset-pill px-2.5 py-1 rounded-lg text-xs font-medium bg-[var(--bg-elevated)] border border-[var(--border)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:border-emerald-500/40 transition-all cursor-pointer" data-preset="Casual">Casual</button>
+          <button type="button" class="vs-preset-pill px-2.5 py-1 rounded-lg text-xs font-medium bg-[var(--bg-elevated)] border border-[var(--border)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:border-emerald-500/40 transition-all cursor-pointer" data-preset="News Anchor">News Anchor</button>
+          <button type="button" class="vs-preset-pill px-2.5 py-1 rounded-lg text-xs font-medium bg-[var(--bg-elevated)] border border-[var(--border)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:border-emerald-500/40 transition-all cursor-pointer" data-preset="Storyteller">Storyteller</button>
+          <button type="button" class="vs-preset-pill px-2.5 py-1 rounded-lg text-xs font-medium bg-[var(--bg-elevated)] border border-[var(--border)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:border-emerald-500/40 transition-all cursor-pointer" data-preset="Corporate">Corporate</button>
+          <button type="button" class="vs-preset-pill px-2.5 py-1 rounded-lg text-xs font-medium bg-[var(--bg-elevated)] border border-[var(--border)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:border-emerald-500/40 transition-all cursor-pointer" data-preset="Energetic">Energetic</button>
+          <button type="button" class="vs-preset-pill px-2.5 py-1 rounded-lg text-xs font-medium bg-[var(--bg-elevated)] border border-[var(--border)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:border-emerald-500/40 transition-all cursor-pointer" data-preset="Authoritative">Authoritative</button>
+          <button type="button" class="vs-preset-pill px-2.5 py-1 rounded-lg text-xs font-medium bg-[var(--bg-elevated)] border border-[var(--border)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:border-emerald-500/40 transition-all cursor-pointer" data-preset="Excited Child">Excited Child</button>
+          <button type="button" class="vs-preset-pill px-2.5 py-1 rounded-lg text-xs font-medium bg-[var(--bg-elevated)] border border-[var(--border)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:border-emerald-500/40 transition-all cursor-pointer" data-preset="Whisper">Whisper</button>
+          <button type="button" class="vs-preset-pill px-2.5 py-1 rounded-lg text-xs font-medium bg-[var(--bg-elevated)] border border-[var(--border)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:border-emerald-500/40 transition-all cursor-pointer" data-preset="Surprised">Surprised</button>
+          <button type="button" class="vs-preset-pill px-2.5 py-1 rounded-lg text-xs font-medium bg-[var(--bg-elevated)] border border-[var(--border)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:border-emerald-500/40 transition-all cursor-pointer" data-preset="Elder">Elder</button>
+        </div>
+      </section>
+
+      <!-- 3. Details & Advanced Acoustic Tuning Accordion -->
+      <details id="vs-details-accordion" class="bg-[var(--bg-card)] border border-[var(--border)] rounded-2xl p-4 shadow-xs group">
+        <summary class="flex items-center justify-between cursor-pointer select-none text-xs font-semibold text-[var(--text-primary)] hover:text-emerald-400 transition-colors list-none">
+          <div class="flex items-center gap-2">
+            <svg class="w-3.5 h-3.5 text-emerald-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg>
+            <span>Voice Details & Acoustic Tuning</span>
+          </div>
+          <svg class="w-3.5 h-3.5 transition-transform duration-200 group-open:rotate-180 text-[var(--text-muted)]" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"/></svg>
+        </summary>
+        
+        <div class="grid grid-cols-2 gap-3 mt-3.5 pt-3 border-t border-[var(--border)] text-xs">
+          <!-- Gender -->
+          <div>
+            <label class="block text-[11px] text-[var(--text-muted)] mb-1">Gender</label>
+            <select id="vs-detail-gender" class="w-full px-2.5 py-1.5 rounded-lg bg-[var(--bg-base)] border border-[var(--border)] text-[var(--text-primary)] focus:border-emerald-500/60 focus:outline-none">
+              <option value="Auto">Auto</option>
+              <option value="Male">Male</option>
+              <option value="Female">Female</option>
+            </select>
+          </div>
+
+          <!-- Age -->
+          <div>
+            <label class="block text-[11px] text-[var(--text-muted)] mb-1">Age</label>
+            <select id="vs-detail-age" class="w-full px-2.5 py-1.5 rounded-lg bg-[var(--bg-base)] border border-[var(--border)] text-[var(--text-primary)] focus:border-emerald-500/60 focus:outline-none">
+              <option value="Auto">Auto</option>
+              <option value="Child">Child</option>
+              <option value="Teenager">Teenager</option>
+              <option value="Young Adult">Young Adult</option>
+              <option value="Middle-aged">Middle-aged</option>
+              <option value="Elderly">Elderly</option>
+            </select>
+          </div>
+
+          <!-- Pitch -->
+          <div>
+            <label class="block text-[11px] text-[var(--text-muted)] mb-1">Pitch</label>
+            <select id="vs-detail-pitch" class="w-full px-2.5 py-1.5 rounded-lg bg-[var(--bg-base)] border border-[var(--border)] text-[var(--text-primary)] focus:border-emerald-500/60 focus:outline-none">
+              <option value="Auto">Auto</option>
+              <option value="Very Low">Very Low</option>
+              <option value="Low">Low</option>
+              <option value="Moderate">Moderate</option>
+              <option value="High">High</option>
+              <option value="Very High">Very High</option>
+            </select>
+          </div>
+
+          <!-- Style -->
+          <div>
+            <label class="block text-[11px] text-[var(--text-muted)] mb-1">Style</label>
+            <select id="vs-detail-style" class="w-full px-2.5 py-1.5 rounded-lg bg-[var(--bg-base)] border border-[var(--border)] text-[var(--text-primary)] focus:border-emerald-500/60 focus:outline-none">
+              <option value="Auto">Auto</option>
+              <option value="Whisper">Whisper</option>
+            </select>
+          </div>
+
+          <!-- English Accent -->
+          <div>
+            <label class="block text-[11px] text-[var(--text-muted)] mb-1">English Accent</label>
+            <select id="vs-detail-accent" class="w-full px-2.5 py-1.5 rounded-lg bg-[var(--bg-base)] border border-[var(--border)] text-[var(--text-primary)] focus:border-emerald-500/60 focus:outline-none">
+              <option value="Auto">Auto</option>
+              <option value="American">American</option>
+              <option value="British">British</option>
+              <option value="Australian">Australian</option>
+              <option value="Canadian">Canadian</option>
+              <option value="Indian">Indian</option>
+              <option value="Chinese">Chinese</option>
+              <option value="Japanese">Japanese</option>
+              <option value="Portuguese">Portuguese</option>
+              <option value="Russian">Russian</option>
+            </select>
+          </div>
+
+          <!-- Dialects & Language -->
+          <div>
+            <label class="block text-[11px] text-[var(--text-muted)] mb-1">Language</label>
+            <select id="vs-detail-language" class="w-full px-2.5 py-1.5 rounded-lg bg-[var(--bg-base)] border border-[var(--border)] text-[var(--text-primary)] focus:border-emerald-500/60 focus:outline-none">
+              <option value="en">English (en)</option>
+              <option value="ar">Arabic (العربية)</option>
+              <option value="es">Spanish (es)</option>
+              <option value="fr">French (fr)</option>
+              <option value="de">German (de)</option>
+              <option value="zh">Chinese (zh)</option>
+              <option value="ja">Japanese (ja)</option>
+              <option value="pt">Portuguese (pt)</option>
+              <option value="ru">Russian (ru)</option>
+              <option value="it">Italian (it)</option>
+              <option value="ko">Korean (ko)</option>
+              <option value="hi">Hindi (hi)</option>
+            </select>
+          </div>
+
+          <!-- Personality Preset (from /personalities) -->
+          <div class="col-span-2">
+            <label class="block text-[11px] text-[var(--text-muted)] mb-1">Personality Preset</label>
+            <select id="vs-detail-personality" class="w-full px-2.5 py-1.5 rounded-lg bg-[var(--bg-base)] border border-[var(--border)] text-[var(--text-primary)] focus:border-emerald-500/60 focus:outline-none">
+              <option value="">Default (No Personality Preset)</option>
+            </select>
+          </div>
+
+          <!-- Guidance Scale (CFG) -->
+          <div>
+            <div class="flex items-center justify-between mb-1">
+              <label for="vs-guidance-slider" class="text-[11px] text-[var(--text-muted)]">CFG Guidance</label>
+              <span id="vs-guidance-val" class="text-[11px] font-mono text-emerald-400 font-semibold">3.0</span>
+            </div>
+            <input type="range" id="vs-guidance-slider" min="1.0" max="8.0" step="0.5" value="3.0" class="w-full accent-emerald-500 cursor-pointer">
+          </div>
+
+          <!-- Diffusion Steps (num_step) -->
+          <div>
+            <div class="flex items-center justify-between mb-1">
+              <label for="vs-steps-slider" class="text-[11px] text-[var(--text-muted)]">Diffusion Steps</label>
+              <span id="vs-steps-val" class="text-[11px] font-mono text-emerald-400 font-semibold">32</span>
+            </div>
+            <input type="range" id="vs-steps-slider" min="16" max="96" step="8" value="32" class="w-full accent-emerald-500 cursor-pointer">
+          </div>
+
+          <!-- RNG Seed Control -->
+          <div class="col-span-2 flex items-center justify-between gap-3 pt-1">
+            <div class="flex-1">
+              <label for="vs-seed-input" class="block text-[11px] text-[var(--text-muted)] mb-1">RNG Seed (-1 for random)</label>
+              <input type="number" id="vs-seed-input" value="-1" class="w-full px-2.5 py-1.5 rounded-lg bg-[var(--bg-base)] border border-[var(--border)] text-xs text-[var(--text-primary)] font-mono focus:border-emerald-500/60 focus:outline-none">
+            </div>
+            <button id="btn-vs-randomize-seed" type="button" class="mt-4 px-3 py-1.5 rounded-lg bg-[var(--bg-elevated)] border border-[var(--border)] text-xs text-[var(--text-secondary)] hover:text-emerald-400 hover:border-emerald-500/40 transition-colors flex items-center gap-1 cursor-pointer">
+              <svg class="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>
+              <span>Random</span>
+            </button>
+          </div>
+        </div>
+      </details>
+
+      <!-- 4. Text to Synthesize, DSP Effects, & Direct Controls -->
+      <section class="bg-[var(--bg-card)] border border-[var(--border)] rounded-2xl p-4 space-y-3 shadow-xs">
+        <div class="flex items-center justify-between">
+          <label for="vs-input-text" class="text-xs font-semibold text-[var(--text-primary)]">
+            Input Text to Synthesize
+          </label>
+          <div class="flex items-center gap-2">
+            <span id="vs-char-counter" class="text-[10px] text-[var(--text-muted)] font-mono">0 chars</span>
+            <button id="btn-vs-sample-text" type="button" class="text-[10px] text-emerald-400 hover:text-emerald-300 transition-colors cursor-pointer">
+              Insert Sample
+            </button>
+          </div>
+        </div>
+
+        <textarea id="vs-input-text" rows="4" class="w-full px-3 py-2.5 text-xs bg-[var(--bg-base)] border border-[var(--border)] rounded-xl text-[var(--text-primary)] placeholder-[var(--text-muted)] focus:border-emerald-500/60 focus:outline-none transition-colors leading-relaxed" placeholder="Type or paste the words you want the voice to speak out loud..."></textarea>
+
+        <!-- DSP Master Audio Effect Presets (/tools/effects) -->
+        <div class="space-y-1.5 pt-0.5">
+          <div class="flex items-center justify-between">
+            <label class="text-[11px] text-[var(--text-muted)] font-medium flex items-center gap-1">
+              <span>DSP Master Chain</span>
+            </label>
+            <span id="vs-active-effect-desc" class="text-[10px] text-[var(--text-muted)] italic truncate max-w-[200px]">Raw output</span>
+          </div>
+          <div id="vs-effects-pills" class="flex flex-wrap gap-1.5">
+            <button type="button" class="vs-effect-pill active px-2.5 py-1 rounded-lg text-xs font-semibold bg-emerald-500 text-black border border-emerald-400 shadow-xs cursor-pointer" data-effect="raw" title="No processing - model output as-is">🔇 Raw</button>
+            <button type="button" class="vs-effect-pill px-2.5 py-1 rounded-lg text-xs font-medium bg-[var(--bg-elevated)] border border-[var(--border)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:border-emerald-500/40 transition-all cursor-pointer" data-effect="broadcast" title="Radio standard - warm, compressed, clear">📻 Broadcast</button>
+            <button type="button" class="vs-effect-pill px-2.5 py-1 rounded-lg text-xs font-medium bg-[var(--bg-elevated)] border border-[var(--border)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:border-emerald-500/40 transition-all cursor-pointer" data-effect="cinematic" title="Film-quality - spacious reverb, gentle compression">🎬 Cinematic</button>
+            <button type="button" class="vs-effect-pill px-2.5 py-1 rounded-lg text-xs font-medium bg-[var(--bg-elevated)] border border-[var(--border)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:border-emerald-500/40 transition-all cursor-pointer" data-effect="podcast" title="Close-mic intimate - heavy compression">🎙️ Podcast</button>
+            <button type="button" class="vs-effect-pill px-2.5 py-1 rounded-lg text-xs font-medium bg-[var(--bg-elevated)] border border-[var(--border)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:border-emerald-500/40 transition-all cursor-pointer" data-effect="warm" title="Boosted low-mids, cozy feel">☀️ Warm</button>
+            <button type="button" class="vs-effect-pill px-2.5 py-1 rounded-lg text-xs font-medium bg-[var(--bg-elevated)] border border-[var(--border)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:border-emerald-500/40 transition-all cursor-pointer" data-effect="bright" title="Crisp high-end presence">✨ Bright</button>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
+          <!-- Voice Selector -->
+          <div>
+            <label for="vs-voice-select" class="block text-[11px] text-[var(--text-muted)] mb-1">Target Voice</label>
+            <select id="vs-voice-select" class="w-full px-2.5 py-1.5 rounded-lg bg-[var(--bg-base)] border border-[var(--border)] text-xs text-[var(--text-primary)] focus:border-emerald-500/60 focus:outline-none truncate">
+              <option value="Narrator">Narrator (Stock)</option>
+              <option value="Storyteller">Storyteller (Stock)</option>
+              <option value="Casual">Casual (Stock)</option>
+              <option value="News Anchor">News Anchor (Stock)</option>
+            </select>
+          </div>
+
+          <!-- Speed Slider -->
+          <div>
+            <div class="flex items-center justify-between mb-1">
+              <label for="vs-speed-slider" class="text-[11px] text-[var(--text-muted)]">Speed</label>
+              <span id="vs-speed-val" class="text-[11px] font-mono text-emerald-400 font-semibold">1.00x</span>
+            </div>
+            <input type="range" id="vs-speed-slider" min="0.5" max="2.0" step="0.05" value="1.0" class="w-full accent-emerald-500 cursor-pointer">
+          </div>
+        </div>
+
+        <!-- Optional Style Instruct -->
+        <div>
+          <label for="vs-instruct-input" class="block text-[11px] text-[var(--text-muted)] mb-1">Instruction / Tone Modifier</label>
+          <input type="text" id="vs-instruct-input" class="w-full px-3 py-1.5 rounded-lg bg-[var(--bg-base)] border border-[var(--border)] text-xs text-[var(--text-primary)] placeholder-[var(--text-muted)] focus:border-emerald-500/60 focus:outline-none" placeholder="e.g. gentle, whispering, authoritative, enthusiastic">
+        </div>
+
+        <!-- Synthesize Button -->
+        <button id="btn-vs-synthesize" class="w-full py-2.5 px-4 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-black font-semibold text-xs flex items-center justify-center gap-2 transition-all shadow-md shadow-emerald-500/20 cursor-pointer active:scale-[0.99] disabled:opacity-50 disabled:cursor-not-allowed">
+          <svg id="vs-synth-icon" class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/>
+          </svg>
+          <span id="vs-synth-btn-text">Synthesize Audio</span>
+        </button>
+      </section>
+    </div>
+
+    <!-- RIGHT PANEL: Multi-Mode Studio Workspace -->
+    <div class="flex-1 flex flex-col bg-[var(--bg-card)] border border-[var(--border)] rounded-2xl overflow-hidden min-h-0 shadow-xs">
+      
+      <!-- Sub-Tabs Header Navigation -->
+      <div class="px-5 py-3 border-b border-[var(--border)] bg-[var(--bg-elevated)] flex flex-wrap items-center justify-between gap-3 shrink-0">
+        <div class="flex items-center gap-1.5 bg-[var(--bg-base)] p-1 rounded-xl border border-[var(--border)] overflow-x-auto">
+          <!-- Subtab 1: Library -->
+          <button id="btn-vs-subtab-history" class="vs-subtab-btn active px-3 py-1.5 rounded-lg text-xs font-semibold bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 transition-all flex items-center gap-1.5 cursor-pointer whitespace-nowrap">
+            <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M12 7v5l4 2"/></svg>
+            <span>Library</span>
+            <span id="vs-history-count" class="px-1.5 py-0.2 rounded-full text-[10px] bg-emerald-500/20 text-emerald-300 font-mono">0</span>
+          </button>
+
+          <!-- Subtab 2: Voice Cloning & Profiles -->
+          <button id="btn-vs-subtab-profiles" class="vs-subtab-btn px-3 py-1.5 rounded-lg text-xs font-medium text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-all flex items-center gap-1.5 cursor-pointer whitespace-nowrap">
+            <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+            <span>Voice Cloning & Profiles</span>
+            <span id="vs-profiles-count" class="px-1.5 py-0.2 rounded-full text-[10px] bg-[var(--bg-elevated)] text-[var(--text-muted)] font-mono">0</span>
+          </button>
+
+          <!-- Subtab 3: Speech-to-Speech -->
+          <button id="btn-vs-subtab-convert" class="vs-subtab-btn px-3 py-1.5 rounded-lg text-xs font-medium text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-all flex items-center gap-1.5 cursor-pointer whitespace-nowrap">
+            <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m16 3 4 4-4 4"/><path d="M20 7H4"/><path d="m8 21-4-4 4-4"/><path d="M4 17h16"/></svg>
+            <span>Speech-to-Speech</span>
+          </button>
+
+          <!-- Subtab 4: Stories & Longform -->
+          <button id="btn-vs-subtab-stories" class="vs-subtab-btn px-3 py-1.5 rounded-lg text-xs font-medium text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-all flex items-center gap-1.5 cursor-pointer whitespace-nowrap">
+            <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1-2.5-2.5Z"/><path d="M6 6h10"/><path d="M6 10h10"/></svg>
+            <span>Stories Studio</span>
+          </button>
+        </div>
+
+        <!-- History Search & Actions (Visible in Library mode) -->
+        <div id="vs-history-actions" class="flex items-center gap-2">
+          <!-- Starred Filter Toggle -->
+          <button id="btn-vs-filter-starred" class="px-2.5 py-1 rounded-lg border border-[var(--border)] bg-[var(--bg-base)] text-xs text-[var(--text-muted)] hover:text-amber-400 hover:border-amber-500/40 transition-colors flex items-center gap-1 cursor-pointer" title="Show only starred keeper takes">
+            <span>⭐</span>
+            <span class="hidden sm:inline">Keepers</span>
+          </button>
+
+          <div class="relative">
+            <input type="text" id="vs-history-search" class="w-36 sm:w-48 px-2.5 py-1 text-xs bg-[var(--bg-base)] border border-[var(--border)] rounded-lg text-[var(--text-primary)] placeholder-[var(--text-muted)] focus:outline-none focus:border-emerald-500/50" placeholder="Filter audio records...">
+          </div>
+          <button id="btn-vs-reload-history" class="p-1.5 rounded-lg border border-[var(--border)] bg-[var(--bg-base)] hover:text-emerald-400 text-[var(--text-muted)] transition-colors cursor-pointer" title="Reload History">
+            <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16"/><path d="M16 21h5v-5"/></svg>
+          </button>
+        </div>
+      </div>
+
+      <!-- VIEW 1: Generated Audio Library (History) -->
+      <div id="vs-pane-history" class="flex-1 overflow-y-auto p-4 sm:p-5">
+        <!-- Empty State -->
+        <div id="vs-history-empty" class="h-full flex flex-col items-center justify-center text-center p-8 text-[var(--text-muted)]">
+          <div class="w-16 h-16 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400 mb-3">
+            <svg class="w-8 h-8" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>
+          </div>
+          <h3 class="text-sm font-semibold text-[var(--text-primary)] mb-1">No audio generations yet</h3>
+          <p class="text-xs max-w-sm leading-relaxed">Design your voice or select a starting point on the left, enter prompt text, and synthesize your first audio track!</p>
+        </div>
+
+        <!-- History Cards List -->
+        <div id="vs-history-list" class="hidden grid grid-cols-1 gap-3.5"></div>
+      </div>
+
+      <!-- VIEW 2: Voice Cloning & Profiles Studio -->
+      <div id="vs-pane-profiles" class="hidden flex-1 overflow-y-auto p-4 sm:p-5 space-y-5">
+        <!-- Create New Clone Card -->
+        <div class="p-4 sm:p-5 rounded-2xl bg-[var(--bg-elevated)] border border-[var(--border)] shadow-xs space-y-4">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-2">
+              <div class="w-7 h-7 rounded-lg bg-emerald-500/15 border border-emerald-500/30 flex items-center justify-center text-emerald-400">
+                <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+              </div>
+              <div>
+                <h3 class="text-xs font-bold text-[var(--text-primary)]">Create Instant Voice Clone</h3>
+                <p class="text-[11px] text-[var(--text-muted)]">Upload 5–30 seconds of clean reference speech to create a persistent voice profile</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5 text-xs">
+            <!-- Profile Name -->
+            <div>
+              <label for="vs-clone-name" class="block text-[11px] text-[var(--text-muted)] mb-1">Profile Name *</label>
+              <input type="text" id="vs-clone-name" class="w-full px-3 py-1.5 rounded-lg bg-[var(--bg-base)] border border-[var(--border)] text-xs text-[var(--text-primary)] focus:border-emerald-500/60 focus:outline-none" placeholder="e.g. Morgan Freeman, Alex Narrator">
+            </div>
+
+            <!-- Language -->
+            <div>
+              <label for="vs-clone-lang" class="block text-[11px] text-[var(--text-muted)] mb-1">Primary Language</label>
+              <select id="vs-clone-lang" class="w-full px-2.5 py-1.5 rounded-lg bg-[var(--bg-base)] border border-[var(--border)] text-xs text-[var(--text-primary)] focus:border-emerald-500/60 focus:outline-none">
+                <option value="en">English (en)</option>
+                <option value="es">Spanish (es)</option>
+                <option value="fr">French (fr)</option>
+                <option value="de">German (de)</option>
+                <option value="zh">Chinese (zh)</option>
+                <option value="ja">Japanese (ja)</option>
+                <option value="ar">Arabic (ar)</option>
+              </select>
+            </div>
+
+            <!-- Audio File Source -->
+            <div class="col-span-1 sm:col-span-2 space-y-1.5">
+              <label class="block text-[11px] text-[var(--text-muted)]">Reference Audio File * (WAV, MP3, FLAC, M4A)</label>
+              <div class="flex items-center gap-2">
+                <input type="text" id="vs-clone-file-path" class="flex-1 px-3 py-1.5 rounded-lg bg-[var(--bg-base)] border border-[var(--border)] text-xs text-[var(--text-primary)] placeholder-[var(--text-muted)] focus:border-emerald-500/60 focus:outline-none truncate" placeholder="Select or enter local audio file path...">
+                <button type="button" id="btn-vs-clone-browse" class="px-3 py-1.5 rounded-lg bg-[var(--bg-card)] border border-[var(--border)] text-xs text-[var(--text-secondary)] hover:text-emerald-400 hover:border-emerald-500/40 transition-colors flex items-center gap-1.5 cursor-pointer shrink-0">
+                  <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
+                  <span>Browse File</span>
+                </button>
+                <input type="file" id="vs-clone-file-input" accept="audio/*" class="hidden">
+              </div>
+            </div>
+
+            <!-- Reference Transcript (Optional) -->
+            <div class="col-span-1 sm:col-span-2">
+              <label for="vs-clone-ref-text" class="block text-[11px] text-[var(--text-muted)] mb-1">Reference Transcript (Optional - boosts clone fidelity)</label>
+              <textarea id="vs-clone-ref-text" rows="2" class="w-full px-3 py-2 rounded-lg bg-[var(--bg-base)] border border-[var(--border)] text-xs text-[var(--text-primary)] placeholder-[var(--text-muted)] focus:border-emerald-500/60 focus:outline-none resize-none leading-relaxed" placeholder="Exact words spoken in the reference audio clip (if known)..."></textarea>
+            </div>
+
+            <!-- Instruct / Style Hint -->
+            <div class="col-span-1 sm:col-span-2">
+              <label for="vs-clone-instruct" class="block text-[11px] text-[var(--text-muted)] mb-1">Tone / Acoustic Directive (Optional)</label>
+              <input type="text" id="vs-clone-instruct" class="w-full px-3 py-1.5 rounded-lg bg-[var(--bg-base)] border border-[var(--border)] text-xs text-[var(--text-primary)] placeholder-[var(--text-muted)] focus:border-emerald-500/60 focus:outline-none" placeholder="e.g. calm podcast host, cinematic trailer narrator">
+            </div>
+          </div>
+
+          <div class="pt-2 flex justify-end">
+            <button id="btn-vs-create-clone" class="px-4 py-2 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-black font-semibold text-xs flex items-center gap-1.5 transition-all shadow-md shadow-emerald-500/20 cursor-pointer disabled:opacity-50">
+              <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14"/><path d="M5 12h14"/></svg>
+              <span id="btn-vs-create-clone-text">Save Voice Profile</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Custom Profiles Grid -->
+        <div class="space-y-3">
+          <div class="flex items-center justify-between">
+            <h3 class="text-xs font-semibold text-[var(--text-primary)]">Custom Cloned Profiles Library</h3>
+            <button id="btn-vs-reload-profiles" class="text-[11px] text-emerald-400 hover:text-emerald-300 transition-colors cursor-pointer">
+              Refresh Profiles
+            </button>
+          </div>
+
+          <div id="vs-profiles-empty" class="p-8 rounded-2xl bg-[var(--bg-elevated)] border border-[var(--border)] text-center text-[var(--text-muted)]">
+            <p class="text-xs">No custom voice profiles saved yet. Create a clone above to start building your cast!</p>
+          </div>
+
+          <div id="vs-profiles-grid" class="hidden grid grid-cols-1 sm:grid-cols-2 gap-3.5"></div>
+        </div>
+      </div>
+
+      <!-- VIEW 3: Speech-to-Speech (Voice Morph) -->
+      <div id="vs-pane-convert" class="hidden flex-1 overflow-y-auto p-4 sm:p-5 space-y-5">
+        <div class="p-4 sm:p-5 rounded-2xl bg-[var(--bg-elevated)] border border-[var(--border)] shadow-xs space-y-4">
+          <div class="flex items-center gap-2">
+            <div class="w-7 h-7 rounded-lg bg-emerald-500/15 border border-emerald-500/30 flex items-center justify-center text-emerald-400">
+              <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m16 3 4 4-4 4"/><path d="M20 7H4"/><path d="m8 21-4-4 4-4"/><path d="M4 17h16"/></svg>
+            </div>
+            <div>
+              <h3 class="text-xs font-bold text-[var(--text-primary)]">Speech-to-Speech (Voice Morph)</h3>
+              <p class="text-[11px] text-[var(--text-muted)]">Transform spoken audio clips into another character profile voice with duration alignment</p>
+            </div>
+          </div>
+
+          <div class="space-y-3.5 text-xs">
+            <!-- Source Audio File Input -->
+            <div>
+              <label class="block text-[11px] text-[var(--text-muted)] mb-1">Source Audio Clip (Your voice or spoken recording) *</label>
+              <div class="flex items-center gap-2">
+                <input type="text" id="vs-convert-audio-path" class="flex-1 px-3 py-1.5 rounded-lg bg-[var(--bg-base)] border border-[var(--border)] text-xs text-[var(--text-primary)] placeholder-[var(--text-muted)] focus:border-emerald-500/60 focus:outline-none truncate" placeholder="Select source audio recording...">
+                <button type="button" id="btn-vs-convert-browse" class="px-3 py-1.5 rounded-lg bg-[var(--bg-card)] border border-[var(--border)] text-xs text-[var(--text-secondary)] hover:text-emerald-400 hover:border-emerald-500/40 transition-colors flex items-center gap-1.5 cursor-pointer shrink-0">
+                  <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
+                  <span>Browse</span>
+                </button>
+                <input type="file" id="vs-convert-file-input" accept="audio/*" class="hidden">
+              </div>
+            </div>
+
+            <!-- Target Profile Selection -->
+            <div>
+              <label for="vs-convert-target-profile" class="block text-[11px] text-[var(--text-muted)] mb-1">Target Voice Profile *</label>
+              <select id="vs-convert-target-profile" class="w-full px-2.5 py-1.5 rounded-lg bg-[var(--bg-base)] border border-[var(--border)] text-xs text-[var(--text-primary)] focus:border-emerald-500/60 focus:outline-none">
+                <option value="">Select target voice profile...</option>
+              </select>
+            </div>
+
+            <!-- Morph Options -->
+            <div class="flex flex-col sm:flex-row gap-4 pt-1">
+              <label class="flex items-center gap-2 cursor-pointer select-none">
+                <input type="checkbox" id="vs-convert-match-dur" checked class="accent-emerald-500 rounded">
+                <span class="text-xs text-[var(--text-secondary)]">Match Duration (atempo clamp 0.5x–2.0x to fit original timing)</span>
+              </label>
+
+              <label class="flex items-center gap-2 cursor-pointer select-none">
+                <input type="checkbox" id="vs-convert-clean-first" checked class="accent-emerald-500 rounded">
+                <span class="text-xs text-[var(--text-secondary)]">Demucs Vocal Isolation (Clean mic background noise first)</span>
+              </label>
+            </div>
+          </div>
+
+          <div class="pt-2 flex justify-end">
+            <button id="btn-vs-run-convert" class="px-5 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-black font-semibold text-xs flex items-center gap-2 transition-all shadow-md shadow-emerald-500/20 cursor-pointer disabled:opacity-50">
+              <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+              <span id="btn-vs-run-convert-text">Morph Speech Audio</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Conversion Output Container -->
+        <div id="vs-convert-result-card" class="hidden p-4 rounded-2xl bg-[var(--bg-elevated)] border border-emerald-500/40 shadow-xs space-y-3 animate-in fade-in duration-200">
+          <div class="flex items-center justify-between">
+            <span class="px-2.5 py-0.5 rounded-lg text-xs font-semibold bg-emerald-500/15 border border-emerald-500/30 text-emerald-400">
+              Morphed Audio Result
+            </span>
+            <span id="vs-convert-result-time" class="text-[11px] text-[var(--text-muted)] font-mono"></span>
+          </div>
+
+          <div id="vs-convert-result-text" class="text-xs text-[var(--text-primary)] italic bg-[var(--bg-base)]/60 px-3 py-2 rounded-xl border-l-2 border-emerald-500/60 leading-relaxed"></div>
+
+          <div>
+            <audio id="vs-convert-result-audio" controls preload="metadata" class="w-full h-9 rounded-xl outline-none accent-emerald-500">
+              Your browser does not support audio playback.
+            </audio>
+          </div>
+        </div>
+      </div>
+
+      <!-- VIEW 4: Stories & Longform Studio -->
+      <div id="vs-pane-stories" class="hidden flex-1 flex flex-col overflow-hidden p-4 sm:p-5 gap-4">
+        <div class="flex flex-wrap items-center justify-between gap-3 pb-3 border-b border-[var(--border)]">
+          <div class="flex items-center gap-3">
+            <input type="text" id="vs-story-title" class="px-3 py-1.5 rounded-xl bg-[var(--bg-base)] border border-[var(--border)] text-xs text-[var(--text-primary)] font-semibold placeholder-[var(--text-muted)] focus:outline-none focus:border-emerald-500/60 w-56" placeholder="Story Title (e.g. Chapter 1)">
+            
+            <!-- Output Format -->
+            <div class="flex items-center gap-1 text-xs">
+              <span class="text-[var(--text-muted)] text-[11px]">Format:</span>
+              <select id="vs-story-format" class="px-2 py-1 rounded-lg bg-[var(--bg-base)] border border-[var(--border)] text-xs text-[var(--text-primary)]">
+                <option value="mp3">Single MP3 Audio</option>
+                <option value="m4b">M4B Audiobook with Chapters</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="flex items-center gap-2">
+            <button id="btn-vs-story-add-line" class="px-2.5 py-1 rounded-lg bg-[var(--bg-elevated)] border border-[var(--border)] text-xs text-[var(--text-secondary)] hover:text-emerald-400 hover:border-emerald-500/40 transition-colors flex items-center gap-1 cursor-pointer">
+              <svg class="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+              <span>Add Dialogue Line</span>
+            </button>
+            <button id="btn-vs-story-example" class="px-2.5 py-1 rounded-lg bg-[var(--bg-elevated)] border border-[var(--border)] text-xs text-[var(--text-secondary)] hover:text-emerald-400 transition-colors cursor-pointer">
+              Load Example Script
+            </button>
+          </div>
+        </div>
+
+        <!-- Script Lines Container -->
+        <div id="vs-story-lines-container" class="flex-1 overflow-y-auto space-y-3 pr-1"></div>
+
+        <!-- Render Story Action Bar -->
+        <div class="pt-3 border-t border-[var(--border)] flex items-center justify-between gap-4">
+          <div class="text-xs text-[var(--text-muted)]">
+            Synthesizes all speaker segments sequentially and stitches chapters smoothly into one audio release.
+          </div>
+          <button id="btn-vs-render-story" class="px-5 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-black font-semibold text-xs flex items-center gap-2 transition-all shadow-md shadow-emerald-500/20 cursor-pointer disabled:opacity-50">
+            <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+            <span id="btn-vs-render-story-text">Render Full Story Audio</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

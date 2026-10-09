@@ -92,6 +92,12 @@
         <p class="text-[11px] text-[var(--text-muted)]">Automatically publishes newly generated images and prompt metadata to your Discord channel via <code class="text-sky-400">/hook</code>.</p>
       </div>
 
+      <div class="space-y-1">
+        <label for="input-voicestudio-url" class="font-semibold text-[var(--text-primary)]">VoiceStudio Endpoint URL</label>
+        <input id="input-voicestudio-url" placeholder="http://127.0.0.1:3900" class="w-full bg-[var(--bg-input)] border border-[var(--border)] rounded-xl px-3 py-2 text-xs font-mono outline-none focus:border-emerald-400 transition-colors" />
+        <p class="text-[11px] text-[var(--text-muted)]">VoiceStudio OpenAPI engine address for local speech generation and custom voice profiles (default: <code class="text-emerald-400">http://127.0.0.1:3900</code>).</p>
+      </div>
+
       <div class="flex flex-col sm:flex-row gap-4 pt-2">
         <label class="flex items-center gap-2 text-xs text-[var(--text-primary)] cursor-pointer select-none">
           <input id="check-tray" type="checkbox" class="accent-[var(--brand)] w-4 h-4 rounded" />
