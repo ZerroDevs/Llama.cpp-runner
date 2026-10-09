@@ -9,29 +9,12 @@
 [![SwarmUI Diffusion: Port 7801](https://img.shields.io/badge/SwarmUI-Port%207801-violet.svg)](https://github.com/mcmonkeyprojects/SwarmUI)
 [![VoiceStudio Engine: Port 3900](https://img.shields.io/badge/VoiceStudio-Port%203900-emerald.svg)](https://github.com/debpalash/VoiceStudio)
 [![Platform: Windows](https://img.shields.io/badge/Platform-Windows%2010%2F11-lightgrey.svg)]()
-[![Crafted With Local AI](https://img.shields.io/badge/Crafted%20With-Local%20LLMs-10b981.svg?style=flat-square)]()
-
-> *"For local AI, crafted with local AI."*  
-> *(Designed by human intent, developed & refined side-by-side with local LLM coding agents).*
 
 Llama Server Control is a high-performance, native Windows desktop application and network web host for managing your local AI ecosystem. Built with native **C# (.NET 10)**, **WPF**, and **Microsoft Edge WebView2** on the desktop, and powered by an embedded **ASP.NET Core Kestrel** server on port 9095, it acts as a lightweight, zero-waste central hub for running LLMs via [llama.cpp](https://github.com/ggerganov/llama.cpp), diffusion models via [SwarmUI](https://github.com/mcmonkeyprojects/SwarmUI) / [ComfyUI](https://github.com/comfyanonymous/ComfyUI), and zero-latency local speech synthesis via [VoiceStudio](https://github.com/debpalash/VoiceStudio).
 
 ## Project Vision
 
 Our vision is to build the absolute lightest, most performant, zero-waste local AI manager in existence. Hardware headroom is precious. Every megabyte of RAM saved by the control panel is a megabyte given back to your models or your games. We enforce aggressive thread hygiene, zero-copy binary streaming, and strict UI DOM virtualization. Whether you are daily-driving a massive LLM or generating hundreds of high-res images, Llama Server Control is designed to stay completely out of your hardware's way.
-
----
-
-## 🧩 Supported Engines & Ecosystem
-
-Llama Server Control seamlessly coordinates and bridges the top open-source local AI runtimes into a unified, zero-friction desktop experience:
-
-| Engine | Role | Default Port | Link |
-|---|---|---|---|
-| **llama.cpp** | Local LLM inference server (GGUF, Flash Attention, Vision) | `8080` | [github.com/ggerganov/llama.cpp](https://github.com/ggerganov/llama.cpp) |
-| **SwarmUI** | High-performance modular AI image generation UI | `7801` | [github.com/mcmonkeyprojects/SwarmUI](https://github.com/mcmonkeyprojects/SwarmUI) |
-| **ComfyUI** | Powerful node-based backend engine powering SwarmUI image generation | `7821` | [github.com/comfyanonymous/ComfyUI](https://github.com/comfyanonymous/ComfyUI) |
-| **VoiceStudio** | Zero-latency local speech synthesis, voice cloning & audio pipeline | `3900` | [github.com/debpalash/VoiceStudio](https://github.com/debpalash/VoiceStudio) |
 
 ---
 
@@ -178,8 +161,6 @@ Llama Server Control seamlessly coordinates and bridges the top open-source loca
 - **Expanded Hub Integrations:** Allow direct 1-click installation of LoRAs and Vision Projectors from HuggingFace to matching local directories.
 
 ---
-
-## Requirements
 
 ## Requirements
 
